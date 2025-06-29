@@ -1,5 +1,19 @@
 # Backend - FastAPI with OpenAI Multi-Agent Orchestrator
 
+## ⚠️ IMPORTANT: Before Starting Backend Work
+1. **Review Project Plans**: Check `/product-management/roadmaps/` for:
+   - `backend-development-tasks.md` - Comprehensive task list with priorities
+   - `sprint-execution-plan.md` - Current sprint goals and what to work on
+   - `master-implementation-plan-2025.md` - Overall timeline and dependencies
+
+2. **Current Sprint Focus**: Always align work with the current sprint objectives
+
+3. **Task Priority**: Follow the priority matrix:
+   - Critical Path (Must Complete First)
+   - High Priority (Core Functionality)
+   - Medium Priority (Enhanced Features)
+   - Lower Priority (Nice to Have)
+
 ## Overview
 The backend is built with FastAPI and implements an OpenAI multi-agent orchestrator system for clinical trials management. It provides a RESTful API wrapper around the agent system.
 

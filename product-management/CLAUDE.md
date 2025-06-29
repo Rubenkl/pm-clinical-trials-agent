@@ -1,5 +1,24 @@
 # Product Management Documentation
 
+## ⚠️ CRITICAL: Project Plans and Task Lists
+Before any development work, ALWAYS check the `/product-management/roadmaps/` folder:
+
+1. **📋 Task Lists & Plans** (in order of importance):
+   - `sprint-execution-plan.md` - **START HERE**: Current sprint goals and what to work on NOW
+   - `backend-development-tasks.md` - Comprehensive backend task breakdown with priorities
+   - `master-implementation-plan-2025.md` - 20-week project timeline and phases
+   - `presentation-delivery-plan.md` - All presentations schedule and requirements
+
+2. **🎯 Current Sprint**: We follow 2-week sprints with specific goals
+   - Always work on tasks from the current sprint first
+   - Check Definition of Done before marking tasks complete
+   - Track velocity and progress metrics
+
+3. **📊 Presentations**: Follow the presentation schedule
+   - All presentations use Reveal.js format
+   - Templates are provided for consistency
+   - Presentations are tied to sprint deliverables
+
 ## Overview
 This folder contains all product management artifacts for the clinical trials agent project. This is the central hub for high-level strategic documents and stakeholder communications.
 

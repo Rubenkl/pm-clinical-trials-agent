@@ -1,7 +1,21 @@
 # Behavior
 - Always use Test-driven development. Which means you need to plan first and check best practices online, create tests, make sure all tests fail, then write functionality, and keep iterating until the tests pass (but do not change the tests). Then, you can consider the task done
 - After updating the functionality, check if you can update each CLAUDE.md file so you are better informed later on.
-- Feel free to make use of a scratchpad if you feel so. 
+- Feel free to make use of a scratchpad if you feel so.
+- **For Reveal.js Presentations**: Apply TDD by writing tests for content accuracy, interactive elements, performance, and accessibility BEFORE creating the presentation. See `/product-management/roadmaps/presentation-delivery-plan.md` for detailed TDD approach.
+
+## IMPORTANT: Before Starting Any Work
+1. **Check Project Plans First**: Always review the following documents in `/product-management/roadmaps/` before beginning any task:
+   - `master-implementation-plan-2025.md` - Overall project timeline and phases
+   - `backend-development-tasks.md` - Detailed backend task breakdown
+   - `sprint-execution-plan.md` - Current sprint goals and priorities
+   - `presentation-delivery-plan.md` - Presentation schedule and requirements
+
+2. **Follow Sprint Goals**: Work should align with the current sprint's objectives as defined in the sprint execution plan
+
+3. **Task Prioritization**: Use the priority matrix in backend-development-tasks.md to determine what to work on first
+
+4. **Track Progress**: Update task completion status in the relevant sprint tracking 
 
 
 # PM Clinical Trials Agent

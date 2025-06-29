@@ -1,5 +1,16 @@
 # Frontend - React + Vite + Tailwind (from Lovable)
 
+## ⚠️ IMPORTANT: Before Starting Frontend Work
+1. **Check Backend Progress First**: Frontend work depends on backend API availability
+   - Review `/product-management/roadmaps/sprint-execution-plan.md`
+   - Verify which backend endpoints are ready
+   - Coordinate with backend development timeline
+
+2. **Review Project Timeline**: Frontend development is scheduled after core backend
+   - Check `master-implementation-plan-2025.md` for frontend milestones
+   - Frontend prototyping in Lovable can begin early
+   - Production frontend work should align with API readiness
+
 ## Overview
 The frontend is a React application built with Vite and Tailwind CSS, initially prototyped in Lovable.dev and then exported for production deployment on Railway.
 

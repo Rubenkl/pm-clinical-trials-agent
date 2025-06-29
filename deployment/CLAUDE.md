@@ -1,5 +1,19 @@
 # Deployment Guide - Railway.app
 
+## ⚠️ IMPORTANT: Deployment Readiness Check
+1. **Verify Sprint Progress**: Deployment should align with sprint milestones
+   - Check `/product-management/roadmaps/sprint-execution-plan.md`
+   - Sprint 6: Phase 1 testing complete
+   - Sprint 8: Pilot deployment
+   - Sprint 10: Production deployment
+
+2. **Prerequisites Before Deployment**:
+   - All tests passing (>95% coverage)
+   - Security vulnerabilities: 0 critical
+   - Performance benchmarks met
+   - Documentation complete
+   - Compliance validation passed
+
 ## Overview
 This project deploys as separate services on Railway.app: a FastAPI backend and a React frontend. This guide covers the complete deployment process from development to production.
 
