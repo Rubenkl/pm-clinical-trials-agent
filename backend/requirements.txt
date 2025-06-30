@@ -1,0 +1,48 @@
+# FastAPI and ASGI
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# OpenAI Native Agents
+openai>=1.87.0
+openai-agents>=0.1.0
+
+# Simple PostgreSQL (only if persistent storage needed)
+psycopg2-binary==2.9.9
+
+# Caching and Message Queue
+redis==5.0.1
+celery==5.3.4
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+pytest-xdist==3.5.0
+factory-boy==3.3.0
+httpx==0.25.2
+
+# Development Tools
+black==23.11.0
+isort==5.12.0
+flake8==6.1.0
+mypy==1.7.1
+pre-commit==3.6.0
+
+# Monitoring and Observability
+prometheus-client==0.19.0
+structlog==23.2.0
+opentelemetry-api==1.21.0
+opentelemetry-sdk==1.21.0
+
+# Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+
+# Utilities
+python-dotenv==1.0.0
+email-validator==2.1.0
+requests==2.31.0

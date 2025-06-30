@@ -27,8 +27,9 @@ This project is a comprehensive clinical trials management system that combines 
 ## Architecture
 
 ### Tech Stack
-- **Backend**: FastAPI with OpenAI multi-agent orchestrator
+- **Backend**: FastAPI + OpenAI Agents SDK (handles multi-agent orchestration, state management, handoffs)
 - **Frontend**: React + Vite + Tailwind (initially prototyped in Lovable)
+- **AI Orchestration**: OpenAI Agents SDK with Portfolio Manager pattern
 - **Deployment**: Railway.app for both frontend and backend
 - **Presentations**: Reveal.js for all stakeholder presentations
 
@@ -60,13 +61,14 @@ pm-clinical-trials-agent/
 
 ### Development Process
 1. **Frontend**: Prototype in Lovable.dev, then export to `/frontend/`
-2. **Backend**: Build FastAPI with multi-agent orchestrator in `/backend/`
-3. **Deployment**: Deploy both services separately on Railway
+2. **Backend**: Lightweight FastAPI wrapper around OpenAI Agents SDK
+3. **AI Agents**: Portfolio Manager + specialist agents using SDK's built-in orchestration
+4. **Deployment**: Deploy both services separately on Railway
 
 ### Deployment Strategy
 - **Frontend**: Deployed as React app with Caddy server on Railway
 - **Backend**: Deployed as FastAPI with Hypercorn server on Railway
-- **Database**: PostgreSQL on Railway (if needed)
+- **State Management**: SDK Context objects (in-memory + optional PostgreSQL for persistence)
 - **Environment**: Separate services with proper domain configuration
 
 ## Key Commands
@@ -96,9 +98,10 @@ railway up
 ## Environment Variables
 
 ### Backend
+- `OPENAI_API_KEY`: OpenAI API key for agents (required)
 - `PORT`: Railway-provided port
-- `DATABASE_URL`: PostgreSQL connection string
-- `OPENAI_API_KEY`: OpenAI API key for agents
+- `DEBUG`: Enable debug mode (optional)
+- `CORS_ORIGINS`: Allowed CORS origins (optional)
 
 ### Frontend
 - `VITE_API_BASE_URL`: Backend API URL
@@ -109,3 +112,6 @@ railway up
 - All presentations use Reveal.js format
 - External research separate from PM documentation
 - Railway deployment with separate frontend/backend services
+- **OpenAI Agents SDK handles**: Multi-agent coordination, state management, handoffs, tracing
+- **FastAPI provides**: Lightweight HTTP interface to the agent system
+- **No complex database models**: State managed via SDK Context objects

@@ -1,0 +1,312 @@
+name: Backend CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+
+env:
+  PYTHON_VERSION: '3.10'
+  POETRY_VERSION: '1.6.1'
+
+jobs:
+  lint-and-format:
+    runs-on: ubuntu-latest
+    name: Code Quality (Lint & Format)
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install black isort flake8 mypy
+          pip install -r requirements.txt
+      
+      - name: Check code formatting with Black
+        working-directory: ./backend
+        run: black --check --diff .
+      
+      - name: Check import sorting with isort
+        working-directory: ./backend
+        run: isort --check-only --diff .
+      
+      - name: Lint with flake8
+        working-directory: ./backend
+        run: |
+          # Stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # Exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      
+      - name: Type check with mypy
+        working-directory: ./backend
+        run: |
+          mypy app --ignore-missing-imports --no-strict-optional
+        continue-on-error: true  # Type checking can be warning-only for now
+
+  test:
+    runs-on: ubuntu-latest
+    name: Test Suite
+    
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11']
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Create test environment file
+        working-directory: ./backend
+        run: |
+          echo "DEBUG=true" > .env.test
+          echo "OPENAI_API_KEY=test-key-for-ci" >> .env.test
+          echo "DATABASE_URL=sqlite:///test.db" >> .env.test
+      
+      - name: Run tests with coverage
+        working-directory: ./backend
+        env:
+          ENV_FILE: .env.test
+        run: |
+          pytest --cov=app --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=85 -v
+      
+      - name: Upload coverage to Codecov
+        if: matrix.python-version == '3.10'
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./backend/coverage.xml
+          flags: backend
+          name: backend-coverage
+          fail_ci_if_error: false
+      
+      - name: Archive test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-${{ matrix.python-version }}
+          path: |
+            ./backend/coverage.xml
+            ./backend/htmlcov/
+            ./backend/pytest-report.xml
+
+  security-scan:
+    runs-on: ubuntu-latest
+    name: Security Scan
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install safety bandit
+          pip install -r requirements.txt
+      
+      - name: Check for known security vulnerabilities
+        working-directory: ./backend
+        run: safety check --json --output safety-report.json
+        continue-on-error: true
+      
+      - name: Run Bandit security linter
+        working-directory: ./backend
+        run: |
+          bandit -r app -f json -o bandit-report.json
+        continue-on-error: true
+      
+      - name: Upload security reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-reports
+          path: |
+            ./backend/safety-report.json
+            ./backend/bandit-report.json
+
+  integration-test:
+    runs-on: ubuntu-latest
+    name: Integration Tests
+    needs: [lint-and-format, test]
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: clinical_trials_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Create integration test environment
+        working-directory: ./backend
+        run: |
+          echo "DEBUG=true" > .env.integration
+          echo "OPENAI_API_KEY=test-key-for-integration" >> .env.integration
+          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/clinical_trials_test" >> .env.integration
+      
+      - name: Run integration tests
+        working-directory: ./backend
+        env:
+          ENV_FILE: .env.integration
+        run: |
+          pytest tests/test_portfolio_integration.py -v --tb=short
+      
+      - name: Test API startup
+        working-directory: ./backend
+        env:
+          ENV_FILE: .env.integration
+        run: |
+          # Start the API in background
+          python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+          API_PID=$!
+          
+          # Wait for API to start
+          sleep 10
+          
+          # Test health endpoint
+          curl -f http://localhost:8000/health || exit 1
+          
+          # Test API root endpoint
+          curl -f http://localhost:8000/ || exit 1
+          
+          # Stop the API
+          kill $API_PID
+
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    name: Build and Deploy
+    needs: [lint-and-format, test, security-scan, integration-test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Build application
+        working-directory: ./backend
+        run: |
+          # Add any build steps here (e.g., compiling assets, etc.)
+          echo "Building FastAPI application..."
+          python -c "import app.main; print('✅ Application imports successfully')"
+      
+      - name: Create deployment package
+        working-directory: ./backend
+        run: |
+          # Create a deployment package
+          tar -czf ../backend-deployment.tar.gz \
+            --exclude='.git*' \
+            --exclude='__pycache__' \
+            --exclude='*.pyc' \
+            --exclude='.pytest_cache' \
+            --exclude='htmlcov' \
+            --exclude='coverage.xml' \
+            --exclude='.env*' \
+            .
+      
+      - name: Upload deployment artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-deployment
+          path: backend-deployment.tar.gz
+          retention-days: 30
+      
+      # Add actual deployment steps here based on your deployment target
+      # Examples:
+      # - Deploy to Railway
+      # - Deploy to AWS
+      # - Deploy to Docker registry
+      - name: Placeholder - Deploy to staging
+        run: |
+          echo "🚀 Deployment placeholder"
+          echo "Add your deployment commands here"
+          echo "Examples: Railway, AWS, Docker, etc."
+
+  notify:
+    runs-on: ubuntu-latest
+    name: Notify Results
+    needs: [lint-and-format, test, security-scan, integration-test, build-and-deploy]
+    if: always()
+    
+    steps:
+      - name: Notify success
+        if: ${{ needs.build-and-deploy.result == 'success' }}
+        run: |
+          echo "✅ All pipeline stages completed successfully!"
+          echo "Backend is ready for deployment."
+      
+      - name: Notify failure
+        if: ${{ contains(needs.*.result, 'failure') }}
+        run: |
+          echo "❌ Pipeline failed. Check the logs for details."
+          echo "Failed jobs: ${{ toJson(needs) }}"
