@@ -91,9 +91,11 @@ This presentation is **perfectly aligned** with the IQVIA job requirements:
   - **Evidence:** Automated data validation and NLP-powered query resolution, reducing 30-minute manual processes to 3-minute automated workflows
   - **How Achieved:** Natural language processing identifies data discrepancies and auto-generates medically accurate queries
 
-- **AWS-Pfizer PACT: $750M-$1B Savings**
+- **AWS-Pfizer PACT: $750M-$1B Annual Savings**
   - **Source:** Same file, line 31
-  - **Evidence:** Partnership-reported annual savings potential
+  - **Evidence:** Platform for AI-Enabled Clinical Trial Suite (PACT) built on Amazon Bedrock and SageMaker
+  - **How Achieved:** Automated FHIR transformation and built-in NLP entity extraction saving 16,000 hours annually
+  - **Technology:** AWS cloud infrastructure with AI/ML capabilities for automated clinical trial processes
 
 #### **Strategic Context:**
 - **Employee Value:** Reduce CRA overtime by 40%, eliminate 90% of manual query processing

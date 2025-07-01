@@ -13,10 +13,11 @@ git push origin main
 1. Go to [railway.app](https://railway.app)
 2. Click "Deploy Now" → "Deploy from GitHub repo"
 3. Select repository: `pm-clinical-trials-agent`
-4. Railway should auto-detect the `railway.toml` configuration
+4. Railway should auto-detect the `railway.toml` configuration (uses Nixpacks)
 5. If not, manually set:
-   - **Root Directory**: `backend`
-   - **Dockerfile Path**: `backend/Dockerfile`
+   - **Builder**: Nixpacks
+   - **Build Command**: `cd backend && pip install -r requirements.txt`
+   - **Start Command**: `cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 6. Add environment variable: `OPENAI_API_KEY=sk-your-key-here`
 7. Click "Deploy"
 
@@ -52,26 +53,21 @@ open https://your-app.up.railway.app/docs
 
 ### **Problem**: Railway tries to deploy entire repo instead of just `/backend`
 
-### **Solution**: Use `railway.toml` at root level
+### **Solution**: Use Nixpacks with `railway.toml` at root level
 ```toml
 [build]
-builder = "dockerfile"
-dockerfilePath = "backend/Dockerfile"
-buildContext = "backend"
+builder = "nixpacks"
+buildCommand = "cd backend && pip install -r requirements.txt"
+startCommand = "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
 ```
 
 ### **Manual Configuration** (if auto-detection fails):
 In Railway dashboard → Settings:
 
 **Build Settings:**
-- **Root Directory**: `backend`
-- **Builder**: Dockerfile  
-- **Dockerfile Path**: `Dockerfile` (relative to root directory)
-
-**OR use these settings:**
-- **Root Directory**: Leave empty
-- **Builder**: Dockerfile
-- **Dockerfile Path**: `backend/Dockerfile`
+- **Builder**: Nixpacks
+- **Build Command**: `cd backend && pip install -r requirements.txt`
+- **Start Command**: `cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 
 ### **Environment Variables** (required):
 ```
