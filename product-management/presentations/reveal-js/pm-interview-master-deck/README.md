@@ -39,13 +39,16 @@ This presentation is **perfectly aligned** with the IQVIA job requirements:
 - **Focus:** Internal IQVIA platform for operational efficiency
 - **Strategy:** Employee-centric design for competitive advantage
 
-### **Slide 2: The Problem - IQVIA Internal Inefficiencies**
-**Key Messages:** CRA Crisis + Market Inefficiencies
+### **Slide 2: The Problem - Industry CRA Crisis (Affects IQVIA)**
+**Key Messages:** Industry CRA Crisis + Market Inefficiencies
 
-#### **CRA Crisis Metrics (All Sourced):**
-- **30% Annual CRA Turnover** 
+**IMPORTANT NOTE:** All CRA metrics are industry-wide data (2019-2020), not IQVIA-specific.
+
+#### **Industry CRA Crisis Metrics (All Sourced):**
+- **30% Current Industry CRA Turnover Rate** 
   - **Source:** `/research/user-research/clinical-research-associate-user-persona.md` line 23
-  - **Impact:** Major retention challenge driving project urgency
+  - **Context:** Double the general industry average of 15% (2019-2020 data)
+  - **Impact:** Industry-wide crisis that affects IQVIA's competitive position
 
 - **165 Hours Monthly Work** 
   - **Source:** Same file, line 7
@@ -226,13 +229,13 @@ This presentation is **perfectly aligned** with the IQVIA job requirements:
 **Key Message:** Triple value proposition for internal stakeholders
 
 #### **Employee Satisfaction & Retention:**
-- **30% CRA Turnover Reduction Target**
-  - **Source:** Workload automation correlation with job satisfaction
-  - **Method:** Eliminate 46-50% manual SDV burden
+- **Target Industry Turnover Rate: <20% (vs current 30%)**
+  - **Source:** IQVIA's goal to improve on industry benchmarks
+  - **Method:** Address root causes through workload automation
 
-- **40% Overtime Hours Reduction**
-  - **Source:** 30x efficiency improvement × CRA workload impact
-  - **Result:** Work-life balance improvement
+- **Target Weekly Hours: 40 hrs (vs current 165/month)**
+  - **Source:** Normalize from current 165 monthly hours to standard 160-hour months
+  - **Method:** Reduce from 165 monthly hours to normalized 160-hour months (40hrs/week)
 
 - **67% Job Satisfaction Increase**
   - **Source:** Healthcare automation impact studies
@@ -256,18 +259,47 @@ This presentation is **perfectly aligned** with the IQVIA job requirements:
   - **Source:** CRA cost savings ($125-200/hour) + efficiency gains + quality improvements
   - **Evidence:** Operational cost reduction analysis
 
-### **Slide 12: AI Framework Evaluation Expertise**
-**Key Message:** Perfect alignment with IQVIA job requirements
+### **Slide 12: Technical Implementation for CRAs**
+**Key Message:** Practical AI tools and workflow transformations for clinical research staff
 
-#### **Technical Implementation Evidence:**
-- **5 Agents:** Portfolio Manager + 4 specialists (real implementation)
-- **23 Function Tools:** JSON schema-compliant tools (actual code)
-- **8 Handoff Rules:** Inter-agent coordination (working system)
+#### **CRA Interface & Daily Tools:**
+- **Unified AI Assistant Dashboard:** Natural language requests, smart notifications, progress tracking
+- **AI-Powered SDV Tools:** OCR document verification, risk-based prioritization, travel optimization
 
-**IQVIA Job Requirement Fulfillment:** ✅ Experience with LangGraph, CrewAI, AutoGen - EVALUATED ALL
+#### **Workflow Transformations:**
+- **Before AI:** 6-15 systems, 90 minutes per query, 46-50% manual SDV, reactive problem discovery
+- **After AI:** Single AI assistant, 3 minutes per query, <10% manual verification, proactive issue detection
+- **Result:** 30x productivity improvement achieved
 
-### **Slide 13: Project Management Approach**
-**Key Message:** Strategic planning + implementation excellence
+### **Slide 13: Mission, Vision & Product Strategy**
+**Key Message:** Clear strategic direction for IQVIA's AI transformation
+
+#### **Mission Statement:**
+*"To transform IQVIA's clinical trial operations through intelligent automation, enabling our teams to focus on high-value clinical insights while AI agents handle routine tasks, ultimately accelerating the delivery of life-saving treatments to patients."*
+
+#### **Vision Statement:**
+*"To be the world's first AI-native clinical research organization, where every clinical trial workflow is enhanced by specialized AI agents, setting the standard for efficiency, quality, and innovation in clinical research."*
+
+#### **2025 Strategic OKRs:**
+1. **Establish AI Foundation:** Deploy 5 agents, 90% query reduction, 99.9% uptime
+2. **Demonstrate Operational Value:** 75% SDV cost reduction, 45% amendment reduction, >400% ROI
+3. **Build Internal Transformation:** Train 500+ employees, 80% satisfaction, 90% manual reduction
+
+### **Slide 14: Project Management Approach**
+**Key Message:** Comprehensive PM methodology from research to delivery
+
+#### **User-Centered Research & Planning:**
+- **Discovery Phase:** CRA user research, pain point analysis, industry benchmarking, stakeholder alignment
+- **Data-Driven Insights:** 30% turnover crisis, 165hrs/month workload, 46-50% manual SDV time
+
+#### **Agile Development & Delivery:**
+- **Test-Driven Development:** 100% test coverage for production quality
+- **2-Week Sprints:** Rapid iteration with user feedback
+- **MVP Approach:** Query Analyzer delivered first (30x improvement)
+- **Risk Mitigation:** Confidence-based routing with human oversight
+
+### **Slide 15: Ready for IQVIA IT Project Manager Role**
+**Key Message:** Perfect alignment with job requirements and proven results
 
 #### **Strategic Planning:**
 - Internal stakeholder research and pain point analysis
