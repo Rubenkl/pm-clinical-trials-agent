@@ -39,20 +39,21 @@ This presentation is **perfectly aligned** with the IQVIA job requirements:
 - **Focus:** Internal IQVIA platform for operational efficiency
 - **Strategy:** Employee-centric design for competitive advantage
 
-### **Slide 2: The Problem - Industry CRA Crisis (Affects IQVIA)**
-**Key Messages:** Industry CRA Crisis + Market Inefficiencies
+### **Slide 2: The Problem - Clinical Research Industry Crisis**
+**Key Messages:** CRA Workforce Crisis + Market Inefficiencies
 
-**IMPORTANT NOTE:** All CRA metrics are industry-wide data (2019-2020), not IQVIA-specific.
+**IMPORTANT NOTE:** All CRA metrics are industry-wide data, not IQVIA-specific. The real problem is schedule disruption (15-16 hour days) and travel burden (20% of time), not total monthly hours.
 
-#### **Industry CRA Crisis Metrics (All Sourced):**
-- **30% Current Industry CRA Turnover Rate** 
+#### **CRA Workforce Crisis Metrics (All Sourced):**
+- **30% Industry CRA Turnover Rate (2019-2020)** 
   - **Source:** `/research/user-research/clinical-research-associate-user-persona.md` line 23
-  - **Context:** Double the general industry average of 15% (2019-2020 data)
-  - **Impact:** Industry-wide crisis that affects IQVIA's competitive position
+  - **Context:** Down to 23% in 2024, but still above 15% industry norm
+  - **Impact:** Industry-wide crisis affecting talent retention and quality
 
-- **165 Hours Monthly Work** 
-  - **Source:** Same file, line 7
-  - **Impact:** Significant overtime indicating system inefficiency
+- **4-5AM to 8PM Daily Schedule (15-16 hour days)** 
+  - **Source:** Same file, line 25
+  - **Impact:** Schedule disruption and work-life balance crisis, not total hours (165/month is actually normal)
+  - **Root Cause:** 20% travel time + on-site monitoring demands
 
 - **46-50% Time on Manual SDV**
   - **Source:** Same file, line 11  
@@ -75,19 +76,15 @@ This presentation is **perfectly aligned** with the IQVIA job requirements:
   - **Source:** Same file, line 9
   - **Mechanism:** AI-powered protocol deviation detection through pattern recognition agents that analyze patient visits, lab values, and concomitant medications using ML models to identify deviations before they require costly amendments. Early detection allows protocol adjustments without formal amendments.
 
-### **Slide 3: Industry Benchmarks - 8-672x Performance Potential**
-**Key Message:** Proven industry results validate our targets
+### **Slide 3: Industry Benchmarks - Advanced Agentic AI Results**
+**Key Message:** Cutting-edge agentic AI implementations demonstrate transformative potential through autonomous multi-agent systems
 
 #### **Documented Industry Achievements (All Sourced):**
-- **Tempus AI (Deep 6 AI): AI-Powered Patient Matching**
+- **Deep 6 AI (acquired by Tempus AI, March 2025): 672x Patient Screening Improvement**
   - **Source:** `/research/market-analysis/clinical-trials-AI-market-report.md` line 23
-  - **Evidence:** AI-powered patient matching with 95.7% accuracy for patient exclusion criteria and 91.6% for overall eligibility assessment, reducing physician screening time by 40%. Platform processed 280 million searches resulting in 847,689 potential matches.
-  - **How Achieved:** TrialGPT uses natural language processing to analyze patient records and match inclusion/exclusion criteria automatically
-
-- **Deep 6 AI: 672x Patient Screening Improvement**
-  - **Source:** Same file, line 23
-  - **Evidence:** Machine learning algorithms analyze unstructured clinical data, reducing weeks of manual screening to minutes of automated matching
-  - **How Achieved:** ML models process clinical notes, lab results, and imaging data to identify eligible patients instantly
+  - **Evidence:** Agentic AI autonomously analyzes unstructured clinical data, reducing weeks of manual screening to minutes. TrialGPT maintains 95.7% accuracy for patient exclusion criteria, processing 280M searches resulting in 847,689 potential matches.
+  - **How Achieved:** Multi-agent systems with autonomous decision-making analyze patient records, lab results, and imaging data without human intervention
+  - **Agentic AI Differentiator:** Unlike traditional AI requiring constant oversight, these agents make independent decisions and adapt workflows in real-time
 
 - **Saama Technologies: 10x Query Processing Improvement**
   - **Source:** Same file, line 19
