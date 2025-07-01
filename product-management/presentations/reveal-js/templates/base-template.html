@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>{{PRESENTATION_TITLE}} - PM Clinical Trials Agent</title>
+
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reset.css">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.css">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/theme/white.css">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/highlight/monokai.css">
+
+		<!-- Common CSS Template -->
+		<style>
+			/* Base template styles */
+			.reveal .slides section {
+				text-align: left;
+			}
+			.reveal h1, .reveal h2, .reveal h3 {
+				color: #1e3a8a;
+			}
+			.reveal .title-slide {
+				text-align: center;
+			}
+			
+			/* Accessibility base styles */
+			.reveal .slides section:focus {
+				outline: 3px solid #f59e0b;
+				outline-offset: 2px;
+			}
+			.sr-only {
+				position: absolute;
+				width: 1px;
+				height: 1px;
+				padding: 0;
+				margin: -1px;
+				overflow: hidden;
+				clip: rect(0,0,0,0);
+				white-space: nowrap;
+				border: 0;
+			}
+			
+			/* Common component styles */
+			.highlight-badge {
+				background: linear-gradient(135deg, #1e3a8a, #3730a3);
+				color: white;
+				padding: 0.75rem 1rem;
+				border-radius: 0.5rem;
+				font-weight: bold;
+				display: inline-block;
+				margin: 0.5rem 0;
+			}
+			
+			.metric-card {
+				background: #f8fafc;
+				border: 2px solid #e2e8f0;
+				padding: 1.5rem;
+				border-radius: 0.75rem;
+				text-align: center;
+				margin: 0.5rem;
+			}
+			
+			/* Responsive design */
+			@media (max-width: 768px) {
+				.reveal h1 { font-size: 2em; }
+				.reveal h2 { font-size: 1.6em; }
+				.metric-card { padding: 1rem; }
+			}
+		</style>
+		
+		<!-- Presentation-specific styles -->
+		{{CUSTOM_STYLES}}
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<!-- Slides content goes here -->
+				{{SLIDES_CONTENT}}
+			</div>
+		</div>
+
+		<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/notes/notes.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/markdown/markdown.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/highlight/highlight.js"></script>
+		
+		<!-- Common JavaScript -->
+		<script>
+			// Initialize Reveal.js
+			Reveal.initialize({
+				hash: true,
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ],
+				// Common configuration
+				transition: 'slide',
+				transitionSpeed: 'default',
+				backgroundTransition: 'fade'
+			});
+			
+			// Common accessibility features
+			document.addEventListener('DOMContentLoaded', function() {
+				// Add skip link
+				const skipLink = document.createElement('a');
+				skipLink.href = '#main-content';
+				skipLink.textContent = 'Skip to main content';
+				skipLink.className = 'sr-only';
+				document.body.insertBefore(skipLink, document.body.firstChild);
+			});
+		</script>
+		
+		<!-- Presentation-specific scripts -->
+		{{CUSTOM_SCRIPTS}}
+	</body>
+</html>

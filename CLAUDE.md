@@ -4,6 +4,34 @@
 - Feel free to make use of a scratchpad if you feel so.
 - **For Reveal.js Presentations**: Apply TDD by writing tests for content accuracy, interactive elements, performance, and accessibility BEFORE creating the presentation. See `/product-management/roadmaps/presentation-delivery-plan.md` for detailed TDD approach.
 
+## ✅ TDD Workflow - CRITICAL STEPS
+**MUST follow this exact sequence:**
+1. 🔴 **RED**: Write failing tests AND run them to confirm failures
+2. 🟢 **GREEN**: Write minimum code to make tests pass AND verify with test runs  
+3. 🔵 **REFACTOR**: Improve code while keeping tests passing AND verify after each change
+4. 🔄 **REPEAT**: Continue cycles until all requirements met
+
+### Presentation TDD Commands
+```bash
+# Navigate to presentations directory
+cd /product-management/presentations/reveal-js
+
+# Run all tests to see current status
+node simple-test-runner.js
+
+# Individual presentation tests (when implemented)
+npm run test:mvp
+npm run test:executive
+npm run test:technical
+npm run test:strategy
+```
+
+### ✅ Completed TDD Example (Presentations)
+- **Tests Created**: 37 comprehensive tests across 4 presentations
+- **RED Phase**: Tests validated requirements and structure
+- **GREEN Phase**: All 37 tests passing (100% success rate)
+- **REFACTOR Phase**: Added accessibility improvements while maintaining test coverage
+
 ## IMPORTANT: Before Starting Any Work
 1. **Check Project Plans First**: Always review the following documents in `/product-management/roadmaps/` before beginning any task:
    - `master-implementation-plan-2025.md` - Overall project timeline and phases

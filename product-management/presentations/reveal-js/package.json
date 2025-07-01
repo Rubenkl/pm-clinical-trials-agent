@@ -1,0 +1,34 @@
+{
+  "name": "pm-clinical-trials-presentations",
+  "version": "1.0.0",
+  "description": "Reveal.js presentations for PM Clinical Trials Agent",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:create": "node scripts/create-test.js",
+    "test:mvp": "jest mvp-demo-jan-10/tests/mvp-demo.test.js",
+    "test:executive": "jest executive-overview-jan-17/tests/executive-overview.test.js",
+    "test:technical": "jest technical-deep-dive-jan-20/tests/technical-deep-dive.test.js",
+    "test:strategy": "jest product-strategy-jan-24/tests/product-strategy.test.js",
+    "test:all": "jest --coverage",
+    "dev": "live-server",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "@testing-library/jest-dom": "^5.16.5",
+    "puppeteer": "^20.7.0",
+    "jest-puppeteer": "^9.0.0",
+    "axe-core": "^4.7.2",
+    "jest-axe": "^8.0.0",
+    "live-server": "^1.2.2",
+    "eslint": "^8.42.0"
+  },
+  "jest": {
+    "preset": "jest-puppeteer",
+    "testTimeout": 30000,
+    "moduleFileExtensions": ["js", "html"],
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"]
+  }
+}

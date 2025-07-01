@@ -1,15 +1,15 @@
-# FastAPI and ASGI
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-pydantic==2.5.0
-pydantic-settings==2.1.0
+# Core dependencies
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
 
-# OpenAI Native Agents
+# OpenAI
 openai>=1.87.0
 openai-agents>=0.1.0
 
-# Simple PostgreSQL (only if persistent storage needed)
-psycopg2-binary==2.9.9
+# Database (optional)
+# psycopg2-binary>=2.9.9  # Commented out due to install issues
 
 # Caching and Message Queue
 redis==5.0.1

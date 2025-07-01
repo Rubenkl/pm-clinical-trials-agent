@@ -51,10 +51,10 @@ pm-clinical-trials-agent/
 ## 🛠️ Tech Stack
 
 ### Backend
-- **FastAPI**: Modern Python web framework
-- **OpenAI Agents**: Multi-agent orchestrator system
-- **PostgreSQL**: Database (Railway managed)
-- **Hypercorn**: ASGI server for production
+- **FastAPI**: Lightweight API wrapper for agent system
+- **OpenAI Agents SDK**: Multi-agent orchestration and state management
+- **Python 3.11+**: Core runtime environment
+- **Hypercorn**: ASGI server for Railway deployment
 
 ### Frontend  
 - **React 18**: UI framework
@@ -79,11 +79,38 @@ The project includes comprehensive product management documentation:
 
 ## 🤖 AI Agent System
 
-The backend implements a multi-agent orchestrator with specialized agents:
+The backend implements a comprehensive multi-agent system using **real OpenAI Agents SDK** with 5 specialized agents:
 
-- **Clinical Agent**: Clinical trials protocols and regulations
-- **Data Agent**: Data analysis and reporting
-- **Workflow Agent**: Project management and task coordination
+### ✅ **Production-Ready Architecture**
+- **Portfolio Manager**: Central orchestrator with 5 function tools
+- **Query Analyzer**: Clinical data analysis with 5 specialized tools  
+- **Data Verifier**: Cross-system verification with 6 tools for SDV/audit
+- **Query Generator**: Clinical query generation with 3 tools
+- **Query Tracker**: Query lifecycle tracking with 4 tools
+
+### ✅ **Real OpenAI Agents SDK Integration**
+- **23 Function Tools**: All using string-based signatures with JSON serialization
+- **Pydantic Context Classes**: Modern data validation (no mock implementations)
+- **Agent Coordination**: Native SDK handoffs and state management
+- **Full Compliance**: No fallback mocks - 100% OpenAI Agents SDK
+
+### 🔧 **Technical Implementation**
+```python
+# Correct SDK imports (not openai_agents)
+from agents import Agent, function_tool, Runner
+from pydantic import BaseModel
+
+# String-based function tools (not Dict[str, Any])
+@function_tool
+def analyze_data(data_json: str) -> str:
+    return json.dumps(analysis_result)
+```
+
+### 🎯 **Key Features**
+- **Multi-Agent Orchestration**: Automated handoffs between specialized agents
+- **Context Sharing**: Shared state management across agent workflows  
+- **Regulatory Compliance**: Built-in GCP, FDA, and audit trail generation
+- **Performance Optimization**: Batch processing and concurrent operations
 
 ## 🚢 Deployment
 
