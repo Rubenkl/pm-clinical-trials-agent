@@ -13,13 +13,13 @@ git push origin main
 1. Go to [railway.app](https://railway.app)
 2. Click "Deploy Now" → "Deploy from GitHub repo"
 3. Select repository: `pm-clinical-trials-agent`
-4. Railway should auto-detect the `railway.toml` configuration (uses Nixpacks)
-5. If not, manually set:
-   - **Builder**: Nixpacks
-   - **Build Command**: `cd backend && pip install -r requirements.txt`
-   - **Start Command**: `cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-6. Add environment variable: `OPENAI_API_KEY=sk-your-key-here`
-7. Click "Deploy"
+4. **MANUALLY CONFIGURE** (railway.toml might not work):
+   - Go to **Settings** → **Build**
+   - **Root Directory**: `backend`
+   - **Builder**: Nixpacks (or leave auto-detect)
+   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+5. Add environment variable: `OPENAI_API_KEY=sk-your-key-here`
+6. Click "Deploy"
 
 ### **Step 3: Test Your System**
 Railway gives you a URL like: `https://your-app.up.railway.app`

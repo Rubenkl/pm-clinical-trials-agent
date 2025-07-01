@@ -1,21 +1,9 @@
-# Railway configuration for backend service only
 [build]
 builder = "nixpacks"
 buildCommand = "cd backend && pip install -r requirements.txt"
-startCommand = "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
-watchPaths = ["backend/**"]
 
 [deploy]
-numReplicas = 1
-sleepApplication = false
-restartPolicyType = "always"
-
-[[deploy.healthcheck]]
-httpPath = "/health"
-initialDelaySeconds = 60
-periodSeconds = 10
-timeoutSeconds = 5
-failureThreshold = 3
-
-[environments.production]
-variables = { USE_TEST_DATA = "true", TEST_DATA_PRESET = "cardiology_phase2", DEBUG = "false", LOG_LEVEL = "INFO" }
+startCommand = "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "ALWAYS"
