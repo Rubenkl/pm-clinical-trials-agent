@@ -81,3 +81,36 @@ TEST_DATA_PRESET=cardiology_phase2
 ```
 
 This ensures Railway only builds and deploys the backend service, not the entire repository.
+
+---
+
+## 🚨 Railway Build Troubleshooting
+
+### **Issue: Docker registry timeout/context canceled**
+```
+failed to copy: httpReadSeeker: failed open: context canceled
+```
+
+**Quick Fixes:**
+1. **Try again** - Railway sometimes has temporary issues
+2. **Use Alpine image** - Faster download (already updated in Dockerfile)
+3. **Manually redeploy** - Click "Redeploy" in Railway dashboard
+
+### **Issue: Build timeout (exit code 137)**
+**Solution:** Railway free tier has limited resources
+- Try deploying during off-peak hours
+- Consider upgrading to Railway Pro ($5/month)
+
+### **Alternative: Manual Railway Settings**
+If `railway.toml` doesn't work, manually configure:
+
+1. Go to Railway Dashboard → Your Project → Settings
+2. **Build Command**: `docker build -f backend/Dockerfile backend`
+3. **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+4. **Root Directory**: `backend`
+
+### **Last Resort: Simpler Deployment**
+If Docker keeps failing, try Nixpacks:
+1. Railway Settings → Builder: `Nixpacks`
+2. Root Directory: `backend`
+3. Start Command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`

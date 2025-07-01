@@ -1,8 +1,11 @@
-# Simple Dockerfile for Railway deployment
-FROM python:3.11-slim
+# Railway-optimized Dockerfile
+FROM python:3.11-alpine
 
 # Set working directory
 WORKDIR /app
+
+# Install build dependencies
+RUN apk add --no-cache gcc musl-dev
 
 # Copy requirements and install dependencies
 COPY requirements.txt .
