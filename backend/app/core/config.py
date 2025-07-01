@@ -42,6 +42,11 @@ class Settings(BaseSettings):
     # Rate Limiting
     rate_limit_requests: int = Field(default=100, env="RATE_LIMIT_REQUESTS")
     rate_limit_window: int = Field(default=60, env="RATE_LIMIT_WINDOW")
+    
+    # Test Data Configuration
+    use_test_data: bool = Field(default=False, env="USE_TEST_DATA")
+    test_data_preset: str = Field(default="cardiology_phase2", env="TEST_DATA_PRESET")
+    test_data_path: str = Field(default="tests/test_data/", env="TEST_DATA_PATH")
 
 
     @field_validator("database_url")
@@ -79,6 +84,15 @@ class Settings(BaseSettings):
         """Validate OpenAI temperature is between 0 and 2."""
         if not 0 <= v <= 2:
             raise ValueError("OpenAI temperature must be between 0 and 2")
+        return v
+
+    @field_validator("test_data_preset")
+    @classmethod
+    def validate_test_data_preset(cls, v: str) -> str:
+        """Validate test data preset name."""
+        valid_presets = ["cardiology_phase2", "oncology_phase1"]
+        if v not in valid_presets:
+            raise ValueError(f"Test data preset must be one of {valid_presets}")
         return v
 
     model_config = {
