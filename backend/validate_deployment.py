@@ -20,8 +20,8 @@ def test_critical_imports():
         ("Core Config", "from app.core.config import settings"),
         ("Portfolio Manager", "from app.agents.portfolio_manager import PortfolioManager, WorkflowRequest"),
         ("Base Agent", "from app.agents.base_agent import BaseAgent, AgentResponse"),
-        ("Agents Endpoint", "from app.api.endpoints.agents import router"),
-        ("Health Endpoint", "from app.api.endpoints.health import router"),
+        ("Agents Endpoint", "from app.api.endpoints.agents import agents_router"),
+        ("Health Endpoint", "from app.api.endpoints.health import health_router"),
         ("Main App", "from app.main import app"),
         ("OpenAI SDK", "from agents import Agent, function_tool"),
     ]

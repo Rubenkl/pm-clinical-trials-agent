@@ -43,16 +43,16 @@ class TestImports:
     def test_api_endpoints_import(self):
         """Test API endpoint imports - This catches the specific deployment failure"""
         try:
-            from app.api.endpoints.agents import router
-            assert router is not None
+            from app.api.endpoints.agents import agents_router
+            assert agents_router is not None
         except ImportError as e:
             pytest.fail(f"Failed to import agents endpoint: {e}")
     
     def test_health_endpoint_import(self):
         """Test health endpoint imports"""
         try:
-            from app.api.endpoints.health import router
-            assert router is not None
+            from app.api.endpoints.health import health_router
+            assert health_router is not None
         except ImportError as e:
             pytest.fail(f"Failed to import health endpoint: {e}")
     
@@ -84,8 +84,7 @@ class TestImports:
     def test_pydantic_models_import(self):
         """Test Pydantic model imports"""
         try:
-            from app.api.models.requests import ChatRequest, WorkflowStatusRequest
-            from app.api.models.responses import ChatResponse, AgentStatusResponse
+            from app.api.models.agent_models import ChatRequest, ChatResponse
             assert ChatRequest is not None
             assert ChatResponse is not None
         except ImportError as e:
