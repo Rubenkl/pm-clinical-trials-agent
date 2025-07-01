@@ -1,0 +1,9 @@
+# Root requirements for Nixpacks detection
+# This file makes Nixpacks detect Python and install dependencies
+# The actual dependencies are in backend/requirements.txt
+
+# Core dependencies for Nixpacks
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+openai>=1.87.0
+openai-agents>=0.1.0
