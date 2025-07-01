@@ -1,6 +1,8 @@
+# Railway configuration for backend service only
 [build]
 builder = "dockerfile"
-dockerfilePath = "Dockerfile"
+dockerfilePath = "backend/Dockerfile"
+buildContext = "backend"
 
 [deploy]
 numReplicas = 1

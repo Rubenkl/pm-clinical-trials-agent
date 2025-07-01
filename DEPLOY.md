@@ -13,8 +13,12 @@ git push origin main
 1. Go to [railway.app](https://railway.app)
 2. Click "Deploy Now" → "Deploy from GitHub repo"
 3. Select repository: `pm-clinical-trials-agent`
-4. Add environment variable: `OPENAI_API_KEY=sk-your-key-here`
-5. Click "Deploy"
+4. Railway should auto-detect the `railway.toml` configuration
+5. If not, manually set:
+   - **Root Directory**: `backend`
+   - **Dockerfile Path**: `backend/Dockerfile`
+6. Add environment variable: `OPENAI_API_KEY=sk-your-key-here`
+7. Click "Deploy"
 
 ### **Step 3: Test Your System**
 Railway gives you a URL like: `https://your-app.up.railway.app`
@@ -41,3 +45,32 @@ open https://your-app.up.railway.app/docs
 - Instant testing capability
 
 **That's it! Your clinical trials AI system is live on Railway.**
+
+---
+
+## 🔧 Railway Configuration Fixed
+
+### **Problem**: Railway tries to deploy entire repo instead of just `/backend`
+
+### **Solution**: Use `railway.toml` at root level
+```toml
+[build]
+builder = "dockerfile"
+dockerfilePath = "backend/Dockerfile"
+buildContext = "backend"
+```
+
+### **Manual Configuration** (if auto-detection fails):
+In Railway dashboard → Settings → Build:
+- **Root Directory**: `backend`
+- **Dockerfile Path**: `backend/Dockerfile`
+- **Builder**: Dockerfile
+
+### **Environment Variables** (required):
+```
+OPENAI_API_KEY=sk-your-openai-api-key-here
+USE_TEST_DATA=true
+TEST_DATA_PRESET=cardiology_phase2
+```
+
+This ensures Railway only builds and deploys the backend service, not the entire repository.
