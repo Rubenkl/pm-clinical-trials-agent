@@ -61,10 +61,17 @@ buildContext = "backend"
 ```
 
 ### **Manual Configuration** (if auto-detection fails):
-In Railway dashboard → Settings → Build:
+In Railway dashboard → Settings:
+
+**Build Settings:**
 - **Root Directory**: `backend`
-- **Dockerfile Path**: `backend/Dockerfile`
+- **Builder**: Dockerfile  
+- **Dockerfile Path**: `Dockerfile` (relative to root directory)
+
+**OR use these settings:**
+- **Root Directory**: Leave empty
 - **Builder**: Dockerfile
+- **Dockerfile Path**: `backend/Dockerfile`
 
 ### **Environment Variables** (required):
 ```

@@ -2,7 +2,7 @@
 [build]
 builder = "dockerfile"
 dockerfilePath = "backend/Dockerfile"
-buildContext = "backend"
+watchPaths = ["backend/**"]
 
 [deploy]
 numReplicas = 1
