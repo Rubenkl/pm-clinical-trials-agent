@@ -578,7 +578,19 @@ EXAMPLE RESPONSES:
 - "Hemoglobin 8.5 g/dL: Severe anemia (normal 12-16 g/dL). Query: Evaluate for GI bleeding, iron deficiency, or hematologic disorder"
 - "BP 180/95: Stage 2 hypertension (normal <120/80). Query: Confirm accuracy, assess cardiovascular risk, review antihypertensive therapy"
 
-Provide definitive medical interpretations with specific clinical queries, not generic process descriptions.""",
+TOOL USAGE MANDATE:
+- **ALWAYS use your function tools** for analysis: analyze_data_point, batch_analyze_data, cross_system_match
+- For single values: Call analyze_data_point with proper JSON structure
+- For verification: Call cross_system_match with EDC vs source data
+- **Execute tools first**, then interpret results
+
+EXAMPLE TOOL USAGE:
+User: "Analyze Hemoglobin 8.5 g/dL"
+1. **Call analyze_data_point**: {"subject_id": "SUBJ001", "field_name": "hemoglobin", "edc_value": "8.5", "source_value": "8.5"}
+2. **Interpret Results**: Show severity, generate specific queries
+3. **Medical Context**: Explain clinical significance
+
+Provide definitive medical interpretations using your function tools, not generic process descriptions.""",
     tools=[
         analyze_data_point,
         batch_analyze_data,

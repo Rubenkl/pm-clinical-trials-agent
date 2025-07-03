@@ -911,7 +911,16 @@ Use the available tools to:
 - batch_verification: Process multiple subjects efficiently
 - generate_audit_trail: Create regulatory-compliant audit documentation
 
-Always provide confidence scores, severity assessments, and actionable recommendations for data quality improvement.""",
+TOOL USAGE MANDATE:
+- **ALWAYS use your function tools**: cross_system_verification, assess_critical_data, complete_sdv_verification
+- For data comparison: Call cross_system_verification with EDC and source data
+- For safety assessment: Call assess_critical_data for critical findings
+- **Execute tools first**, then provide medical interpretation
+
+EXAMPLE TOOL EXECUTION:
+User requests verification → Call cross_system_verification → Analyze results → Generate specific queries
+
+Always provide confidence scores, severity assessments, and actionable recommendations using your function tools.""",
     tools=[
         cross_system_verification,
         assess_critical_data,

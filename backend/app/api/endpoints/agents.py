@@ -38,15 +38,48 @@ async def chat_with_agent(
         # Get request context
         context = get_request_context(http_request)
         
-        # Route to appropriate agent
+        # Route to appropriate agent with workflow orchestration
         if request.agent_type == "portfolio-manager":
             agent = portfolio_manager
         else:
             # For other agent types, use portfolio manager to coordinate
             agent = portfolio_manager
         
-        # Process the message
-        response = await agent.process_message(request.message)
+        # Determine if this requires workflow orchestration
+        message_lower = request.message.lower()
+        clinical_keywords = ['analyze', 'hemoglobin', 'blood pressure', 'clinical', 'subject', 'discrepancy', 'verify']
+        
+        if any(keyword in message_lower for keyword in clinical_keywords):
+            # Use workflow orchestration for clinical tasks
+            workflow_type = "comprehensive_analysis"
+            if "verify" in message_lower or "verification" in message_lower:
+                workflow_type = "data_verification"
+            elif "query" in message_lower or "generate" in message_lower:
+                workflow_type = "query_resolution"
+            
+            # Create workflow request
+            workflow_request = {
+                "workflow_id": f"CHAT_{int(time.time())}",
+                "workflow_type": workflow_type,
+                "description": f"Chat-initiated {workflow_type}",
+                "input_data": {"message": request.message},
+                "priority": 1
+            }
+            
+            # Execute through workflow orchestration
+            workflow_result = await agent.orchestrate_workflow(workflow_request)
+            
+            # Create agent response from workflow result
+            response = AgentResponse(
+                success=workflow_result.get("success", True),
+                content=str(workflow_result),
+                agent_id="portfolio-manager",
+                execution_time=0.0,
+                metadata={"workflow_executed": True, "workflow_type": workflow_type}
+            )
+        else:
+            # Process as simple message for general queries
+            response = await agent.process_message(request.message)
         
         execution_time = time.time() - start_time
         

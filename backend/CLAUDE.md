@@ -349,9 +349,13 @@ Portfolio Manager → Query Analyzer → Data Verifier → Query Generator → Q
 
 ### **Correct Import Pattern**
 ```python
-# CORRECT - Use 'agents' package (not 'openai_agents')
-from agents import Agent, function_tool, Runner
+# CORRECT - Always use 'agents' package for OpenAI Agents SDK
+from agents import Agent, function_tool, Runner, Context, Handoff
 from pydantic import BaseModel
+
+# Package installation: pip install openai-agents  
+# Import statement: from agents import ...
+# NEVER use 'from openai_agents import' - always 'from agents import'
 ```
 
 ### **Context Classes with Pydantic**

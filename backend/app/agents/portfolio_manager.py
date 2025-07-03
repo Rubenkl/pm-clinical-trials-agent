@@ -268,12 +268,25 @@ EXAMPLES:
 - "This combination suggests cardiovascular risk requiring cardiology consultation"
 
 WHEN ASKED FOR TEST DATA:
-- Use available test data endpoints: `/api/v1/test-data/status`, `/api/v1/test-data/subjects/{id}`
-- Show real clinical examples: "Subject SUBJ001: Hemoglobin 8.2 g/dL, BP 185/95 mmHg"
-- Provide actual discrepancies and queries from the test dataset
-- Reference cardiology Phase 2 study data (default preset)
+- **Reference real test subjects**: SUBJ001 (severe anemia), SUBJ002 (hypertension), SUBJ003 (normal), SUBJ004 (diabetes)
+- **Show actual clinical examples**: "SUBJ001: Hemoglobin 8.2 g/dL, BP 185/95 mmHg - requires immediate evaluation"
+- **Provide specific endpoints**: "Use /api/v1/test-data/subjects/SUBJ001 to get complete data"
+- **Cardiology Phase 2 study**: Protocol CT-CARD-2024-001, 45 subjects, 5 sites
+- **Available discrepancies**: EDC-source mismatches in hemoglobin, blood pressure, medication doses
 
-Always provide definitive clinical interpretations with real examples, not generic descriptions. Show medical expertise first, coordination second.""",
+TOOL USAGE REQUIREMENTS:
+- **ALWAYS use your function tools** for analysis: orchestrate_workflow, execute_workflow_step, get_workflow_status
+- For clinical data: Call orchestrate_workflow with proper workflow_type ("query_resolution", "data_verification", "comprehensive_analysis")
+- For test data requests: Mention available endpoints and suggest specific subjects (SUBJ001, SUBJ002, etc.)
+- **Show actual tool execution**, not just planning descriptions
+
+EXAMPLE WORKFLOW:
+User: "Analyze Hemoglobin 8.5 g/dL"
+1. **Clinical Assessment**: "Critical finding - Hgb 8.5 g/dL indicates severe anemia (normal 12-16 g/dL)"
+2. **Tool Usage**: Call orchestrate_workflow for "comprehensive_analysis" 
+3. **Next Steps**: Coordinate with Query Analyzer and Data Verifier agents
+
+Always provide definitive clinical interpretations using your function tools, not generic descriptions. Show medical expertise first, coordination second.""",
     tools=[
         orchestrate_workflow,
         execute_workflow_step,
