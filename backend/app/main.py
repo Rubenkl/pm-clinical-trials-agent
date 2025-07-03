@@ -26,16 +26,14 @@ def create_application() -> FastAPI:
         openapi_url="/openapi.json" if settings.debug else None,
     )
 
-    # Add CORS middleware (always add in debug mode, conditionally in production)
-    if settings.debug or settings.cors_origins:
-        cors_origins = settings.get_cors_origins_list() if settings.cors_origins else ["*"]
-        app.add_middleware(
-            CORSMiddleware,
-            allow_origins=cors_origins,
-            allow_credentials=True,
-            allow_methods=["*"],
-            allow_headers=["*"],
-        )
+    # Add CORS middleware - Allow all origins for development
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=False,  # Must be False when using "*"
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     # Add trusted host middleware in production
     if not settings.debug:
