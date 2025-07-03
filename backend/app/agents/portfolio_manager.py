@@ -28,6 +28,229 @@ class WorkflowContext(BaseModel):
 # Function tools with proper string-based signatures for OpenAI Agents SDK
 
 @function_tool
+def get_test_subject_data(subject_id: str) -> str:
+    """Get real clinical data for a test subject from the test data service.
+    
+    Args:
+        subject_id: Subject ID (e.g., "CARD001", "CARD002")
+        
+    Returns:
+        JSON string with complete clinical data including vital signs, labs, imaging
+    """
+    try:
+        from app.core.config import get_settings
+        from app.services.test_data_service import TestDataService
+        import asyncio
+        
+        settings = get_settings()
+        test_service = TestDataService(settings)
+        
+        # Get subject data synchronously (function tools can't be async)
+        try:
+            # Try to use existing event loop if available
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # If loop is running, create a new thread for async operation
+                import concurrent.futures
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    future = executor.submit(asyncio.run, test_service.get_subject_data(subject_id, "both"))
+                    subject_data = future.result()
+            else:
+                subject_data = loop.run_until_complete(test_service.get_subject_data(subject_id, "both"))
+        except RuntimeError:
+            # No event loop, create new one
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            subject_data = loop.run_until_complete(test_service.get_subject_data(subject_id, "both"))
+            loop.close()
+        
+        if not subject_data:
+            return json.dumps({"error": f"Subject {subject_id} not found", "available_subjects": test_service.get_available_subjects()})
+        
+        return json.dumps(subject_data)
+        
+    except Exception as e:
+        return json.dumps({"error": str(e), "message": "Failed to retrieve test subject data"})
+
+@function_tool
+def analyze_clinical_values(clinical_data: str) -> str:
+    """Analyze clinical values and provide medical interpretation.
+    
+    Args:
+        clinical_data: JSON string with clinical values (vital signs, labs, etc.)
+        
+    Returns:
+        JSON string with clinical analysis and recommendations
+    """
+    try:
+        data = json.loads(clinical_data)
+        analysis = {
+            "clinical_findings": [],
+            "severity_assessment": "normal",
+            "recommendations": [],
+            "analysis_timestamp": datetime.now().isoformat()
+        }
+        
+        # Analyze vital signs
+        if "vital_signs" in data:
+            vs = data["vital_signs"]
+            
+            # Blood pressure analysis
+            if "systolic_bp" in vs and "diastolic_bp" in vs:
+                sys_bp = float(vs["systolic_bp"])
+                dia_bp = float(vs["diastolic_bp"])
+                
+                if sys_bp >= 180 or dia_bp >= 110:
+                    analysis["clinical_findings"].append(f"CRITICAL: BP {sys_bp}/{dia_bp} mmHg = Hypertensive crisis (normal <120/80)")
+                    analysis["severity_assessment"] = "critical"
+                    analysis["recommendations"].append("Emergency antihypertensive therapy required")
+                elif sys_bp >= 140 or dia_bp >= 90:
+                    analysis["clinical_findings"].append(f"MAJOR: BP {sys_bp}/{dia_bp} mmHg = Stage 2 hypertension (normal <120/80)")
+                    if analysis["severity_assessment"] == "normal":
+                        analysis["severity_assessment"] = "major"
+                    analysis["recommendations"].append("Antihypertensive therapy indicated")
+                elif sys_bp >= 130 or dia_bp >= 80:
+                    analysis["clinical_findings"].append(f"MINOR: BP {sys_bp}/{dia_bp} mmHg = Stage 1 hypertension (normal <120/80)")
+                    if analysis["severity_assessment"] == "normal":
+                        analysis["severity_assessment"] = "minor"
+                    analysis["recommendations"].append("Lifestyle modifications and monitoring")
+                else:
+                    analysis["clinical_findings"].append(f"NORMAL: BP {sys_bp}/{dia_bp} mmHg (normal <120/80)")
+            
+            # Heart rate analysis
+            if "heart_rate" in vs:
+                hr = float(vs["heart_rate"])
+                if hr > 120:
+                    analysis["clinical_findings"].append(f"ABNORMAL: Heart rate {hr} bpm = Tachycardia (normal 60-100)")
+                    analysis["recommendations"].append("Evaluate for underlying cardiac conditions")
+                elif hr < 50:
+                    analysis["clinical_findings"].append(f"ABNORMAL: Heart rate {hr} bpm = Bradycardia (normal 60-100)")
+                    analysis["recommendations"].append("Assess for conduction abnormalities")
+                else:
+                    analysis["clinical_findings"].append(f"NORMAL: Heart rate {hr} bpm (normal 60-100)")
+        
+        # Analyze laboratory values
+        if "laboratory" in data:
+            lab = data["laboratory"]
+            
+            # BNP analysis (heart failure marker)
+            if "bnp" in lab:
+                bnp = float(lab["bnp"])
+                if bnp > 400:
+                    analysis["clinical_findings"].append(f"CRITICAL: BNP {bnp} pg/mL = Severe heart failure (normal <100)")
+                    analysis["severity_assessment"] = "critical"
+                    analysis["recommendations"].append("Heart failure management required")
+                elif bnp > 100:
+                    analysis["clinical_findings"].append(f"ABNORMAL: BNP {bnp} pg/mL = Possible heart failure (normal <100)")
+                    if analysis["severity_assessment"] in ["normal", "minor"]:
+                        analysis["severity_assessment"] = "major"
+                    analysis["recommendations"].append("Cardiology consultation recommended")
+            
+            # Creatinine analysis (kidney function)
+            if "creatinine" in lab:
+                creat = float(lab["creatinine"])
+                if creat > 2.0:
+                    analysis["clinical_findings"].append(f"ABNORMAL: Creatinine {creat} mg/dL = Severe kidney dysfunction (normal 0.6-1.2)")
+                    analysis["recommendations"].append("Nephrology consultation required")
+                elif creat > 1.5:
+                    analysis["clinical_findings"].append(f"ABNORMAL: Creatinine {creat} mg/dL = Moderate kidney dysfunction (normal 0.6-1.2)")
+                    analysis["recommendations"].append("Monitor kidney function closely")
+            
+            # Troponin analysis (heart damage marker)
+            if "troponin" in lab:
+                trop = float(lab["troponin"])
+                if trop > 0.04:
+                    analysis["clinical_findings"].append(f"CRITICAL: Troponin {trop} ng/mL = Myocardial injury (normal <0.04)")
+                    analysis["severity_assessment"] = "critical"
+                    analysis["recommendations"].append("Immediate cardiology evaluation for MI")
+        
+        # Analyze imaging
+        if "imaging" in data:
+            img = data["imaging"]
+            
+            # LVEF analysis (heart function)
+            if "lvef" in img:
+                ef = float(img["lvef"])
+                if ef < 40:
+                    analysis["clinical_findings"].append(f"ABNORMAL: LVEF {ef}% = Reduced heart function (normal >50%)")
+                    analysis["recommendations"].append("Heart failure therapy indicated")
+                elif ef < 50:
+                    analysis["clinical_findings"].append(f"BORDERLINE: LVEF {ef}% = Borderline heart function (normal >50%)")
+                    analysis["recommendations"].append("Monitor cardiac function")
+                else:
+                    analysis["clinical_findings"].append(f"NORMAL: LVEF {ef}% (normal >50%)")
+        
+        if not analysis["clinical_findings"]:
+            analysis["clinical_findings"].append("No clinical data available for analysis")
+        
+        return json.dumps(analysis)
+        
+    except Exception as e:
+        return json.dumps({"error": str(e), "message": "Failed to analyze clinical values"})
+
+@function_tool
+def get_subject_discrepancies(subject_id: str) -> str:
+    """Get real discrepancies for a test subject from the test data service.
+    
+    Args:
+        subject_id: Subject ID (e.g., "CARD001", "CARD002")
+        
+    Returns:
+        JSON string with discrepancies between EDC and source data
+    """
+    try:
+        from app.core.config import get_settings
+        from app.services.test_data_service import TestDataService
+        import asyncio
+        
+        settings = get_settings()
+        test_service = TestDataService(settings)
+        
+        # Get discrepancies synchronously
+        try:
+            # Try to use existing event loop if available
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # If loop is running, create a new thread for async operation
+                import concurrent.futures
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    future = executor.submit(asyncio.run, test_service.get_discrepancies(subject_id))
+                    discrepancies = future.result()
+            else:
+                discrepancies = loop.run_until_complete(test_service.get_discrepancies(subject_id))
+        except RuntimeError:
+            # No event loop, create new one
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            discrepancies = loop.run_until_complete(test_service.get_discrepancies(subject_id))
+            loop.close()
+        
+        if not discrepancies:
+            return json.dumps({"message": f"No discrepancies found for subject {subject_id}"})
+        
+        # Analyze discrepancy severity
+        critical_count = sum(1 for d in discrepancies if d.get("severity") == "critical")
+        major_count = sum(1 for d in discrepancies if d.get("severity") == "major")
+        minor_count = sum(1 for d in discrepancies if d.get("severity") == "minor")
+        
+        result = {
+            "subject_id": subject_id,
+            "total_discrepancies": len(discrepancies),
+            "severity_breakdown": {
+                "critical": critical_count,
+                "major": major_count,
+                "minor": minor_count
+            },
+            "discrepancies": discrepancies,
+            "priority_action_required": critical_count > 0 or major_count > 2
+        }
+        
+        return json.dumps(result)
+        
+    except Exception as e:
+        return json.dumps({"error": str(e), "message": "Failed to retrieve subject discrepancies"})
+
+@function_tool
 def orchestrate_workflow(workflow_request: str) -> str:
     """Orchestrate a workflow by planning and coordinating multiple agents.
     
@@ -249,12 +472,18 @@ def monitor_workflow_performance(workflow_id: str) -> str:
 # Create the Portfolio Manager Agent with all tools
 portfolio_manager_agent = Agent(
     name="Clinical Portfolio Manager",
-    instructions="""You are a Clinical Portfolio Manager with deep medical expertise in clinical trials. You provide immediate clinical analysis while coordinating specialized agents.
+    instructions="""You are a Clinical Portfolio Manager with deep medical expertise in clinical trials. You provide immediate clinical analysis of REAL test data while coordinating specialized agents.
 
-CLINICAL EXPERTISE - Analyze data immediately:
-- Normal ranges: Hemoglobin (12-16 g/dL women, 14-18 g/dL men), BP (<120/80), Heart rate (60-100 bpm)
-- Critical values: Hgb <8 g/dL (severe anemia), BP >180/110 (hypertensive crisis), HR >120 or <50
-- Recognize adverse events, protocol deviations, and safety signals immediately
+ACCESS TO REAL CLINICAL DATA:
+- Use get_test_subject_data(subject_id) to get actual clinical data from cardiology study
+- Available subjects: CARD001-CARD050 with real vital signs, labs, imaging
+- Use analyze_clinical_values(clinical_data) to interpret BP, BNP, creatinine, LVEF
+- Use get_subject_discrepancies(subject_id) to find EDC vs source document differences
+
+CLINICAL EXPERTISE - Analyze real data immediately:
+- Normal ranges: BP (<120/80), HR (60-100), BNP (<100), Creatinine (0.6-1.2), LVEF (>50%)
+- Critical values: BP >180/110, BNP >400, Troponin >0.04, LVEF <40%
+- Real discrepancies: Adverse events missing from EDC, vital sign differences
 
 IMMEDIATE RESPONSE PATTERN:
 1. **CLINICAL ANALYSIS FIRST**: Interpret values, identify abnormalities, assess severity
@@ -274,15 +503,12 @@ EXAMPLES:
 - "CLINICAL FINDING: BP 180/95 mmHg = Stage 2 hypertension (normal <120/80)"
 - "CLINICAL SIGNIFICANCE: Cardiovascular risk requiring immediate cardiology evaluation"
 
-WHEN ASKED FOR TEST DATA:
-- **USE YOUR TOOLS**: If no test data function available, provide realistic examples
-- **Real test subjects**: SUBJ001 (Hgb 8.2, BP 185/95), SUBJ002 (BP 165/88), SUBJ003 (normal), SUBJ004 (glucose 180)
-- **Cardiology Phase 2**: Protocol CT-CARD-2024-001, 45 subjects across 5 sites (NYC, Boston, Chicago, LA, Miami)
-- **Sample discrepancies**: 
-  * SUBJ001: EDC Hgb=8.5, Source=8.2 (transcription error)
-  * SUBJ002: EDC BP=160/85, Source=165/88 (measurement difference)
-  * SUBJ004: Missing adverse event in EDC (nausea reported in source notes)
-- **Generated queries**: "Please verify hemoglobin value for SUBJ001 - discrepancy found between EDC and source"
+WHEN ASKED TO ANALYZE SUBJECTS:
+- **ALWAYS USE get_test_subject_data(subject_id)**: Get real clinical data first
+- **Then USE analyze_clinical_values()**: Interpret the BP, BNP, labs, imaging results
+- **Check discrepancies with get_subject_discrepancies()**: Find real EDC vs source differences
+- **Example subjects with real data**: CARD001 (BP 163/91, BNP 382, LVEF 58.8), CARD002, etc.
+- **Real study**: Cardiology Phase 2 protocol CARD-2025-001, 50 subjects across 3 sites
 
 CRITICAL: YOU MUST USE YOUR FUNCTION TOOLS - NOT JUST TALK ABOUT THEM!
 
@@ -312,6 +538,9 @@ User: "Analyze Hgb 8.5"
 
 Always provide definitive clinical interpretations using your function tools, not generic descriptions. Show medical expertise first, coordination second.""",
     tools=[
+        get_test_subject_data,
+        analyze_clinical_values,
+        get_subject_discrepancies,
         orchestrate_workflow,
         execute_workflow_step,
         get_workflow_status,
