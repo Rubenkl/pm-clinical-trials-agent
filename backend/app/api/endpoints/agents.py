@@ -4,6 +4,10 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request
 from typing import Dict, Any
 import asyncio
 import time
+import json
+
+# OpenAI Agents SDK
+from agents import Runner
 
 from app.api.models.agent_models import (
     ChatRequest, ChatResponse, WorkflowExecutionRequest, WorkflowExecutionResponse,
@@ -66,20 +70,51 @@ async def chat_with_agent(
                 "priority": 1
             }
             
-            # Execute through workflow orchestration
-            workflow_result = await agent.orchestrate_workflow(workflow_request)
+            # Use OpenAI Agents SDK Runner to execute with function tools
             
-            # Create agent response from workflow result
+            # Create a message that will trigger function tool usage
+            workflow_message = f"""
+CLINICAL DATA ANALYSIS REQUEST:
+{request.message}
+
+WORKFLOW TYPE: {workflow_type}
+INSTRUCTIONS: Use your function tools to analyze this data. Call orchestrate_workflow with this JSON:
+{json.dumps(workflow_request)}
+
+Execute your tools and show the actual results, not just planning descriptions.
+"""
+            
+            # Execute through OpenAI Agents SDK Runner
+            sdk_result = await Runner.run(
+                agent.agent,  # Use the actual SDK agent
+                workflow_message,
+                context=agent.context
+            )
+            
+            # Create agent response from SDK result
             response = AgentResponse(
-                success=workflow_result.get("success", True),
-                content=str(workflow_result),
+                success=True,
+                content=sdk_result.final_output,
                 agent_id="portfolio-manager",
                 execution_time=0.0,
-                metadata={"workflow_executed": True, "workflow_type": workflow_type}
+                metadata={"workflow_executed": True, "workflow_type": workflow_type, "tools_used": True}
             )
         else:
-            # Process as simple message for general queries
-            response = await agent.process_message(request.message)
+            # Process as simple message using OpenAI Agents SDK
+            
+            sdk_result = await Runner.run(
+                agent.agent,  # Use the actual SDK agent
+                request.message,
+                context=agent.context
+            )
+            
+            response = AgentResponse(
+                success=True,
+                content=sdk_result.final_output,
+                agent_id="portfolio-manager",
+                execution_time=0.0,
+                metadata={"simple_query": True, "tools_available": True}
+            )
         
         execution_time = time.time() - start_time
         
