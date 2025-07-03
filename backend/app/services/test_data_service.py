@@ -21,13 +21,13 @@ class TestDataService:
         self.current_study: Optional[Dict[str, Any]] = None
         
         # Initialize test data if enabled
-        if settings.USE_TEST_DATA:
+        if settings.use_test_data:
             self._initialize_test_data()
     
     def _initialize_test_data(self):
         """Initialize test data based on configuration."""
         try:
-            study_preset = getattr(self.settings, 'TEST_DATA_PRESET', 'cardiology_phase2')
+            study_preset = getattr(self.settings, 'test_data_preset', 'cardiology_phase2')
             logger.info(f"Initializing test data with preset: {study_preset}")
             
             self.current_study = generate_test_study(study_preset)
@@ -85,7 +85,7 @@ class TestDataService:
         Returns:
             Subject data dictionary or None if not found
         """
-        if not self.settings.USE_TEST_DATA or subject_id not in self.test_data_cache['subjects']:
+        if not self.settings.use_test_data or subject_id not in self.test_data_cache['subjects']:
             return None
             
         subject = self.test_data_cache['subjects'][subject_id]
@@ -134,7 +134,7 @@ class TestDataService:
         Returns:
             Visit data dictionary or None if not found
         """
-        if not self.settings.USE_TEST_DATA:
+        if not self.settings.use_test_data:
             return None
             
         key = f"{subject_id}_{visit_name}"
@@ -170,7 +170,7 @@ class TestDataService:
         Returns:
             List of discrepancy dictionaries
         """
-        if not self.settings.USE_TEST_DATA:
+        if not self.settings.use_test_data:
             return []
             
         discrepancies = []
@@ -199,7 +199,7 @@ class TestDataService:
         Returns:
             List of query dictionaries
         """
-        if not self.settings.USE_TEST_DATA:
+        if not self.settings.use_test_data:
             return []
             
         queries = []
@@ -227,7 +227,7 @@ class TestDataService:
         Returns:
             Site data dictionary or None if not found
         """
-        if not self.settings.USE_TEST_DATA:
+        if not self.settings.use_test_data:
             return None
             
         return self.test_data_cache['sites'].get(site_id)
@@ -238,7 +238,7 @@ class TestDataService:
         Returns:
             Study information dictionary
         """
-        if not self.settings.USE_TEST_DATA or not self.current_study:
+        if not self.settings.use_test_data or not self.current_study:
             return None
             
         return self.current_study['study_info']
@@ -254,7 +254,7 @@ class TestDataService:
         Returns:
             List of subjects with discrepancy information
         """
-        if not self.settings.USE_TEST_DATA:
+        if not self.settings.use_test_data:
             return []
             
         subjects_with_discrepancies = []
@@ -289,7 +289,7 @@ class TestDataService:
         Returns:
             List of site performance summaries
         """
-        if not self.settings.USE_TEST_DATA:
+        if not self.settings.use_test_data:
             return []
             
         site_performance = []
@@ -334,17 +334,17 @@ class TestDataService:
     
     def is_test_mode(self) -> bool:
         """Check if system is running in test data mode."""
-        return self.settings.USE_TEST_DATA and self.current_study is not None
+        return self.settings.use_test_data and self.current_study is not None
     
     def get_available_subjects(self) -> List[str]:
         """Get list of available subject IDs."""
-        if not self.settings.USE_TEST_DATA:
+        if not self.settings.use_test_data:
             return []
         return list(self.test_data_cache['subjects'].keys())
     
     def get_available_sites(self) -> List[str]:
         """Get list of available site IDs."""
-        if not self.settings.USE_TEST_DATA:
+        if not self.settings.use_test_data:
             return []
         return list(self.test_data_cache['sites'].keys())
     
@@ -362,7 +362,7 @@ class TestDataService:
                 self.current_study = generate_test_study(preset_name)
             else:
                 # Use current preset
-                current_preset = getattr(self.settings, 'TEST_DATA_PRESET', 'cardiology_phase2')
+                current_preset = getattr(self.settings, 'test_data_preset', 'cardiology_phase2')
                 self.current_study = generate_test_study(current_preset)
             
             self._build_lookup_cache()
