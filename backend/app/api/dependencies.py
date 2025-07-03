@@ -76,15 +76,14 @@ async def initialize_agent_system() -> None:
     query_analyzer = get_query_analyzer()
     data_verifier = get_data_verifier()
     
-    # Register agents with portfolio manager
-    portfolio_manager.register_agent("query_analyzer", query_analyzer, ["data_analysis", "query_generation"])
-    portfolio_manager.register_agent("data_verifier", data_verifier, ["data_verification", "quality_checks"])
+    # OpenAI Agents SDK uses handoffs instead of explicit registration
+    # Agents coordinate through the handoff patterns defined in each agent
     
     print("✅ Agent system initialized successfully")
-    print(f"📊 Portfolio Manager: {portfolio_manager.agent_id}")
-    print(f"🔍 Query Analyzer: {query_analyzer.agent_id}")
-    print(f"✅ Data Verifier: {data_verifier.agent_id}")
-    print(f"🤝 Registered agents: {portfolio_manager.get_available_agents()}")
+    print(f"📊 Portfolio Manager: {portfolio_manager.__class__.__name__}")
+    print(f"🔍 Query Analyzer: {query_analyzer.__class__.__name__}")
+    print(f"✅ Data Verifier: {data_verifier.__class__.__name__}")
+    print(f"🤝 Available agents: {portfolio_manager.get_available_agents()}")
 
 
 async def cleanup_agent_system() -> None:
