@@ -23,11 +23,104 @@
 - **Environment Configuration**: ✅ .env.example created
 - **Setup Verification**: ✅ verify_setup.py script ready
 
-### ⚠️ IMMEDIATE NEXT PRIORITIES
-1. **Clinical Domain Enhancement** (HIGH PRIORITY)
-2. **Safety Workflow Implementation** (CRITICAL)
-3. **Production Deployment Preparation** (HIGH)
-4. **Clinical Expert Validation** (MEDIUM)
+### ⚠️ IMMEDIATE NEXT PRIORITIES - ARCHITECTURE REDESIGN
+
+## 🏗️ AGENT ARCHITECTURE TRANSFORMATION - DETAILED PLAN
+
+### **Core Architecture Principles** (Updated January 2025)
+1. **Portfolio Manager Orchestration**: All endpoints → Portfolio Manager → Specialized Agent Chain → Structured JSON
+2. **Multi-Agent Coordination**: Maintain workflow chains (Query Analyzer → Data Verifier → Query Generator → Query Tracker)
+3. **JSON + Human-Readable**: Agents output structured JSON with `human_readable_summary` fields for frontend display
+4. **Specialized Agents**: Each agent has minimal, focused responsibilities
+5. **TDD Approach**: RED → GREEN → REFACTOR for each component
+
+### **Agent Responsibility Matrix**
+| Agent                    | New Role                                         | JSON Output                     | Human-Readable Fields                           |
+|--------------------------|--------------------------------------------------|---------------------------------|-------------------------------------------------|
+| Portfolio Manager        | Workflow orchestrator, endpoint coordination     | Workflow status, execution plan | execution_summary, workflow_description         |
+| Query Analyzer           | Clinical data analysis, severity classification  | QueryAnalyzerResponse           | clinical_interpretation, recommendation_summary |
+| Data Verifier            | Cross-system verification, discrepancy detection | DataVerifierResponse            | verification_summary, findings_description      |
+| Query Generator          | Internal workflow component, query creation      | Query objects                   | query_rationale, clinical_context               |
+| Query Tracker            | Internal workflow component, lifecycle tracking  | Tracking status                 | progress_summary, next_steps                    |
+| **[NEW] Deviation Detector** | Protocol compliance, deviation detection         | DeviationDetectionResponse      | deviation_summary, compliance_assessment        |
+
+### **New Orchestration Flow**
+```
+Frontend Request
+    ↓
+Structured Endpoint (/queries/analyze, /sdv/verify, /deviations/detect)
+    ↓
+Portfolio Manager (orchestration_workflow)
+    ↓
+Specialized Agent Chain (based on workflow type)
+    ↓
+JSON Response with human_readable fields
+    ↓
+Frontend (structured data + human-readable display)
+```
+
+### **TDD Implementation Phases**
+
+#### **Phase 1: Foundation** (CRITICAL - Complete First)
+- **Task #4**: Portfolio Manager Restructure
+  - 🔴 RED: Write tests for Portfolio Manager workflow orchestration
+  - 🟢 GREEN: Update Portfolio Manager to coordinate structured workflows
+  - 🔵 REFACTOR: Optimize workflow routing and state management
+- **Task #5**: Deviation Detector Agent ✅ **COMPLETED**
+  - 🔴 RED: ✅ Write tests for Deviation Detector with JSON output (15 tests created)
+  - 🟢 GREEN: ✅ Create new Deviation Detector agent with minimal responsibilities  
+  - 🔵 REFACTOR: ✅ Integrate with Portfolio Manager orchestration
+
+#### **Phase 2: Agent Modernization** (HIGH PRIORITY)
+- **Task #6**: Query Analyzer JSON Output ✅ **COMPLETED**
+  - 🔴 RED: ✅ Write tests expecting JSON + human-readable fields (13 tests created)
+  - 🟢 GREEN: ✅ Update Query Analyzer prompts and tools with medical intelligence
+  - 🔵 REFACTOR: ✅ Optimize clinical intelligence and JSON structure
+- **Task #7**: Data Verifier JSON Output ✅ **COMPLETED**
+  - 🔴 RED: ✅ Write tests for Data Verifier JSON responses (10 tests created)
+  - 🟢 GREEN: ✅ Update Data Verifier for structured verification results with medical intelligence
+  - 🔵 REFACTOR: ✅ Enhance discrepancy detection, match scoring, and human-readable summaries
+- **Task #8**: Internal Agent Components
+  - 🔴 RED: Write tests for Query Generator and Query Tracker as internal components
+  - 🟢 GREEN: Update agents for internal workflow use
+  - 🔵 REFACTOR: Optimize inter-agent communication
+
+#### **Phase 3: Integration** (HIGH PRIORITY)
+- **Task #9**: Endpoint Integration
+  - 🔴 RED: Write tests for endpoints using Portfolio Manager
+  - 🟢 GREEN: Update endpoints to use orchestrated workflows
+  - 🔵 REFACTOR: Optimize response times and error handling
+- **Task #10**: Integration Testing
+  - 🔴 RED: Write comprehensive end-to-end tests
+  - 🟢 GREEN: Ensure all workflows pass integration tests
+  - 🔵 REFACTOR: Performance optimization and error handling
+
+### **Sample Agent Output Format**
+```json
+{
+  "success": true,
+  "response_type": "clinical_analysis",
+  "query_id": "Q-20250109-001",
+  "severity": "critical",
+  "clinical_findings": [...],
+  "ai_analysis": {
+    "confidence_score": 0.95,
+    "recommendations": ["Immediate medical review", "Check for bleeding"]
+  },
+  "human_readable_summary": "Critical finding: Hemoglobin 8.5 g/dL indicates severe anemia requiring immediate medical evaluation",
+  "clinical_interpretation": "CLINICAL FINDING: Hemoglobin 8.5 g/dL = Severe anemia (normal 12-16 g/dL). Risk of tissue hypoxia and cardiovascular strain.",
+  "recommendation_summary": "Urgent medical review required - evaluate for bleeding sources and consider transfusion",
+  "execution_time": 1.2,
+  "agent_id": "query-analyzer"
+}
+```
+
+## **CURRENT IMPLEMENTATION STATUS**
+- ✅ **Structured Endpoints**: Query Management, SDV, Deviation Detection (21+18+14 tests passing)
+- ✅ **Response Models**: QueryAnalyzerResponse, DataVerifierResponse, DeviationDetectionResponse
+- ✅ **OpenAI Agents SDK**: 5 agents with 26 function tools
+- ⚠️ **Architecture Gap**: Agents designed for chat, endpoints expect structured JSON
+- 🎯 **Next Step**: Task #4 - Portfolio Manager Restructure (TDD Cycle 1)
 
 ---
 

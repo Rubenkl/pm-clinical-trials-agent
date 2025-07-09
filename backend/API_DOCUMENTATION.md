@@ -1,19 +1,410 @@
-# Clinical Trials Agent API Documentation
+# Clinical Trials Management API Documentation
 
 ## Overview
 
-The Clinical Trials Agent API provides a lightweight FastAPI wrapper around the **OpenAI Agents SDK** multi-agent system. The API enables interaction with **5 specialized clinical trials agents** powered by the real OpenAI Agents SDK (not mock implementations).
+The Clinical Trials Management API provides comprehensive clinical trials management capabilities through **two complementary interfaces**:
+
+1. **Structured Workflow Endpoints** (NEW) - Direct access to clinical workflows with frontend-optimized responses
+2. **Agent System Interface** - Multi-agent orchestration powered by OpenAI Agents SDK
 
 ### **System Architecture**
 - ✅ **Real OpenAI Agents SDK**: Using `agents` package (openai-agents==0.1.0)
-- ✅ **23 Function Tools**: All using string-based signatures with JSON serialization
+- ✅ **26 Function Tools**: All using string-based signatures with JSON serialization
 - ✅ **5 Specialized Agents**: Portfolio Manager, Query Analyzer, Data Verifier, Query Generator, Query Tracker
+- ✅ **Structured Endpoints**: Frontend-optimized REST API for Query Management, SDV, and Deviation Detection
 - ✅ **Pydantic Context Classes**: No dataclass or mock implementations
 - ✅ **Full SDK Integration**: Agent coordination, handoffs, and state management
 
 ## Base URL
 - **Development**: `http://localhost:8000`
 - **Production**: `https://your-railway-app.railway.app`
+
+---
+
+# 🆕 Structured Workflow Endpoints
+
+## Overview
+
+The new structured endpoints provide direct access to clinical trial workflows with responses optimized for frontend consumption. These endpoints return consistent JSON structures for data tables, charts, and dashboard components.
+
+### Available Workflows
+
+1. **Query Management** (`/api/v1/queries/`) - Clinical data analysis and query generation
+2. **Source Data Verification** (`/api/v1/sdv/`) - Cross-system data verification and audit trails
+3. **Protocol Deviation Detection** (`/api/v1/deviations/`) - Automated compliance monitoring
+
+### Response Format
+
+All structured endpoints follow a consistent format:
+
+```json
+{
+  "success": boolean,
+  "response_type": "string", // workflow identifier
+  "execution_time": number,  // seconds
+  "agent_id": "string",     // responsible agent
+  "raw_response": "string", // original agent output
+  // ... workflow-specific fields
+}
+```
+
+## Query Management Endpoints
+
+### POST /api/v1/queries/analyze
+
+Analyze clinical data for discrepancies and generate queries with medical intelligence.
+
+**Request Body**:
+```json
+{
+  "subject_id": "SUBJ001",
+  "site_id": "SITE01", 
+  "visit": "Week 12",
+  "field_name": "hemoglobin",
+  "field_value": "8.5",
+  "expected_value": "12.0", // optional
+  "form_name": "Laboratory Results",
+  "page_number": 1, // optional
+  "context": {
+    "initials": "JD",
+    "site_name": "Boston General"
+  }
+}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "response_type": "clinical_analysis",
+  "query_id": "Q-20250109-120000-SUBJ001",
+  "created_date": "2025-01-09T12:00:00Z",
+  "status": "pending",
+  "severity": "critical",
+  "category": "laboratory_value",
+  "subject": {
+    "id": "SUBJ001",
+    "initials": "JD",
+    "site": "Boston General",
+    "site_id": "SITE01"
+  },
+  "clinical_context": {
+    "visit": "Week 12",
+    "field": "hemoglobin",
+    "value": "8.5",
+    "expected_value": "12.0",
+    "form_name": "Laboratory Results"
+  },
+  "clinical_findings": [
+    {
+      "parameter": "hemoglobin",
+      "value": "8.5",
+      "interpretation": "Severe anemia",
+      "normal_range": "12-16 g/dL",
+      "severity": "critical",
+      "clinical_significance": "Risk of tissue hypoxia"
+    }
+  ],
+  "ai_analysis": {
+    "interpretation": "Critical finding: Hemoglobin 8.5 g/dL indicates severe anemia",
+    "clinical_significance": "high",
+    "confidence_score": 0.95,
+    "suggested_query": "URGENT: Please confirm hemoglobin value and evaluate for bleeding source",
+    "recommendations": [
+      "Immediate medical review",
+      "Check for GI bleeding", 
+      "Consider transfusion"
+    ]
+  },
+  "execution_time": 1.2,
+  "confidence_score": 0.95
+}
+```
+
+### GET /api/v1/queries/
+
+List queries with filtering and pagination.
+
+**Query Parameters**:
+- `skip` (integer, default: 0) - Pagination offset
+- `limit` (integer, default: 100, max: 1000) - Number of records
+- `severity` (array) - Filter by severity levels
+- `status` (array) - Filter by query status
+- `site_id` (string) - Filter by site
+- `subject_id` (string) - Filter by subject
+- `date_from` (ISO date) - Filter from date
+- `date_to` (ISO date) - Filter to date
+
+### GET /api/v1/queries/stats/dashboard
+
+Get query statistics for dashboard display.
+
+**Response**:
+```json
+{
+  "total_queries": 234,
+  "open_queries": 45,
+  "critical_queries": 5,
+  "major_queries": 23,
+  "minor_queries": 17,
+  "resolved_today": 12,
+  "resolved_this_week": 78,
+  "average_resolution_time": 24.5,
+  "queries_by_site": {
+    "SITE01": 15,
+    "SITE02": 12,
+    "SITE03": 8
+  },
+  "queries_by_category": {
+    "laboratory_value": 20,
+    "vital_signs": 15,
+    "adverse_event": 8
+  },
+  "trend_data": [
+    {"date": "2025-01-01", "queries": 8},
+    {"date": "2025-01-02", "queries": 12}
+  ]
+}
+```
+
+## Source Data Verification (SDV) Endpoints
+
+### POST /api/v1/sdv/verify
+
+Verify source data against EDC data with discrepancy detection.
+
+**Request Body**:
+```json
+{
+  "subject_id": "SUBJ001",
+  "site_id": "SITE01",
+  "visit": "Week 12",
+  "edc_data": {
+    "hemoglobin": "12.5",
+    "systolic_bp": "120",
+    "diastolic_bp": "80"
+  },
+  "source_data": {
+    "hemoglobin": "12.3",
+    "systolic_bp": "125",
+    "diastolic_bp": "80"
+  },
+  "monitor_id": "MON001",
+  "context": {
+    "initials": "JD",
+    "site_name": "Boston General"
+  }
+}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "response_type": "data_verification",
+  "verification_id": "SDV-20250109-120000-SUBJ001",
+  "site": "SITE01",
+  "monitor": "MON001",
+  "verification_date": "2025-01-09T12:00:00Z",
+  "subject": {
+    "id": "SUBJ001",
+    "initials": "JD",
+    "site": "Boston General",
+    "site_id": "SITE01"
+  },
+  "visit": "Week 12",
+  "match_score": 0.75,
+  "matching_fields": ["diastolic_bp"],
+  "discrepancies": [
+    {
+      "field": "hemoglobin",
+      "field_label": "Hemoglobin",
+      "edc_value": "12.5",
+      "source_value": "12.3",
+      "severity": "minor",
+      "discrepancy_type": "value_mismatch",
+      "confidence": 0.9
+    }
+  ],
+  "total_fields_compared": 3,
+  "progress": {
+    "total_fields": 3,
+    "verified": 1,
+    "discrepancies": 2,
+    "completion_rate": 0.75
+  },
+  "recommendations": [
+    "Review hemoglobin discrepancy with medical monitor"
+  ],
+  "execution_time": 1.8
+}
+```
+
+### GET /api/v1/sdv/stats/dashboard
+
+Get SDV statistics for dashboard display.
+
+**Response**:
+```json
+{
+  "total_subjects": 75,
+  "verified_subjects": 60,
+  "total_data_points": 2250,
+  "verified_data_points": 1800,
+  "overall_completion": 0.8,
+  "discrepancy_rate": 0.05,
+  "sites_summary": [
+    {
+      "site_id": "SITE01",
+      "completion_rate": 0.72,
+      "discrepancy_rate": 0.06,
+      "monitor": "Monitor A"
+    }
+  ],
+  "high_risk_sites": ["SITE01"],
+  "resource_utilization": {
+    "monitor_a": 0.85,
+    "monitor_b": 0.75
+  }
+}
+```
+
+## Protocol Deviation Detection Endpoints
+
+### POST /api/v1/deviations/detect
+
+Detect protocol deviations by comparing requirements to actual data.
+
+**Request Body**:
+```json
+{
+  "subject_id": "SUBJ001",
+  "site_id": "SITE01",
+  "visit": "Week 12",
+  "protocol_data": {
+    "required_visit_window": "±3 days",
+    "required_fasting": "12 hours",
+    "prohibited_medications": ["aspirin", "warfarin"]
+  },
+  "actual_data": {
+    "visit_date": "2025-01-15",
+    "scheduled_date": "2025-01-09",
+    "fasting_hours": "8",
+    "concomitant_medications": ["aspirin", "metformin"]
+  },
+  "monitor_id": "MON001",
+  "context": {
+    "initials": "JD",
+    "site_name": "Boston General"
+  }
+}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "response_type": "deviation_detection",
+  "deviation_id": "DEV-20250109-120000-SUBJ001",
+  "subject": {
+    "id": "SUBJ001",
+    "initials": "JD",
+    "site": "Boston General",
+    "site_id": "SITE01"
+  },
+  "site": "SITE01",
+  "visit": "Week 12",
+  "monitor": "MON001",
+  "detection_date": "2025-01-09T12:00:00Z",
+  "deviations": [
+    {
+      "category": "visit_window",
+      "severity": "major",
+      "protocol_requirement": "Visit within ±3 days",
+      "actual_value": "6 days outside window",
+      "impact_level": "medium",
+      "corrective_action_required": true,
+      "deviation_description": "Visit occurred 6 days outside protocol window",
+      "confidence": 0.95
+    },
+    {
+      "category": "prohibited_medication",
+      "severity": "critical",
+      "protocol_requirement": "No prohibited medications allowed",
+      "actual_value": "Taking aspirin",
+      "impact_level": "critical",
+      "corrective_action_required": true,
+      "deviation_description": "Subject taking prohibited medication: aspirin",
+      "confidence": 0.98
+    }
+  ],
+  "total_deviations_found": 2,
+  "impact_assessment": "Critical impact: 1 critical deviation(s) detected",
+  "recommendations": [
+    "Immediate medical monitor notification required",
+    "Consider subject discontinuation assessment"
+  ],
+  "corrective_actions_required": [
+    "Review and update visit scheduling procedures",
+    "Immediate medication review and discontinuation if necessary"
+  ],
+  "execution_time": 1.5
+}
+```
+
+### GET /api/v1/deviations/stats/dashboard
+
+Get deviation statistics for dashboard display.
+
+**Response**:
+```json
+{
+  "total_deviations": 42,
+  "critical_deviations": 3,
+  "major_deviations": 15,
+  "minor_deviations": 24,
+  "resolved_deviations": 35,
+  "pending_deviations": 7,
+  "deviations_by_site": {
+    "SITE01": 18,
+    "SITE02": 14,
+    "SITE03": 10
+  },
+  "deviations_by_category": {
+    "visit_window": 20,
+    "fasting_requirement": 12,
+    "prohibited_medication": 6
+  },
+  "deviation_trends": [
+    {"date": "2025-01-01", "deviations": 5},
+    {"date": "2025-01-02", "deviations": 8}
+  ],
+  "resolution_rate": 0.83,
+  "average_resolution_time": 72.5
+}
+```
+
+### Severity Classification
+
+All endpoints use consistent severity levels:
+- `critical` - Life-threatening findings, protocol violations (Hgb < 8.0, prohibited medications)
+- `major` - Significant clinical concerns, major deviations (Hgb < 10.0, visit windows > 2x limit)
+- `minor` - Minor deviations from normal, small discrepancies
+- `info` - Informational findings, no action required
+
+### Frontend Integration
+
+Responses are optimized for common frontend components:
+
+**Data Tables**: All list endpoints return arrays with consistent field structures
+**Dashboard Widgets**: Statistics endpoints provide ready-to-use metrics
+**Progress Bars**: Completion rates as 0-1 decimals for easy percentage calculation
+**Charts**: Trend data with date/value pairs for direct chart library integration
+**Notifications**: Critical findings include urgency indicators and recommendations
+
+---
+
+# 🤖 Multi-Agent System Interface
 
 ## Authentication
 
