@@ -11,6 +11,10 @@ import re
 # OpenAI Agents SDK imports
 try:
     from agents import Agent, function_tool, Context, Runner
+    from app.agents.calculation_tools import (
+        convert_medical_units,
+        calculate_date_difference
+    )
 except ImportError:
     # Mock for development if SDK not available
     class Context(BaseModel):
@@ -123,8 +127,8 @@ UNIT_CONVERSIONS = {
 }
 
 
-@function_tool
-def cross_system_verification(verification_request: str) -> str:
+# REMOVED: cross_system_verification function tool - Use AI verification methods instead
+# This was a mock function that returned fake medical assessments without AI intelligence
     """Perform comprehensive cross-system data verification between EDC and source documents.
     
     This function executes sophisticated data verification comparing Electronic Data Capture (EDC)
@@ -335,8 +339,8 @@ def cross_system_verification(verification_request: str) -> str:
     return json.dumps(verification_result)
 
 
-@function_tool
-def assess_critical_data(assessment_request: str) -> str:
+# REMOVED: assess_critical_data function tool - Use AI assessment methods instead
+# This was a mock function that made fake medical judgments without AI intelligence
     """Perform critical safety assessment of clinical trial data to identify immediate risks.
     
     This function conducts rapid safety screening of clinical data to detect conditions
@@ -572,8 +576,8 @@ def assess_critical_data(assessment_request: str) -> str:
     return json.dumps(assessment_result)
 
 
-@function_tool
-def detect_discrepancy_patterns(pattern_request: str) -> str:
+# REMOVED: detect_discrepancy_patterns function tool - Use AI pattern detection instead
+# Pattern detection should use AI intelligence, not rule-based logic
     """Detect patterns in historical discrepancy data.
     
     Args:
@@ -673,8 +677,8 @@ def detect_discrepancy_patterns(pattern_request: str) -> str:
     return json.dumps(pattern_result)
 
 
-@function_tool
-def complete_sdv_verification(sdv_request: str) -> str:
+# REMOVED: complete_sdv_verification function tool - Use AI verification methods instead
+# SDV verification should use AI intelligence for medical assessments
     """Perform complete Source Data Verification (SDV) process.
     
     Args:
@@ -754,8 +758,8 @@ def complete_sdv_verification(sdv_request: str) -> str:
     return json.dumps(sdv_result)
 
 
-@function_tool
-def batch_verification(batch_request: str) -> str:
+# REMOVED: batch_verification function tool - Use AI batch methods instead
+# Batch processing should use AI intelligence for medical reasoning
     """Perform batch verification of multiple subject data sets.
     
     Args:
@@ -825,8 +829,8 @@ def batch_verification(batch_request: str) -> str:
     return json.dumps(batch_result)
 
 
-@function_tool
-def generate_audit_trail(audit_request: str) -> str:
+# REMOVED: generate_audit_trail function tool - Audit trails generated via AI methods
+# Audit documentation should be based on AI analysis results
     """Generate comprehensive audit trail for verification process.
     
     Args:
@@ -1289,14 +1293,40 @@ REGULATORY CITATIONS:
 
 NEVER compromise data integrity. When in doubt, query for clarification.
 
-USE FUNCTION TOOLS: Call cross_system_verification for EDC vs source comparison, assess_critical_data for safety evaluation.""",
+📋 REQUIRED JSON OUTPUT FORMAT:
+{
+    "verification_id": "unique identifier",
+    "match_score": 0.0-1.0,
+    "total_fields": number,
+    "matching_fields": number,
+    "discrepancies": [
+        {
+            "field_name": "field with discrepancy",
+            "edc_value": "value in EDC",
+            "source_value": "value in source",
+            "discrepancy_type": "value_mismatch|missing_in_edc|missing_in_source|format_difference|unit_mismatch",
+            "severity": "critical|major|minor|info",
+            "impact": "clinical significance",
+            "recommended_action": "specific action"
+        }
+    ],
+    "critical_findings": ["list of critical issues requiring immediate attention"],
+    "verification_summary": "overall assessment",
+    "audit_trail": {
+        "verification_date": "ISO date",
+        "verification_type": "manual|automated|hybrid",
+        "compliance_status": "compliant|non_compliant|review_required"
+    },
+    "recommendations": ["action 1", "action 2"]
+}
+
+FUNCTION TOOLS: Use convert_medical_units and calculate_date_difference for calculations ONLY.
+RETURN: Only the JSON object, no explanatory text.""",
     tools=[
-        cross_system_verification,
-        assess_critical_data,
-        detect_discrepancy_patterns,
-        complete_sdv_verification,
-        batch_verification,
-        generate_audit_trail
+        # Calculation helpers for data verification
+        convert_medical_units,
+        calculate_date_difference
+    ]  # Medical reasoning uses AI methods; tools provide calculations only
     ],
     model="gpt-4-turbo-preview"
 )

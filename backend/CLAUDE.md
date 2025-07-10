@@ -36,7 +36,8 @@ Based on frontend integration, we need these additional endpoints to eliminate m
 - ✅ `GET /api/v1/test-data/sites/performance` - Site performance data
 
 ## Quick Reference
-- **Architecture Guide**: `/backend/ARCHITECTURE-GUIDE.md` - Single source of truth
+- **API Documentation**: `/backend/API_DOCUMENTATION.md` - Complete endpoint reference
+- **Architecture Guide**: `/backend/ARCHITECTURE-GUIDE.md` - System design
 - **Task Priorities**: `/product-management/roadmaps/backend-development-tasks.md`
 - **Current Sprint**: Check `/product-management/roadmaps/sprint-execution-plan.md`
 
@@ -110,12 +111,15 @@ backend/
 │   │   ├── data_verifier.py        # Cross-system verification specialist
 │   │   ├── query_generator.py      # Clinical query generation specialist
 │   │   ├── query_tracker.py        # Query lifecycle tracking specialist
-│   │   └── handoff_registry.py     # Agent coordination registry
+│   │   ├── deviation_detector.py    # Protocol compliance specialist
+│   │   └── calculation_tools.py     # Medical calculation helpers
 │   ├── api/             # FastAPI routes (lightweight wrapper)
 │   │   ├── __init__.py
 │   │   ├── endpoints/
-│   │   │   ├── agents.py           # Agent interaction endpoints
-│   │   │   └── health.py           # Health check endpoints
+│   │   │   ├── clinical_workflows.py # Main clinical workflow endpoints
+│   │   │   ├── test_data.py         # Test data endpoints
+│   │   │   ├── dashboard.py         # Dashboard metrics endpoints
+│   │   │   └── health.py            # Health check endpoints
 │   │   ├── models/                 # Pydantic request/response models
 │   │   └── dependencies.py         # API dependencies
 │   ├── core/            # Core configurations
@@ -146,12 +150,15 @@ The system uses the Portfolio Manager pattern with 5 specialized agents:
 4. **Query Generator**: Clinical query generation with regulatory compliance
 5. **Query Tracker**: Query lifecycle tracking, SLA monitoring, and escalation management
 
-### Agent Function Tools Summary
-- **Portfolio Manager**: 5 tools (workflow orchestration, planning, status tracking)
-- **Query Analyzer**: 5 tools (data analysis, medical terminology, batch processing)
-- **Data Verifier**: 6 tools (cross-system verification, SDV, audit trails)
-- **Query Generator**: 5 tools (query generation, templates, compliance validation)
-- **Query Tracker**: 5 tools (lifecycle tracking, SLA monitoring, escalation)
+### Agent Capabilities
+- **Portfolio Manager**: Orchestrates multi-agent workflows
+- **Query Analyzer**: Clinical data analysis with medical intelligence
+- **Data Verifier**: EDC vs source verification with discrepancy detection
+- **Deviation Detector**: Protocol compliance monitoring
+- **Query Generator**: Professional query creation
+- **Query Tracker**: Query lifecycle and SLA management
+
+All agents use OpenAI's GPT-4 for medical reasoning, not mock functions.
 
 ### SDK-Based Orchestration Patterns
 - **Handoffs**: Agents delegate specific tasks to specialized sub-agents
@@ -193,10 +200,13 @@ uvicorn app.main:app --reload --port 8000
 
 ## API Documentation
 
-### Agent Endpoints
-- `POST /api/v1/agents/chat` - Chat with Portfolio Manager (orchestrates other agents)
-- `GET /api/v1/agents/status` - Get agent system status
-- `POST /api/v1/agents/reset` - Reset agent context/state
+### Clinical Workflow Endpoints
+- `POST /api/v1/clinical/analyze-query` - Analyze clinical queries
+- `POST /api/v1/clinical/verify-data` - Verify EDC vs source data
+- `POST /api/v1/clinical/detect-deviations` - Detect protocol compliance issues
+- `POST /api/v1/clinical/execute-workflow` - Run multi-agent workflows
+
+See `/backend/API_DOCUMENTATION.md` for complete API reference.
 
 ### Health Check
 - `GET /health` - Application health status
@@ -645,3 +655,54 @@ Based on frontend developer feedback, implemented ALL missing endpoints that wer
 - **Error Handling**: Consistent with existing endpoint patterns
 
 This completes the backend API requirements for frontend integration, ensuring the system maintains its enterprise automation platform architecture without reverting to chat-based functionality! 🚀
+
+## 🔧 **FUNCTION TOOL REFACTORING (January 10, 2025)**
+
+### **Problem Identified**
+The current function tools in agents are returning **mock medical judgments** instead of helping with calculations:
+- `analyze_data_point()` - Returns fake severity assessments and medical interpretations
+- `batch_analyze_data()` - Returns mock batch analysis without real intelligence
+- `detect_patterns()` - Fake pattern detection without AI
+- `cross_system_match()` - Mock data matching
+- `check_regulatory_compliance()` - Fake compliance assessments
+
+### **Key Insight**
+Function tools should help agents with **concrete calculations**, not make medical judgments:
+- ✅ **Good function tools**: Unit conversions, date calculations, numeric comparisons
+- ❌ **Bad function tools**: Medical severity assessment, clinical interpretation, regulatory judgment
+
+### **Refactoring Plan**
+
+#### Phase 1: Remove Mock Medical Analysis Functions
+1. Remove function tools that make fake medical judgments
+2. Keep agent structure and AI methods intact
+3. Update agent creation to not include removed tools
+4. Clean up helper functions that generate mock medical assessments
+
+#### Phase 2: Create Useful Calculation Tools
+```python
+@function_tool
+def convert_units(value: str, from_unit: str, to_unit: str) -> str:
+    """Convert between medical units (mg/dL to mmol/L, etc.)"""
+    # Helps agent with concrete unit conversions
+    
+@function_tool
+def calculate_age_at_visit(birth_date: str, visit_date: str) -> str:
+    """Calculate patient age at specific visit date"""
+    # Helps agent determine age-specific normal ranges
+    
+@function_tool
+def check_date_window(target_date: str, actual_date: str, window_days: int) -> str:
+    """Check if actual date is within allowed window of target date"""
+    # Helps agent verify protocol compliance for visit windows
+    
+@function_tool
+def calculate_change_from_baseline(baseline_value: float, current_value: float) -> str:
+    """Calculate percentage and absolute change from baseline"""
+    # Helps agent assess trends without making medical judgments
+```
+
+### **Implementation Status**
+- ⏳ **In Progress**: Removing mock medical analysis functions
+- 📋 **Next**: Create calculation helper tools
+- 🎯 **Goal**: Let LLM use its medical training for judgments, tools for calculations

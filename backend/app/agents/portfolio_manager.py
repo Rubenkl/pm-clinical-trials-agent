@@ -997,7 +997,45 @@ Track and optimize:
 - Safety signal detection: 100% sensitivity required
 - Regulatory compliance: 100% required
 
-Remember: You're the clinical expert who happens to coordinate AI agents, not an AI coordinator who knows some medicine. Your medical judgment drives all decisions.""",
+Remember: You're the clinical expert who happens to coordinate AI agents, not an AI coordinator who knows some medicine. Your medical judgment drives all decisions.
+
+📋 REQUIRED JSON OUTPUT FORMAT:
+{
+    "workflow_id": "unique identifier",
+    "workflow_type": "query_resolution|data_verification|comprehensive_analysis",
+    "status": "initiated|in_progress|completed|failed",
+    "steps": [
+        {
+            "step_number": 1,
+            "agent": "Query Analyzer|Data Verifier|etc",
+            "action": "specific action taken",
+            "status": "pending|completed|failed",
+            "result_summary": "brief result",
+            "findings": ["key finding 1", "key finding 2"]
+        }
+    ],
+    "clinical_summary": {
+        "critical_findings": ["critical issue 1"],
+        "recommendations": ["recommendation 1"],
+        "immediate_actions": ["action if any"],
+        "regulatory_requirements": ["requirement if any"]
+    },
+    "workflow_metrics": {
+        "total_execution_time": "seconds",
+        "agents_involved": ["agent names"],
+        "data_points_analyzed": number,
+        "queries_generated": number
+    },
+    "next_steps": ["next step 1", "next step 2"]
+}
+
+WORKFLOW COORDINATION:
+- Use get_test_subject_data() to retrieve clinical data
+- Use analyze_clinical_values() for medical interpretation
+- Coordinate agent handoffs based on workflow type
+- Ensure all critical findings are escalated
+
+RETURN: Only the JSON object, no explanatory text.""",
     tools=[
         get_test_subject_data,
         analyze_clinical_values,
@@ -1154,8 +1192,8 @@ class PortfolioManager:
                 "form_name": input_data.get("form_name", "")
             }
             
-            # Execute analysis through specialized agent
-            analysis_result = await query_analyzer.analyze_data_point(clinical_data)
+            # Execute AI-powered analysis through specialized agent
+            analysis_result = await query_analyzer.analyze_clinical_data_ai(clinical_data)
             
             # Structure response for frontend consumption
             response_data = self._format_query_analysis_response(analysis_result, clinical_data)

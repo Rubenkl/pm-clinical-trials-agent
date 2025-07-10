@@ -130,8 +130,9 @@ ESCALATION_RULES = {
 }
 
 
-@function_tool
-def track_clinical_query(tracking_request: str) -> str:
+# REMOVED: track_clinical_query function tool - Use AI tracking methods instead
+# Query tracking should use AI intelligence for optimal workflow management
+def track_clinical_query_removed(tracking_request: str) -> str:
     """Initiate comprehensive lifecycle tracking for clinical trial queries with automated escalation.
     
     This function establishes intelligent tracking for clinical queries, monitoring their
@@ -335,8 +336,9 @@ def track_clinical_query(tracking_request: str) -> str:
     return json.dumps(result)
 
 
-@function_tool
-def update_query_status(update_request: str) -> str:
+# REMOVED: update_query_status function tool - Use AI methods instead
+# Status updates should use AI intelligence
+def update_query_status_removed(update_request: str) -> str:
     """Update the status of a tracked query.
     
     Args:
@@ -377,8 +379,9 @@ def update_query_status(update_request: str) -> str:
     return json.dumps(result)
 
 
-@function_tool
-def check_queries_for_follow_up(check_request: str = "{}") -> str:
+# REMOVED: check_queries_for_follow_up function tool - Use AI methods instead
+# Follow-up checks should use AI intelligence
+def check_queries_for_follow_up_removed(check_request: str = "{}") -> str:
     """Check all tracked queries for needed follow-ups.
     
     Args:
@@ -418,8 +421,9 @@ def check_queries_for_follow_up(check_request: str = "{}") -> str:
     return json.dumps(follow_ups)
 
 
-@function_tool
-def generate_follow_up_message(followup_request: str) -> str:
+# REMOVED: generate_follow_up_message function tool - Use AI methods instead
+# Follow-up messages should use AI intelligence
+def generate_follow_up_message_removed(followup_request: str) -> str:
     """Generate a follow-up message for a query.
     
     Args:
@@ -656,8 +660,52 @@ REGULATORY COMPLIANCE:
 
 NEVER let queries age without action. Every delay impacts patient safety and study timelines.
 
-USE FUNCTION TOOLS: Call track_clinical_query for lifecycle tracking, check_queries_for_follow_up for SLA monitoring.""",
-    tools=[track_clinical_query, update_query_status, check_queries_for_follow_up, generate_follow_up_message],
+📋 REQUIRED JSON OUTPUT FORMAT:
+{
+    "tracking_id": "unique identifier",
+    "query_id": "query being tracked",
+    "current_status": "pending|acknowledged|in_progress|resolved|escalated|cancelled",
+    "age_days": number,
+    "sla_status": "on_time|at_risk|overdue",
+    "sla_deadline": "ISO datetime",
+    "escalation_level": 0-3,
+    "site_response_history": [
+        {
+            "timestamp": "ISO datetime",
+            "action": "sent|reminder|response|escalation",
+            "actor": "system|site|monitor",
+            "details": "action details"
+        }
+    ],
+    "follow_up_actions": [
+        {
+            "action": "send_reminder|escalate|close|re_query",
+            "scheduled_time": "ISO datetime",
+            "target": "site_coordinator|site_pi|medical_monitor",
+            "message_preview": "action message"
+        }
+    ],
+    "performance_metrics": {
+        "response_time_hours": number,
+        "back_and_forth_cycles": number,
+        "site_responsiveness_score": 0.0-1.0
+    },
+    "recommendations": ["recommendation 1", "recommendation 2"],
+    "risk_assessment": {
+        "delay_impact": "high|medium|low",
+        "regulatory_risk": "high|medium|low",
+        "relationship_risk": "high|medium|low"
+    }
+}
+
+TRACKING RULES:
+- Monitor SLA compliance continuously
+- Escalate proactively before deadlines
+- Balance urgency with site relationship
+- Document all interactions
+
+RETURN: Only the JSON object, no explanatory text.""",
+    tools=[],  # All intelligent reasoning uses AI methods, not function tools
     model="gpt-4-turbo-preview"
 )
 

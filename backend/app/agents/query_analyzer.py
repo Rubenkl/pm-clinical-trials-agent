@@ -10,6 +10,12 @@ import uuid
 # OpenAI Agents SDK imports
 try:
     from agents import Agent, function_tool, Context, Runner
+    from app.agents.calculation_tools import (
+        convert_medical_units,
+        calculate_age_at_visit,
+        check_visit_window_compliance,
+        calculate_change_from_baseline
+    )
 except ImportError:
     # Mock for development if SDK not available
     class Context(BaseModel):
@@ -113,12 +119,8 @@ MAJOR_MEDICAL_TERMS = {
 }
 
 
-@function_tool
-def analyze_data_point(
-    context: QueryAnalysisContext,
-    data_point: str
-) -> str:
-    """Perform deep clinical analysis on a single data point to identify issues requiring queries.
+# REMOVED: analyze_data_point function tool - Use analyze_clinical_data_ai() instead
+# This was a mock function that returned fake data without AI intelligence
     
     This function applies medical expertise and clinical trial knowledge to analyze individual
     data points, identifying discrepancies, safety concerns, protocol violations, and data
@@ -292,14 +294,8 @@ def analyze_data_point(
     # Store in context
     context.analysis_history.append(analysis_result)
     
-    return json.dumps(analysis_result)
-
-
-@function_tool
-def batch_analyze_data(
-    context: QueryAnalysisContext,
-    data_points: str
-) -> str:
+# REMOVED: batch_analyze_data function tool - Use batch AI methods instead
+# This was a mock function that returned fake data without AI intelligence
     """Perform high-throughput analysis of multiple clinical data points with intelligent prioritization.
     
     This function processes batches of clinical data points efficiently, applying parallel
@@ -442,11 +438,8 @@ def batch_analyze_data(
     return json.dumps(results)
 
 
-@function_tool
-def detect_patterns(
-    context: QueryAnalysisContext,
-    historical_data: str
-) -> str:
+# REMOVED: detect_patterns function tool - Use AI pattern detection instead
+# This was a mock function that returned fake patterns without AI intelligence
     """Detect patterns across historical clinical data."""
     
     # Parse input data
@@ -518,12 +511,8 @@ def detect_patterns(
     return json.dumps(pattern_result)
 
 
-@function_tool
-def cross_system_match(
-    context: QueryAnalysisContext,
-    edc_data: str,
-    source_data: str
-) -> str:
+# REMOVED: cross_system_match function tool - Use AI verification instead
+# This was a mock function that returned fake matches without AI intelligence
     """Perform cross-system data matching and verification."""
     
     # Parse input data
@@ -572,11 +561,8 @@ def cross_system_match(
     return json.dumps(result)
 
 
-@function_tool
-def check_regulatory_compliance(
-    context: QueryAnalysisContext,
-    subject_data: str
-) -> str:
+# REMOVED: check_regulatory_compliance function tool - Use AI compliance checking instead
+# This was a mock function that returned fake compliance data without AI intelligence
     """Check subject data for regulatory compliance issues."""
     
     # Parse input data
@@ -972,7 +958,30 @@ STRUCTURED JSON FORMAT:
 4. ALWAYS apply clinical context (age, gender, medical history)
 5. ALWAYS use standardized medical terminology
 6. NEVER delay critical findings - immediate escalation required
-7. ALWAYS return structured JSON - no conversational responses
+7. ALWAYS return ONLY a JSON object with no text before or after
+
+📋 REQUIRED JSON OUTPUT FORMAT:
+{
+    "severity": "critical|major|minor|info",
+    "category": "data_discrepancy|missing_data|protocol_deviation|adverse_event|laboratory_value|vital_signs|other",
+    "findings": [
+        {
+            "parameter": "field name",
+            "value": "actual value",
+            "normal_range": "expected range",
+            "interpretation": "clinical interpretation",
+            "clinical_significance": "high|medium|low",
+            "severity": "critical|major|minor|info"
+        }
+    ],
+    "recommendations": ["action 1", "action 2"],
+    "medical_context": "clinical significance explanation",
+    "regulatory_requirements": "ICH-GCP reference if applicable",
+    "confidence_score": 0.95,
+    "immediate_actions_required": true|false
+}
+
+FUNCTION TOOLS: Use convert_medical_units, calculate_age_at_visit, and calculate_change_from_baseline for calculations ONLY. Medical judgments come from your expertise
 
 🎯 PERFORMANCE TARGETS:
 
@@ -984,12 +993,11 @@ STRUCTURED JSON FORMAT:
 
 Remember: You catch the issues that could harm patients or compromise study integrity. Your vigilance protects both patient safety and data quality.""",
     tools=[
-        analyze_data_point,
-        batch_analyze_data,
-        detect_patterns,
-        cross_system_match,
-        check_regulatory_compliance
-    ],
+        # Calculation helpers that don't make medical judgments
+        convert_medical_units,
+        calculate_age_at_visit,
+        calculate_change_from_baseline
+    ],  # Medical reasoning uses AI methods; tools provide calculations only
     model="gpt-4-turbo-preview"
 )
 
@@ -1019,30 +1027,11 @@ class QueryAnalyzer:
         
         self.instructions = self.agent.instructions
     
-    async def analyze_data_point(self, data_point: Dict[str, Any]) -> Dict[str, Any]:
-        """Analyze a single data point."""
-        result_json = analyze_data_point(self.context, json.dumps(data_point))
-        return json.loads(result_json)
-    
-    async def batch_analyze(self, data_points: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Analyze multiple data points in batch."""
-        result_json = batch_analyze_data(self.context, json.dumps(data_points))
-        return json.loads(result_json)
-    
-    async def detect_patterns(self, historical_data: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Detect patterns in historical data."""
-        result_json = detect_patterns(self.context, json.dumps(historical_data))
-        return json.loads(result_json)
-    
-    async def cross_system_match(self, edc_data: Dict[str, Any], source_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Perform cross-system data matching."""
-        result_json = cross_system_match(self.context, json.dumps(edc_data), json.dumps(source_data))
-        return json.loads(result_json)
-    
-    async def check_regulatory_compliance(self, subject_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Check regulatory compliance."""
-        result_json = check_regulatory_compliance(self.context, json.dumps(subject_data))
-        return json.loads(result_json)
+    # REMOVED: Non-AI wrapper methods
+    # All medical analysis now uses AI methods:
+    # - analyze_clinical_data_ai() for general analysis
+    # - batch_analyze_clinical_data() for batch processing
+    # These methods provide real medical intelligence, not mock data
     
     def assess_medical_severity(self, medical_term: str) -> QuerySeverity:
         """Assess medical severity of a term."""
@@ -1633,10 +1622,5 @@ __all__ = [
     "QueryAnalysisContext", 
     "QueryCategory",
     "QuerySeverity",
-    "analyze_data_point",
-    "batch_analyze_data",
-    "detect_patterns",
-    "cross_system_match",
-    "check_regulatory_compliance",
     "query_analyzer_agent"
 ]

@@ -80,8 +80,9 @@ QUERY_TEMPLATES = {
 }
 
 
-@function_tool
-def generate_clinical_query(query_request: str) -> str:
+# REMOVED: generate_clinical_query function tool - Use AI generation methods instead
+# This was a mock function that generated fake queries without AI intelligence
+def generate_clinical_query_removed(query_request: str) -> str:
     """Generate professional clinical trial queries with regulatory compliance and medical accuracy.
     
     This function creates properly formatted clinical queries that effectively communicate
@@ -267,8 +268,9 @@ Thank you for your cooperation."""
     return json.dumps(response)
 
 
-@function_tool
-def validate_clinical_query(query_text: str) -> str:
+# REMOVED: validate_clinical_query function tool - Use AI validation methods instead
+# Query validation should use AI intelligence
+def validate_clinical_query_removed(query_text: str) -> str:
     """Validate a query for compliance and quality.
     
     Returns:
@@ -303,8 +305,9 @@ def validate_clinical_query(query_text: str) -> str:
     return json.dumps(result)
 
 
-@function_tool
-def preview_query_from_template(preview_request: str) -> str:
+# REMOVED: preview_query_from_template function tool - Use AI methods instead
+# Template preview should use AI intelligence
+def preview_query_from_template_removed(preview_request: str) -> str:
     """Preview a query using templates.
     
     Args:
@@ -489,8 +492,46 @@ SITE RELATIONSHIP MANAGEMENT:
 
 NEVER compromise on patient safety or data integrity. Always prioritize clear communication over brevity.
 
-USE FUNCTION TOOLS: Call generate_clinical_query for query creation, validate_clinical_query for quality check.""",
-    tools=[generate_clinical_query, validate_clinical_query, preview_query_from_template],
+📋 REQUIRED JSON OUTPUT FORMAT:
+{
+    "query_id": "unique identifier",
+    "query_type": "data_clarification|missing_data|protocol_deviation|safety|other",
+    "priority": "urgent_24hr|high_48hr|medium_5day|low_10day",
+    "subject": "Clear, specific subject line",
+    "body": "Professional query text with proper formatting",
+    "data_points": [
+        {
+            "field_name": "field in question",
+            "current_value": "current value",
+            "expected_value": "expected value",
+            "clarification_needed": "specific clarification"
+        }
+    ],
+    "regulatory_references": ["ICH-GCP section", "Protocol section"],
+    "response_options": [
+        "Option 1: Confirm current value is correct",
+        "Option 2: Provide corrected value",
+        "Option 3: Explain discrepancy"
+    ],
+    "sla_hours": number,
+    "escalation_plan": {
+        "first_reminder": "timeline",
+        "escalation_to": "role/person",
+        "final_escalation": "timeline and action"
+    },
+    "site_burden_score": 1-10,
+    "consolidated_with": ["list of other query IDs if consolidated"]
+}
+
+QUERY WRITING RULES:
+- Professional but friendly tone
+- Clear action items
+- Specific data references
+- Appreciation for site efforts
+- No medical judgments
+
+RETURN: Only the JSON object, no explanatory text.""",
+    tools=[],  # All medical reasoning uses AI methods, not function tools
     model="gpt-4-turbo-preview"
 )
 
