@@ -1,147 +1,25 @@
-"""Agent interaction endpoints."""
+"""Agent management endpoints for workflow orchestration (NO CHAT)."""
 
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Dict, Any
-import asyncio
 import time
-import json
-
-# OpenAI Agents SDK
-from agents import Runner
 
 from app.api.models.agent_models import (
-    ChatRequest, ChatResponse, WorkflowExecutionRequest, WorkflowExecutionResponse,
+    WorkflowExecutionRequest, WorkflowExecutionResponse,
     AgentStatusResponse, WorkflowStatusRequest, WorkflowStatusResponse,
-    AgentHealthResponse, BatchChatRequest, BatchChatResponse
+    AgentHealthResponse
 )
 from app.api.dependencies import (
-    get_portfolio_manager, get_agent_by_type, validate_openai_key,
-    validate_workflow_permissions, get_request_context
+    get_portfolio_manager, validate_openai_key,
+    validate_workflow_permissions
 )
 from app.agents.portfolio_manager import PortfolioManager, WorkflowRequest
-from app.agents.base_agent import AgentResponse
 
 
 agents_router = APIRouter()
 
 
-@agents_router.post(
-    "/chat",
-    response_model=ChatResponse,
-    dependencies=[Depends(validate_openai_key)]
-)
-async def chat_with_agent(
-    request: ChatRequest,
-    http_request: Request,
-    portfolio_manager: PortfolioManager = Depends(get_portfolio_manager)
-) -> ChatResponse:
-    """Chat with an AI agent."""
-    start_time = time.time()
-    
-    try:
-        # Get request context
-        context = get_request_context(http_request)
-        
-        # Route to appropriate agent with workflow orchestration
-        if request.agent_type == "portfolio-manager":
-            agent = portfolio_manager
-        else:
-            # For other agent types, use portfolio manager to coordinate
-            agent = portfolio_manager
-        
-        # Determine if this requires workflow orchestration
-        message_lower = request.message.lower()
-        clinical_keywords = ['analyze', 'hemoglobin', 'blood pressure', 'clinical', 'subject', 'discrepancy', 'verify']
-        
-        if any(keyword in message_lower for keyword in clinical_keywords):
-            # Use workflow orchestration for clinical tasks
-            workflow_type = "comprehensive_analysis"
-            if "verify" in message_lower or "verification" in message_lower:
-                workflow_type = "data_verification"
-            elif "query" in message_lower or "generate" in message_lower:
-                workflow_type = "query_resolution"
-            
-            # Create workflow request
-            workflow_request = {
-                "workflow_id": f"CHAT_{int(time.time())}",
-                "workflow_type": workflow_type,
-                "description": f"Chat-initiated {workflow_type}",
-                "input_data": {"message": request.message},
-                "priority": 1
-            }
-            
-            # Use OpenAI Agents SDK Runner to execute with function tools
-            
-            # Create a message that will trigger function tool usage
-            workflow_message = f"""
-CLINICAL DATA ANALYSIS REQUEST:
-{request.message}
-
-WORKFLOW TYPE: {workflow_type}
-INSTRUCTIONS: Use your function tools to analyze this data. Call orchestrate_workflow with this JSON:
-{json.dumps(workflow_request)}
-
-Execute your tools and show the actual results, not just planning descriptions.
-"""
-            
-            # Execute through OpenAI Agents SDK Runner
-            sdk_result = await Runner.run(
-                agent.agent,  # Use the actual SDK agent
-                workflow_message,
-                context=agent.context
-            )
-            
-            # Create agent response from SDK result
-            response = AgentResponse(
-                success=True,
-                content=sdk_result.final_output,
-                agent_id="portfolio-manager",
-                execution_time=0.0,
-                metadata={"workflow_executed": True, "workflow_type": workflow_type, "tools_used": True}
-            )
-        else:
-            # Process as simple message using OpenAI Agents SDK
-            
-            sdk_result = await Runner.run(
-                agent.agent,  # Use the actual SDK agent
-                request.message,
-                context=agent.context
-            )
-            
-            response = AgentResponse(
-                success=True,
-                content=sdk_result.final_output,
-                agent_id="portfolio-manager",
-                execution_time=0.0,
-                metadata={"simple_query": True, "tools_available": True}
-            )
-        
-        execution_time = time.time() - start_time
-        
-        return ChatResponse(
-            success=response.success,
-            response=response.content,
-            agent_id=response.agent_id,
-            execution_time=execution_time,
-            error=response.error if not response.success else None,
-            metadata={
-                "request_context": context,
-                "tokens_used": response.metadata.get("tokens_used", 0),
-                "model": response.metadata.get("model", "unknown")
-            }
-        )
-        
-    except Exception as e:
-        execution_time = time.time() - start_time
-        
-        return ChatResponse(
-            success=False,
-            response="",
-            agent_id=request.agent_type,
-            execution_time=execution_time,
-            error=str(e),
-            metadata={"request_context": get_request_context(http_request)}
-        )
+# CHAT ENDPOINT REMOVED - Use structured endpoints in /queries, /sdv, /deviations instead
 
 
 @agents_router.post(
@@ -350,10 +228,7 @@ async def reset_agent_system(
 ) -> Dict[str, Any]:
     """Reset the agent system (development/testing only)."""
     try:
-        # Clear conversation history
-        portfolio_manager.clear_conversation()
-        
-        # Reset performance metrics
+        # Reset performance metrics (no conversation history to clear)
         portfolio_manager._performance_metrics = {
             "workflows_executed": 0,
             "total_execution_time": 0.0,
@@ -375,73 +250,5 @@ async def reset_agent_system(
         )
 
 
-@agents_router.post("/batch/chat", response_model=BatchChatResponse)
-async def batch_chat_with_agents(
-    request: BatchChatRequest,
-    portfolio_manager: PortfolioManager = Depends(get_portfolio_manager)
-) -> BatchChatResponse:
-    """Process multiple chat requests in batch."""
-    start_time = time.time()
-    
-    try:
-        if request.parallel_execution:
-            # Execute requests in parallel
-            tasks = []
-            for chat_req in request.requests:
-                task = portfolio_manager.process_message(chat_req.message)
-                tasks.append(task)
-            
-            responses = await asyncio.gather(*tasks, return_exceptions=True)
-        else:
-            # Execute requests sequentially
-            responses = []
-            for chat_req in request.requests:
-                response = await portfolio_manager.process_message(chat_req.message)
-                responses.append(response)
-        
-        # Convert to ChatResponse objects
-        chat_responses = []
-        successful_count = 0
-        failed_count = 0
-        
-        for i, response in enumerate(responses):
-            if isinstance(response, Exception):
-                chat_response = ChatResponse(
-                    success=False,
-                    response="",
-                    agent_id="portfolio-manager",
-                    execution_time=0.0,
-                    error=str(response)
-                )
-                failed_count += 1
-            else:
-                chat_response = ChatResponse(
-                    success=response.success,
-                    response=response.content,
-                    agent_id=response.agent_id,
-                    execution_time=response.execution_time,
-                    error=response.error if not response.success else None
-                )
-                if response.success:
-                    successful_count += 1
-                else:
-                    failed_count += 1
-            
-            chat_responses.append(chat_response)
-        
-        total_execution_time = time.time() - start_time
-        
-        return BatchChatResponse(
-            batch_id=request.batch_id,
-            responses=chat_responses,
-            total_requests=len(request.requests),
-            successful_requests=successful_count,
-            failed_requests=failed_count,
-            total_execution_time=total_execution_time
-        )
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Batch chat processing failed: {str(e)}"
-        )
+# BATCH CHAT ENDPOINT REMOVED - Use structured bulk endpoints instead
+# Example: POST /api/v1/queries/batch/analyze for bulk query processing

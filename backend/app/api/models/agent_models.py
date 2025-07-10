@@ -30,52 +30,7 @@ class WorkflowType(str, Enum):
     RISK_ASSESSMENT = "risk_assessment"
 
 
-# Chat Models
-class ChatRequest(BaseModel):
-    """Request model for agent chat interactions."""
-    
-    message: str = Field(
-        ...,
-        min_length=1,
-        max_length=10000,
-        description="Message to send to the agent"
-    )
-    agent_type: AgentType = Field(
-        default=AgentType.PORTFOLIO_MANAGER,
-        description="Type of agent to interact with"
-    )
-    metadata: Dict[str, Any] = Field(
-        default_factory=dict,
-        description="Additional metadata for the request"
-    )
-
-    class Config:
-        extra = "forbid"  # Prevent extra fields
-
-
-class ChatResponse(BaseModel):
-    """Response model for agent chat interactions."""
-    
-    success: bool = Field(..., description="Whether the request was successful")
-    response: str = Field(..., description="Agent response content")
-    agent_id: str = Field(..., description="ID of the agent that processed the request")
-    execution_time: float = Field(
-        ...,
-        ge=0,
-        description="Time taken to process the request in seconds"
-    )
-    error: Optional[str] = Field(
-        default=None,
-        description="Error message if the request failed"
-    )
-    metadata: Dict[str, Any] = Field(
-        default_factory=dict,
-        description="Additional response metadata"
-    )
-    timestamp: datetime = Field(
-        default_factory=datetime.now,
-        description="Timestamp of the response"
-    )
+# Chat models removed - Use structured endpoint models instead
 
 
 # Workflow Models
@@ -306,52 +261,4 @@ class AgentHealthResponse(BaseModel):
     )
 
 
-# Batch Request Models
-class BatchChatRequest(BaseModel):
-    """Request model for batch chat operations."""
-    
-    requests: List[ChatRequest] = Field(
-        ...,
-        min_items=1,
-        max_items=10,
-        description="List of chat requests to process"
-    )
-    batch_id: str = Field(
-        ...,
-        min_length=1,
-        description="Unique identifier for the batch"
-    )
-    parallel_execution: bool = Field(
-        default=True,
-        description="Whether to execute requests in parallel"
-    )
-
-
-class BatchChatResponse(BaseModel):
-    """Response model for batch chat operations."""
-    
-    batch_id: str = Field(..., description="Batch identifier")
-    responses: List[ChatResponse] = Field(
-        ...,
-        description="List of chat responses"
-    )
-    total_requests: int = Field(
-        ...,
-        ge=0,
-        description="Total number of requests in batch"
-    )
-    successful_requests: int = Field(
-        ...,
-        ge=0,
-        description="Number of successful requests"
-    )
-    failed_requests: int = Field(
-        ...,
-        ge=0,
-        description="Number of failed requests"
-    )
-    total_execution_time: float = Field(
-        ...,
-        ge=0,
-        description="Total time to process all requests"
-    )
+# Batch chat models removed - Use structured bulk processing endpoints

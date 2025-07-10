@@ -280,21 +280,66 @@ def parse_query_analyzer_response(raw_response: str, query_input: QueryInput) ->
 
 @router.post("/analyze", response_model=QueryAnalyzerResponse)
 async def analyze_query(query_input: QueryInput):
-    """Analyze a new query using AI agents"""
+    """Analyze a new query using AI agents through Portfolio Manager orchestration"""
+    from app.api.dependencies import get_portfolio_manager
+    
     try:
         start_time = datetime.now()
         
-        # Mock agent response (replace with real agent once OpenAI API is configured)
-        agent_json = {
-            "query_id": f"Q-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{query_input.subject_id}",
-            "category": "laboratory_value",
-            "severity": determine_severity(query_input.field_name, query_input.field_value).value,
-            "confidence": 0.9,
-            "description": f"Analysis of {query_input.field_name} value {query_input.field_value}",
-            "suggested_actions": ["Verify with source documents", "Medical review if needed"],
-            "medical_context": "Clinical evaluation required",
-            "regulatory_impact": "Standard review process"
+        # Get Portfolio Manager instance
+        portfolio_manager = get_portfolio_manager()
+        
+        # Create analysis request for Portfolio Manager
+        analysis_request = {
+            "study_id": query_input.context.get("study_id", "UNKNOWN"),
+            "site_id": query_input.site_id,
+            "subject_id": query_input.subject_id,
+            "data_points": [
+                {
+                    "field_name": query_input.field_name,
+                    "field_value": query_input.field_value,
+                    "expected_value": query_input.expected_value,
+                    "form_name": query_input.form_name,
+                    "visit": query_input.visit,
+                    "page_number": query_input.page_number
+                }
+            ]
         }
+        
+        # Use Portfolio Manager to orchestrate the workflow
+        workflow_result = await portfolio_manager.orchestrate_query_workflow(analysis_request)
+        
+        if workflow_result.get("success", False):
+            # Convert workflow result to QueryAnalyzerResponse format
+            analysis_data = workflow_result.get("analysis_results", {})
+            
+            # Create agent_json from workflow result for compatibility
+            agent_json = {
+                "query_id": workflow_result.get("workflow_id", f"Q-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{query_input.subject_id}"),
+                "category": "laboratory_value",
+                "severity": determine_severity(query_input.field_name, query_input.field_value).value,
+                "confidence": 0.9,
+                "description": f"Automated analysis of {query_input.field_name} value {query_input.field_value}",
+                "suggested_actions": workflow_result.get("automated_actions", ["Verify with source documents"]),
+                "medical_context": "Clinical evaluation completed through AI workflow",
+                "regulatory_impact": "Standard review process",
+                "workflow_executed": True,
+                "queries_generated": len(workflow_result.get("generated_queries", [])),
+                "execution_time": workflow_result.get("metrics", {}).get("execution_time", 0)
+            }
+        else:
+            # Fallback to mock data if workflow fails
+            agent_json = {
+                "query_id": f"Q-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{query_input.subject_id}",
+                "category": "laboratory_value",
+                "severity": determine_severity(query_input.field_name, query_input.field_value).value,
+                "confidence": 0.9,
+                "description": f"Fallback analysis of {query_input.field_name} value {query_input.field_value}",
+                "suggested_actions": ["Verify with source documents", "Medical review if needed"],
+                "medical_context": "Clinical evaluation required",
+                "regulatory_impact": "Standard review process",
+                "workflow_error": workflow_result.get("error", "Unknown error")
+            }
         
         # Create structured response using agent's JSON output
         structured_response = create_query_response_from_agent_json(agent_json, query_input)

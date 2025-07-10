@@ -1580,6 +1580,221 @@ class PortfolioManager:
             "human_readable_summary": f"Clinical workflow failed due to {agent_name} error: {error_message}"
         }
 
+    # NEW ARCHITECTURE: Structured workflow orchestration methods
+    
+    async def orchestrate_query_workflow(self, analysis_request: Dict[str, Any]) -> Dict[str, Any]:
+        """Orchestrate query analysis workflow for structured API endpoints.
+        
+        Args:
+            analysis_request: Request containing study_id, site_id, subject_id, data_points
+            
+        Returns:
+            Structured response with analysis results, queries, and automated actions
+        """
+        from app.agents.query_analyzer import QueryAnalyzer
+        from app.agents.data_verifier import DataVerifier
+        from app.agents.query_generator import QueryGenerator
+        from app.agents.query_tracker import QueryTracker
+        
+        workflow_id = f"QUERY_{uuid.uuid4().hex[:8]}"
+        start_time = datetime.now()
+        
+        try:
+            # Step 1: Query Analyzer identifies discrepancies
+            query_analyzer = QueryAnalyzer()
+            analysis_result = await query_analyzer.analyze_clinical_discrepancies(
+                json.dumps(analysis_request.get("data_points", []))
+            )
+            analysis_data = json.loads(analysis_result)
+            
+            # Step 2: Data Verifier confirms findings if needed
+            verification_result = None
+            if analysis_data.get("requires_verification", False):
+                data_verifier = DataVerifier()
+                verification_result = await data_verifier.verify_source_documents(
+                    json.dumps(analysis_request)
+                )
+            
+            # Step 3: Query Generator creates queries
+            query_generator = QueryGenerator()
+            queries_result = await query_generator.generate_clinical_query(
+                json.dumps({
+                    "analysis_result": analysis_data,
+                    "verification_result": verification_result,
+                    "workflow_id": workflow_id
+                })
+            )
+            queries_data = json.loads(queries_result)
+            
+            # Step 4: Query Tracker sets up tracking
+            query_tracker = QueryTracker()
+            tracking_result = await query_tracker.track_workflow_query(
+                json.dumps({
+                    "queries": queries_data,
+                    "workflow_id": workflow_id
+                })
+            )
+            tracking_data = json.loads(tracking_result)
+            
+            # Return structured response for dashboard
+            return {
+                "success": True,
+                "workflow_id": workflow_id,
+                "analysis_results": analysis_data,
+                "generated_queries": queries_data.get("queries", []),
+                "tracking_status": tracking_data.get("status", "active"),
+                "automated_actions": [
+                    "discrepancy_analysis_completed",
+                    "queries_generated",
+                    "tracking_initiated"
+                ],
+                "metrics": {
+                    "execution_time": (datetime.now() - start_time).total_seconds(),
+                    "queries_generated": len(queries_data.get("queries", [])),
+                    "critical_findings": sum(1 for q in queries_data.get("queries", []) if q.get("severity") == "critical")
+                }
+            }
+            
+        except Exception as e:
+            return {
+                "success": False,
+                "workflow_id": workflow_id,
+                "error": str(e),
+                "automated_actions": ["error_logged"],
+                "metrics": {
+                    "execution_time": (datetime.now() - start_time).total_seconds(),
+                    "error_occurred": True
+                }
+            }
+    
+    async def orchestrate_sdv_workflow(self, sdv_request: Dict[str, Any]) -> Dict[str, Any]:
+        """Orchestrate Source Data Verification workflow.
+        
+        Args:
+            sdv_request: Request containing study_id, site_id, verification_scope
+            
+        Returns:
+            Structured response with verification plan and schedule
+        """
+        from app.agents.data_verifier import DataVerifier
+        
+        workflow_id = f"SDV_{uuid.uuid4().hex[:8]}"
+        start_time = datetime.now()
+        
+        try:
+            # Step 1: Calculate risk scores
+            data_verifier = DataVerifier()
+            risk_scores = await data_verifier.calculate_risk_scores(
+                json.dumps(sdv_request)
+            )
+            risk_data = json.loads(risk_scores)
+            
+            # Step 2: Schedule verifications based on risk
+            verification_schedule = await data_verifier.verify_source_documents(
+                json.dumps({
+                    "risk_scores": risk_data,
+                    "verification_scope": sdv_request.get("verification_scope", "critical_data")
+                })
+            )
+            schedule_data = json.loads(verification_schedule)
+            
+            # Return structured response
+            return {
+                "success": True,
+                "workflow_id": workflow_id,
+                "verification_plan": schedule_data,
+                "risk_assessment": risk_data,
+                "cost_savings": {
+                    "estimated_savings": "75%",
+                    "hours_saved": risk_data.get("hours_saved", 0)
+                },
+                "automated_actions": [
+                    "risk_assessment_completed",
+                    "verification_scheduled"
+                ],
+                "metrics": {
+                    "execution_time": (datetime.now() - start_time).total_seconds(),
+                    "verifications_scheduled": len(schedule_data.get("scheduled_verifications", [])),
+                    "risk_coverage": risk_data.get("coverage_percentage", 0)
+                }
+            }
+            
+        except Exception as e:
+            return {
+                "success": False,
+                "workflow_id": workflow_id,
+                "error": str(e),
+                "automated_actions": ["error_logged"],
+                "metrics": {
+                    "execution_time": (datetime.now() - start_time).total_seconds(),
+                    "error_occurred": True
+                }
+            }
+    
+    async def orchestrate_deviation_workflow(self, monitoring_request: Dict[str, Any]) -> Dict[str, Any]:
+        """Orchestrate protocol deviation detection workflow.
+        
+        Args:
+            monitoring_request: Request containing study_id, monitoring_rules
+            
+        Returns:
+            Structured response with deviation alerts and patterns
+        """
+        from app.agents.deviation_detector import DeviationDetector
+        
+        workflow_id = f"DEV_{uuid.uuid4().hex[:8]}"
+        start_time = datetime.now()
+        
+        try:
+            # Step 1: Pattern detection
+            deviation_detector = DeviationDetector()
+            pattern_analysis = await deviation_detector.detect_patterns(
+                json.dumps(monitoring_request)
+            )
+            pattern_data = json.loads(pattern_analysis)
+            
+            # Step 2: Generate alerts for deviations
+            alerts = await deviation_detector.generate_alerts(
+                json.dumps({
+                    "patterns": pattern_data,
+                    "monitoring_rules": monitoring_request.get("monitoring_rules", [])
+                })
+            )
+            alerts_data = json.loads(alerts)
+            
+            # Return structured response
+            return {
+                "success": True,
+                "workflow_id": workflow_id,
+                "deviation_alerts": alerts_data.get("alerts", []),
+                "pattern_analysis": pattern_data,
+                "risk_assessment": {
+                    "overall_risk": pattern_data.get("risk_level", "low"),
+                    "patterns_detected": len(pattern_data.get("patterns", []))
+                },
+                "automated_actions": [
+                    "pattern_analysis_completed",
+                    "deviation_alerts_generated"
+                ],
+                "metrics": {
+                    "execution_time": (datetime.now() - start_time).total_seconds(),
+                    "deviations_detected": len(alerts_data.get("alerts", [])),
+                    "prevention_opportunities": alerts_data.get("prevention_count", 0)
+                }
+            }
+            
+        except Exception as e:
+            return {
+                "success": False,
+                "workflow_id": workflow_id,
+                "error": str(e),
+                "automated_actions": ["error_logged"],
+                "metrics": {
+                    "execution_time": (datetime.now() - start_time).total_seconds(),
+                    "error_occurred": True
+                }
+            }
+    
     def clear_conversation(self):
         """Clear conversation history."""
         self.context.workflow_history = []

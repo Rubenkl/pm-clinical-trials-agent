@@ -343,6 +343,98 @@ class BatchQueryResponse(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
+class QueryWorkflowResponse(BaseModel):
+    """Response from orchestrate_query_workflow"""
+    success: bool
+    workflow_id: str
+    workflow_type: str = "query_analysis"
+    
+    # Analysis results
+    analysis_results: Dict[str, Any]
+    discrepancies_found: List[Dict[str, Any]]
+    generated_queries: List[Dict[str, Any]]
+    
+    # Workflow execution
+    agents_executed: List[str]
+    execution_steps: List[Dict[str, Any]]
+    
+    # Automated actions taken
+    automated_actions: List[str]
+    dashboard_update: Dict[str, Any]
+    
+    # Performance metrics
+    execution_time: float
+    metrics: Dict[str, Any] = Field(default_factory=dict)
+    
+    # Status
+    status: str = "completed"
+    error: Optional[str] = None
+    
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class SDVWorkflowResponse(BaseModel):
+    """Response from orchestrate_sdv_workflow"""
+    success: bool
+    workflow_id: str
+    workflow_type: str = "source_data_verification"
+    
+    # SDV results
+    verification_plan: Dict[str, Any]
+    risk_scores: Dict[str, float]
+    scheduled_verifications: List[Dict[str, Any]]
+    
+    # Quality metrics
+    data_quality_score: float = Field(ge=0.0, le=1.0)
+    completion_percentage: float = Field(ge=0.0, le=100.0)
+    discrepancy_rate: float = Field(ge=0.0, le=1.0)
+    
+    # Automated actions
+    automated_actions: List[str]
+    dashboard_update: Dict[str, Any]
+    
+    # Performance
+    execution_time: float
+    estimated_completion_time: Optional[float] = None
+    
+    # Status
+    status: str = "completed"
+    error: Optional[str] = None
+    
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class DeviationWorkflowResponse(BaseModel):
+    """Response from orchestrate_deviation_workflow"""
+    success: bool
+    workflow_id: str
+    workflow_type: str = "deviation_monitoring"
+    
+    # Deviation detection results
+    deviations_detected: List[Dict[str, Any]]
+    compliance_status: str  # compliant, non_compliant, needs_review
+    deviation_alerts: List[Dict[str, Any]]
+    
+    # Pattern analysis
+    patterns_identified: List[Dict[str, Any]]
+    risk_assessment: Dict[str, Any]
+    
+    # Automated actions
+    automated_actions: List[str]
+    escalations_triggered: List[Dict[str, Any]]
+    dashboard_update: Dict[str, Any]
+    
+    # Performance
+    execution_time: float
+    subjects_analyzed: int
+    
+    # Status
+    status: str = "completed"
+    error: Optional[str] = None
+    
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
 class WorkflowExecutionResponse(BaseModel):
     """Response for complex multi-agent workflows"""
     success: bool
@@ -373,5 +465,85 @@ class WorkflowExecutionResponse(BaseModel):
     # Errors and warnings
     errors: List[str]
     warnings: List[str]
+    
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class DashboardOverviewResponse(BaseModel):
+    """Dashboard overview response for GET /api/v1/dashboard/overview"""
+    success: bool = True
+    
+    # Trial overview
+    trial_metrics: TrialOverviewResponse
+    
+    # Query metrics
+    query_statistics: QueryStatistics
+    
+    # SDV metrics
+    sdv_statistics: SDVStatistics
+    
+    # System health
+    system_health: SystemHealthMetrics
+    
+    # Recent activity
+    recent_activities: List[AgentActivity]
+    
+    # Alerts and notifications
+    critical_alerts: List[Dict[str, Any]]
+    pending_actions: List[Dict[str, Any]]
+    
+    # Performance summary
+    performance_summary: Dict[str, Any]
+    
+    # Last updated
+    last_updated: datetime = Field(default_factory=datetime.now)
+    
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class DiscrepancyFinding(BaseModel):
+    """Individual discrepancy finding for API responses"""
+    finding_id: str
+    field_name: str
+    field_label: str
+    edc_value: str
+    source_value: str
+    discrepancy_type: str  # missing, mismatch, format_error
+    severity: SeverityLevel
+    confidence: float = Field(ge=0.0, le=1.0)
+    detection_method: str  # automated, manual
+    detected_date: datetime
+    resolution_status: str = "pending"  # pending, resolved, dismissed
+
+
+class QueryAnalysisResponse(BaseModel):
+    """Simplified response model for query analysis endpoint"""
+    success: bool
+    
+    # Query identification
+    query_id: str
+    analysis_type: str = "clinical_data_analysis"
+    
+    # Subject and context
+    subject_id: str
+    site_id: str
+    visit: str
+    
+    # Analysis results
+    discrepancies_found: List[DiscrepancyFinding]
+    clinical_findings: List[ClinicalFinding]
+    
+    # AI recommendations
+    recommendations: List[str]
+    suggested_actions: List[str]
+    priority: str  # high, medium, low
+    
+    # Performance
+    execution_time: float
+    confidence_score: float = Field(ge=0.0, le=1.0)
+    
+    # Metadata
+    generated_at: datetime = Field(default_factory=datetime.now)
+    agent_id: str = "portfolio-manager"
     
     metadata: Dict[str, Any] = Field(default_factory=dict)

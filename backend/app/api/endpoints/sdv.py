@@ -133,8 +133,52 @@ def calculate_match_score(total_fields: int, discrepancies: List[DiscrepancyDeta
 
 @router.post("/verify", response_model=DataVerifierResponse)
 async def verify_sdv_data(sdv_input: SDVVerifyInput):
-    """Verify source data against EDC data"""
+    """Verify source data against EDC data using AI-powered Data Verifier"""
     try:
+        # Import and initialize the AI-powered Data Verifier
+        from app.agents.data_verifier import DataVerifier
+        data_verifier = DataVerifier()
+        
+        # Prepare verification data in the format expected by the agent
+        verification_data = {
+            "subject_id": sdv_input.subject_id,
+            "site_id": sdv_input.site_id,
+            "visit": sdv_input.visit,
+            "edc_data": sdv_input.edc_data,
+            "source_data": sdv_input.source_data
+        }
+        
+        # Use AI-powered verification
+        ai_result = await data_verifier.verify_clinical_data_ai(verification_data)
+        
+        # If AI verification is successful and powered by AI, use it
+        if ai_result.get("success") and ai_result.get("ai_powered"):
+            # Extract data from AI result to match DataVerifierResponse model
+            return DataVerifierResponse(
+                success=ai_result["success"],
+                verification_id=ai_result["verification_id"],
+                site=ai_result["site"],
+                monitor=ai_result["monitor"],
+                verification_date=datetime.fromisoformat(ai_result["verification_date"]),
+                subject=SubjectInfo(**ai_result["subject"]),
+                visit=ai_result["visit"],
+                match_score=ai_result["match_score"],
+                matching_fields=ai_result["matching_fields"],
+                discrepancies=[DiscrepancyDetail(**d) for d in ai_result["discrepancies"]],
+                total_fields_compared=ai_result["total_fields_compared"],
+                progress=SDVProgress(**ai_result["progress"]),
+                fields_to_verify=[VerificationField(**f) for f in ai_result["fields_to_verify"]],
+                recommendations=ai_result["recommendations"],
+                critical_findings=ai_result["critical_findings"],
+                execution_time=ai_result["execution_time"],
+                raw_response=json.dumps({
+                    "verification_summary": ai_result.get("verification_summary", ""),
+                    "ai_insights": ai_result.get("ai_insights", ""),
+                    "ai_powered": True
+                })
+            )
+        
+        # Fall back to rule-based verification if AI fails
         start_time = datetime.now()
         
         # Detect discrepancies

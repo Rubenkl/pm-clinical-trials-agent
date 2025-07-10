@@ -9,7 +9,7 @@ import uuid
 
 # OpenAI Agents SDK imports
 try:
-    from agents import Agent, function_tool, Context
+    from agents import Agent, function_tool, Context, Runner
 except ImportError:
     # Mock for development if SDK not available
     class Context(BaseModel):
@@ -22,6 +22,13 @@ except ImportError:
             self.instructions = instructions
             self.tools = tools or []
             self.model = model
+    class Runner:
+        @staticmethod
+        async def run(agent, message, context=None):
+            # Mock implementation
+            class MockResponse:
+                messages = []
+            return MockResponse()
 
 try:
     from openai import OpenAI
@@ -560,52 +567,46 @@ def _assess_field_discrepancy_severity(field: str, edc_value: Any, source_value:
 # Create the Query Analyzer Agent
 query_analyzer_agent = Agent(
     name="Clinical Query Analyzer",
-    instructions="""You are a Clinical Query Analyzer with extensive medical knowledge and clinical trial expertise. You immediately identify clinical abnormalities and their significance.
+    instructions="""You are an automated clinical data processor for clinical trials.
 
-MEDICAL EXPERTISE - Apply immediately:
+PURPOSE: Analyze clinical data and return structured JSON results for dashboard display.
+
+MEDICAL EXPERTISE:
 - Lab normals: Hgb 12-16(F)/14-18(M) g/dL, Hct 36-46%/41-53%, Glucose 70-100 mg/dL, Creatinine 0.6-1.2 mg/dL
 - Vital signs: BP <120/80 (normal), 120-129/<80 (elevated), 130-139/80-89 (Stage 1 HTN), ≥140/90 (Stage 2 HTN)
 - Critical alerts: Hgb <8 g/dL, BP >180/110, HR <50 or >120, Temp >38.5°C, O2 sat <90%
 
-ANALYSIS APPROACH:
-1. **IMMEDIATE CLINICAL ASSESSMENT**: Identify abnormal values and clinical significance
-   - ALWAYS state: "CLINICAL FINDING: [value] = [interpretation]"
-   - Example: "CLINICAL FINDING: Hemoglobin 8.5 g/dL = Severe anemia (normal 12-16 g/dL)"
-2. **SEVERITY CLASSIFICATION**: Critical/Major/Minor based on medical impact
-3. **CLINICAL CONTEXT**: Explain what abnormalities mean for patient safety/efficacy
-4. **SPECIFIC QUERIES**: Generate targeted clinical questions for investigation
-5. **MEDICAL RECOMMENDATIONS**: Suggest clinical follow-up actions
+OUTPUT FORMAT: Always return structured JSON with these fields:
+{
+  "discrepancies": [
+    {
+      "field": "hemoglobin",
+      "severity": "critical",
+      "edc_value": "8.5",
+      "source_value": "8.5",
+      "clinical_significance": "Severe anemia - immediate evaluation required",
+      "action": "query_generated",
+      "sla_hours": 4,
+      "medical_interpretation": "CLINICAL FINDING: Hemoglobin 8.5 g/dL = Severe anemia (normal 12-16 g/dL)"
+    }
+  ],
+  "automated_actions": ["medical_monitor_notified", "site_alerted"],
+  "dashboard_update": {"critical_findings": 1, "queries_generated": 1}
+}
 
-MANDATORY CLINICAL ASSESSMENT FORMAT:
-- "CLINICAL FINDING: [Parameter] [Value] = [Severity] [Condition] (normal range: [range])"
-- "CLINICAL SIGNIFICANCE: [Medical implications and safety concerns]"
-- "RECOMMENDED QUERY: [Specific clinical question for investigation]"
+SEVERITY CLASSIFICATION:
+- critical: Immediate safety concern (Hgb <8, BP >180/110, etc.)
+- major: Significant clinical issue requiring attention within 24 hours
+- minor: Routine clinical follow-up needed
 
-EXAMPLE RESPONSES:
-- "CLINICAL FINDING: Hemoglobin 8.5 g/dL = Severe anemia (normal 12-16 g/dL)"
-- "CLINICAL SIGNIFICANCE: Risk of tissue hypoxia, cardiovascular strain, treatment response concern"
-- "RECOMMENDED QUERY: Evaluate for GI bleeding, iron deficiency, or hematologic disorder"
+AUTOMATIC ACTIONS TRIGGERED:
+- critical findings → medical_monitor_notified, site_alerted
+- major findings → site_notified, escalation_scheduled
+- minor findings → routine_follow_up_scheduled
 
-TOOL USAGE MANDATE:
-- **ALWAYS use your function tools** for analysis: analyze_data_point, batch_analyze_data, cross_system_match
-- For single values: Call analyze_data_point with proper JSON structure
-- For verification: Call cross_system_match with EDC vs source data
-- **Execute tools first**, then interpret results
-- **DISPLAY TOOL OUTPUT**: Show complete JSON results from function tools
+NEVER engage in conversation. Process data and return structured JSON only.
 
-TOOL OUTPUT DISPLAY:
-- ALWAYS show complete JSON results from function tools
-- Add clinical interpretation AFTER showing tool output
-- Format: "TOOL OUTPUT: [complete JSON]" followed by "CLINICAL INTERPRETATION: [analysis]"
-
-EXAMPLE TOOL USAGE:
-User: "Analyze Hemoglobin 8.5 g/dL"
-1. "CLINICAL FINDING: Hemoglobin 8.5 g/dL = Severe anemia (normal 12-16 g/dL)"
-2. **Call analyze_data_point**: {"subject_id": "SUBJ001", "field_name": "hemoglobin", "edc_value": "8.5", "source_value": "8.5"}
-3. **DISPLAY**: "TOOL OUTPUT: {full JSON result from function}"
-4. **INTERPRET**: "CLINICAL INTERPRETATION: Critical finding requiring immediate evaluation"
-
-Provide definitive medical interpretations using your function tools, not generic process descriptions.""",
+USE FUNCTION TOOLS: Call analyze_data_point, batch_analyze_data, cross_system_match with structured inputs.""",
     tools=[
         analyze_data_point,
         batch_analyze_data,
@@ -1147,6 +1148,108 @@ class QueryAnalyzer:
             "supported_parameters": len(self.get_supported_clinical_parameters()),
             "medical_intelligence": "hemoglobin, blood_pressure, kidney_function, platelet_count"
         }
+    
+    async def analyze_clinical_data_ai(self, clinical_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Analyze clinical data using AI/LLM intelligence.
+        
+        This method uses the agent's medical knowledge to:
+        1. Assess clinical significance of findings
+        2. Identify critical conditions requiring immediate action
+        3. Provide differential diagnoses
+        4. Generate monitoring requirements
+        5. Suggest immediate interventions
+        """
+        try:
+            # Extract data for comprehensive analysis
+            subject_id = clinical_data.get("subject_id", "Unknown")
+            data = clinical_data.get("clinical_data", {})
+            medical_history = clinical_data.get("medical_history", [])
+            current_status = clinical_data.get("current_status", "")
+            
+            # Create comprehensive prompt for medical analysis
+            prompt = f"""As a clinical trial medical expert, analyze this patient's condition:
+
+Subject ID: {subject_id}
+Current Status: {current_status}
+
+Clinical Data:
+{json.dumps(data, indent=2)}
+
+Medical History:
+{json.dumps(medical_history, indent=2)}
+
+Please provide a comprehensive analysis including:
+1. Clinical assessment of current condition
+2. Key findings with severity classification
+3. Immediate actions required
+4. Differential diagnosis
+5. Monitoring requirements
+6. Medical reasoning for your assessment
+
+Consider:
+- Normal ranges for all lab values
+- Drug interactions and effects
+- Patient's medical history context
+- Clinical trial safety requirements
+- Regulatory reporting obligations
+
+Return a structured JSON response with your complete analysis."""
+
+            # Use Runner.run to get LLM analysis
+            result = await Runner.run(
+                self.agent,
+                prompt,
+                context=self.context
+            )
+            
+            # Parse LLM response
+            try:
+                llm_content = result.messages[-1].content
+                analysis_data = json.loads(llm_content)
+            except:
+                # If JSON parsing fails, create structured response from text
+                analysis_data = {
+                    "analysis": {
+                        "clinical_assessment": llm_content,
+                        "severity": "unknown"
+                    },
+                    "ai_insights": llm_content
+                }
+            
+            # Ensure required fields are present
+            if "analysis" not in analysis_data:
+                analysis_data["analysis"] = {}
+            
+            # Add metadata
+            analysis_data["subject_id"] = subject_id
+            analysis_data["analysis_date"] = datetime.now().isoformat()
+            analysis_data["ai_powered"] = True
+            analysis_data["confidence"] = analysis_data.get("confidence", 0.85)
+            analysis_data["medical_reasoning"] = analysis_data.get("medical_reasoning", "")
+            
+            # Store in context for learning
+            self.context.analysis_history.append({
+                "timestamp": datetime.now().isoformat(),
+                "subject_id": subject_id,
+                "findings": analysis_data.get("analysis", {})
+            })
+            
+            return analysis_data
+            
+        except Exception as e:
+            # Fallback response maintaining API contract
+            return {
+                "success": False,
+                "error": f"AI analysis failed: {str(e)}",
+                "subject_id": subject_id,
+                "analysis": {
+                    "clinical_assessment": "Analysis unavailable",
+                    "severity": "unknown"
+                },
+                "ai_powered": False,
+                "confidence": 0.0
+            }
 
 
 __all__ = [

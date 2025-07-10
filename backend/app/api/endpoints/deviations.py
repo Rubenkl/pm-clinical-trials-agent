@@ -209,32 +209,87 @@ def generate_deviation_recommendations(deviations: List[DeviationDetail]) -> Lis
 
 @router.post("/detect", response_model=DeviationDetectionResponse)
 async def detect_deviations(deviation_input: DeviationDetectionInput):
-    """Detect protocol deviations by comparing protocol requirements to actual data"""
+    """Detect protocol deviations using AI-powered analysis"""
     try:
         start_time = datetime.now()
         
-        # Detect deviations
-        deviations = detect_protocol_deviations(deviation_input.protocol_data, deviation_input.actual_data)
+        # Import and initialize the AI-powered Deviation Detector
+        from app.agents.deviation_detector import DeviationDetector
+        detector = DeviationDetector()
         
-        # Assess impact
-        impact_assessment = assess_deviation_impact(deviations)
+        # Prepare data for AI analysis
+        protocol_data = deviation_input.protocol_data
+        subject_data = {
+            "subject_id": deviation_input.subject_id,
+            "site_id": deviation_input.site_id,
+            "visit": deviation_input.visit,
+            **deviation_input.actual_data
+        }
         
-        # Generate recommendations
-        recommendations = generate_deviation_recommendations(deviations)
+        # Use AI-powered detection
+        ai_result = await detector.detect_protocol_deviations_ai(protocol_data, subject_data)
         
-        # Generate corrective actions
-        corrective_actions = []
-        for deviation in deviations:
-            if deviation.corrective_action_required:
-                if deviation.category == "visit_window":
-                    corrective_actions.append("Review and update visit scheduling procedures")
-                elif deviation.category == "fasting_requirement":
-                    corrective_actions.append("Provide additional patient education on fasting requirements")
-                elif deviation.category == "prohibited_medication":
-                    corrective_actions.append("Immediate medication review and discontinuation if necessary")
-        
-        if not corrective_actions:
-            corrective_actions.append("No corrective actions required")
+        # If AI detection is successful and powered by AI, use it
+        if ai_result.get("ai_powered") and "deviations" in ai_result:
+            # Convert AI deviations to response format
+            deviations = []
+            for dev in ai_result.get("deviations", []):
+                deviations.append(DeviationDetail(
+                    category=dev.get("type", "other"),
+                    severity=dev.get("severity", "minor"),
+                    description=dev.get("description", ""),
+                    detected_value=str(dev.get("detected_value", "")),
+                    expected_value=str(dev.get("expected_value", "")),
+                    corrective_action_required=dev.get("severity") in ["critical", "major"],
+                    medical_justification=dev.get("clinical_impact", ""),
+                    regulatory_impact=dev.get("regulatory_impact", "")
+                ))
+            
+            # Extract AI insights for impact assessment
+            impact_assessment = ImpactAssessment(
+                regulatory_impact=ai_result.get("overall_assessment", ""),
+                patient_safety_impact="high" if ai_result.get("critical_count", 0) > 0 else "low",
+                data_integrity_impact="medium" if len(deviations) > 0 else "low",
+                overall_severity="critical" if ai_result.get("critical_count", 0) > 0 else "minor"
+            )
+            
+            # Use AI recommendations
+            recommendations = []
+            if "recommended_actions" in ai_result:
+                recommendations = ai_result["recommended_actions"]
+            else:
+                # Extract from individual deviations
+                for dev in ai_result.get("deviations", []):
+                    if "recommended_action" in dev:
+                        recommendations.append(dev["recommended_action"])
+            
+            # Generate corrective actions from AI insights
+            corrective_actions = []
+            for dev in ai_result.get("deviations", []):
+                if dev.get("severity") in ["critical", "major"] and "recommended_action" in dev:
+                    corrective_actions.append(dev["recommended_action"])
+            
+            if not corrective_actions:
+                corrective_actions.append("No immediate corrective actions required")
+        else:
+            # Fallback to rule-based detection if AI fails
+            deviations = detect_protocol_deviations(deviation_input.protocol_data, deviation_input.actual_data)
+            impact_assessment = assess_deviation_impact(deviations)
+            recommendations = generate_deviation_recommendations(deviations)
+            
+            # Generate corrective actions
+            corrective_actions = []
+            for deviation in deviations:
+                if deviation.corrective_action_required:
+                    if deviation.category == "visit_window":
+                        corrective_actions.append("Review and update visit scheduling procedures")
+                    elif deviation.category == "fasting_requirement":
+                        corrective_actions.append("Provide additional patient education on fasting requirements")
+                    elif deviation.category == "prohibited_medication":
+                        corrective_actions.append("Immediate medication review and discontinuation if necessary")
+            
+            if not corrective_actions:
+                corrective_actions.append("No corrective actions required")
         
         # Create subject info
         subject = SubjectInfo(
@@ -262,7 +317,9 @@ async def detect_deviations(deviation_input: DeviationDetectionInput):
             execution_time=execution_time,
             raw_response=json.dumps({
                 "detection_summary": f"Analyzed {len(deviation_input.protocol_data)} protocol requirements",
-                "deviations_found": len(deviations)
+                "deviations_found": len(deviations),
+                "ai_powered": ai_result.get("ai_powered", False) if "ai_result" in locals() else False,
+                "compliance_score": ai_result.get("compliance_score", 0.0) if "ai_result" in locals() else 0.0
             })
         )
         

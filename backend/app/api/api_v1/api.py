@@ -7,6 +7,7 @@ from app.api.endpoints.test_data import router as test_data_router
 from app.api.endpoints.queries import router as queries_router
 from app.api.endpoints.sdv import router as sdv_router
 from app.api.endpoints.deviations import router as deviations_router
+from app.api.endpoints.dashboard import router as dashboard_router
 
 
 api_router = APIRouter()
@@ -44,4 +45,11 @@ api_router.include_router(
     deviations_router,
     prefix="/deviations",
     tags=["deviations"]
+)
+
+# Include dashboard metrics endpoints
+api_router.include_router(
+    dashboard_router,
+    prefix="/dashboard",
+    tags=["dashboard"]
 )

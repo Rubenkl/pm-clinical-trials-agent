@@ -108,6 +108,14 @@ async def startup_event():
     from app.api.dependencies import initialize_agent_system
     await initialize_agent_system()
     
+    # Start background monitoring service
+    from app.services.monitoring_service import start_background_monitoring
+    try:
+        await start_background_monitoring()
+        print("🔍 Background monitoring service started")
+    except Exception as e:
+        print(f"⚠️ Failed to start monitoring service: {e}")
+    
     print(f"🚀 {settings.app_name} started successfully")
     print(f"📊 Debug mode: {settings.debug}")
     print(f"🔑 OpenAI API configured: {'Yes' if settings.openai_api_key else 'No'}")
@@ -117,6 +125,14 @@ async def startup_event():
 async def shutdown_event():
     """Clean up on application shutdown."""
     print("🔄 Shutting down Clinical Trials Agent API...")
+    
+    # Stop background monitoring service
+    from app.services.monitoring_service import stop_background_monitoring
+    try:
+        await stop_background_monitoring()
+        print("🔍 Background monitoring service stopped")
+    except Exception as e:
+        print(f"⚠️ Error stopping monitoring service: {e}")
     
     # Clean up agent resources
     from app.api.dependencies import cleanup_agent_system
