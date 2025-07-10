@@ -125,13 +125,132 @@ UNIT_CONVERSIONS = {
 
 @function_tool
 def cross_system_verification(verification_request: str) -> str:
-    """Perform comprehensive cross-system data verification.
+    """Perform comprehensive cross-system data verification between EDC and source documents.
+    
+    This function executes sophisticated data verification comparing Electronic Data Capture (EDC)
+    entries against original source documents (medical records, lab reports, patient diaries).
+    It identifies discrepancies that could impact data integrity, patient safety, or study validity,
+    applying intelligent matching algorithms that account for common variations while detecting
+    critical differences.
+    
+    Verification Intelligence:
+    - Smart Matching: Handles formatting differences, unit conversions, abbreviations
+    - Clinical Context: Applies medical knowledge to assess discrepancy impact
+    - Tolerance Application: Uses field-specific acceptable variations
+    - Pattern Recognition: Identifies systematic data entry issues
+    - Critical Field Priority: Focuses on safety and efficacy endpoints
+    
+    Data Comparison Capabilities:
+    
+    EXACT MATCHING:
+    - Subject IDs, visit names, categorical data
+    - Yes/No fields, protocol deviations
+    - Dates (with format normalization)
+    - Primary endpoint measurements
+    
+    FUZZY MATCHING WITH TOLERANCE:
+    - Laboratory values (± 5% or clinical tolerance)
+    - Vital signs (physiological variation allowed)
+    - Calculated fields (rounding differences)
+    - Timestamps (timezone adjustments)
+    
+    UNIT CONVERSION:
+    - Weight: kg ↔ lbs (2.20462 factor)
+    - Height: cm ↔ inches (2.54 factor)
+    - Temperature: °C ↔ °F
+    - Lab units: SI ↔ conventional
+    
+    INTELLIGENT HANDLING:
+    - Missing vs blank vs zero detection
+    - Implied values (e.g., "WNL" = "Within Normal Limits")
+    - Clinical equivalence (e.g., "120/80" vs "120 / 80 mmHg")
+    - Date format variations (MM/DD/YYYY vs DD-MMM-YYYY)
+    
+    Critical Field Verification:
+    - Adverse Events: Exact matching with severity assessment
+    - Primary Endpoints: Zero tolerance for discrepancies
+    - Safety Labs: Clinical significance evaluation
+    - Eligibility Criteria: Protocol compliance check
+    - Informed Consent: Date and version verification
+    
+    Discrepancy Classification:
+    - VALUE_MISMATCH: Different values that may impact analysis
+    - MISSING_IN_EDC: Source data not entered in EDC
+    - MISSING_IN_SOURCE: EDC data without source documentation
+    - FORMAT_DIFFERENCE: Same data, different representation
+    - UNIT_MISMATCH: Values in different units
+    - CALCULATION_ERROR: Derived field discrepancies
+    - PROTOCOL_DEVIATION: Values outside acceptable ranges
+    - RANGE_VIOLATION: Clinically impossible values
     
     Args:
-        verification_request: JSON string containing edc_data, source_data, and optional context
+        verification_request: JSON string containing:
+        - edc_data: Dictionary of EDC field values
+        - source_data: Dictionary of source document values
+        - context: Optional verification context including:
+          - subject_id: Subject identifier
+          - visit: Visit name/number
+          - site_id: Clinical site
+          - field_metadata: Units, ranges, criticality
+          - tolerance_overrides: Custom tolerances
         
     Returns:
-        JSON string with verification results including discrepancies and match score
+        JSON string with comprehensive verification results:
+        - verification_id: Unique verification identifier
+        - subject_id: Subject being verified
+        - match_score: Overall data accuracy (0.0-1.0)
+        - total_fields: Number of fields compared
+        - matching_fields: Count of exact/acceptable matches
+        - discrepancies: Array of identified issues with:
+          - field_name: Field with discrepancy
+          - edc_value: Value in EDC
+          - source_value: Value in source
+          - discrepancy_type: Classification
+          - severity: Critical/Major/Minor/Info
+          - description: Clear explanation
+          - clinical_impact: Medical significance
+          - suggested_resolution: Recommended action
+        - critical_findings: High-priority issues requiring immediate attention
+        - recommendations: Overall data quality improvements
+        - audit_trail: Verification process details for compliance
+        
+    Example:
+    Input: {
+        "edc_data": {
+            "hemoglobin": "8.5",
+            "systolic_bp": "120",
+            "weight": "75"
+        },
+        "source_data": {
+            "hemoglobin": "12.5",
+            "systolic_bp": "120",
+            "weight": "165.35"
+        },
+        "context": {
+            "field_metadata": {
+                "weight": {"edc_unit": "kg", "source_unit": "lbs"}
+            }
+        }
+    }
+    
+    Output: {
+        "verification_id": "DV_20240115120000_abc123",
+        "match_score": 0.67,
+        "discrepancies": [
+            {
+                "field_name": "hemoglobin",
+                "edc_value": "8.5",
+                "source_value": "12.5",
+                "discrepancy_type": "value_mismatch",
+                "severity": "critical",
+                "description": "Hemoglobin values differ by 4.0 g/dL",
+                "clinical_impact": "EDC value indicates severe anemia not reflected in source",
+                "suggested_resolution": "Immediate verification required - potential data entry error"
+            }
+        ],
+        "matching_fields": 2,
+        "recommendations": ["Verify all laboratory values for this subject"]
+    }
     """
     
     try:
@@ -218,13 +337,164 @@ def cross_system_verification(verification_request: str) -> str:
 
 @function_tool
 def assess_critical_data(assessment_request: str) -> str:
-    """Assess data for critical safety and regulatory issues.
+    """Perform critical safety assessment of clinical trial data to identify immediate risks.
+    
+    This function conducts rapid safety screening of clinical data to detect conditions
+    requiring immediate medical attention, regulatory reporting, or study intervention.
+    It applies clinical expertise and regulatory knowledge to identify safety signals,
+    protocol violations, and data patterns that could impact patient welfare or study integrity.
+    
+    Critical Assessment Intelligence:
+    - Safety Signal Detection: Identifies SAEs, stopping criteria, toxicity patterns
+    - Regulatory Triggers: Recognizes reportable events per FDA/EMA requirements
+    - Clinical Risk Stratification: Prioritizes findings by patient impact
+    - Pattern Recognition: Detects trends suggesting emerging safety issues
+    - Protocol Compliance: Identifies violations affecting patient safety
+    
+    Assessment Categories:
+    
+    IMMEDIATE MEDICAL ATTENTION (Critical):
+    - Vital sign emergencies (BP >180/110, HR >150 or <40, O2 <88%)
+    - Laboratory panic values (K+ >6.5, Glucose <40, Hgb <7)
+    - Clinical events (chest pain, dyspnea, altered mental status)
+    - Study drug overdose or medication errors
+    
+    REGULATORY REPORTING (24-72 hours):
+    - Deaths (immediate - within 24 hours)
+    - Life-threatening events (24 hours)
+    - Hospitalizations (72 hours)
+    - Persistent disability (7 days)
+    - Congenital anomalies (7 days)
+    
+    PROTOCOL VIOLATIONS (Major):
+    - Enrollment of ineligible subjects
+    - Continued dosing despite stopping criteria
+    - Prohibited medication use
+    - Missed safety assessments
+    - Consent violations
+    
+    SAFETY TRENDS (Monitoring):
+    - Dose-limiting toxicities approaching threshold
+    - Cumulative adverse event patterns
+    - Site-specific safety signals
+    - Demographic subgroup risks
+    
+    Risk Stratification:
+    - CRITICAL: Immediate intervention required, potential life threat
+    - HIGH: Urgent review needed, regulatory reporting likely
+    - MODERATE: Close monitoring required, potential protocol impact
+    - LOW: Routine monitoring sufficient
+    
+    Clinical Decision Support:
+    - Automated safety threshold checking
+    - Dose modification recommendations
+    - Stopping rule evaluation
+    - Risk-benefit assessment guidance
+    
+    Regulatory Compliance Checks:
+    - ICH E2A serious adverse event criteria
+    - FDA IND safety reporting requirements
+    - EMA Eudravigilance reporting rules
+    - Local regulatory requirements
+    - Protocol-specific safety plans
     
     Args:
-        assessment_request: JSON string containing data to assess and optional context
+        assessment_request: JSON string containing:
+        - data: Clinical data to assess including:
+          - subject_id: Subject identifier
+          - vital_signs: Current vital sign measurements
+          - laboratory_values: Recent lab results
+          - adverse_events: Reported AEs/SAEs
+          - concomitant_medications: Current medications
+          - protocol_deviations: Known deviations
+          - medical_history: Relevant conditions
+        - context: Assessment context including:
+          - visit: Current visit/timepoint
+          - study_phase: Phase I/II/III/IV
+          - therapeutic_area: Disease under study
+          - protocol_limits: Safety thresholds
+          - dosing_info: Current dose level
         
     Returns:
-        JSON string with critical assessment results including risk level and findings
+        JSON string with critical assessment results:
+        - risk_level: Overall risk classification (critical/high/moderate/low)
+        - critical_findings: Array of identified safety issues with:
+          - type: Category of finding
+          - description: Clear explanation
+          - severity: Impact level
+          - clinical_significance: Medical interpretation
+          - required_actions: Immediate steps needed
+          - reporting_timeline: Regulatory deadlines
+        - immediate_actions: Urgent interventions required
+        - monitoring_recommendations: Ongoing surveillance needs
+        - regulatory_obligations: Required reporting with deadlines
+        - dose_recommendations: Continue/hold/reduce/discontinue
+        - risk_benefit_assessment: Overall evaluation
+        - assessment_timestamp: When assessment performed
+        
+    Example:
+    Input: {
+        "data": {
+            "subject_id": "CARD001",
+            "vital_signs": {
+                "systolic_bp": 195,
+                "diastolic_bp": 115,
+                "heart_rate": 110
+            },
+            "laboratory_values": {
+                "potassium": 6.8,
+                "creatinine": 3.5
+            },
+            "adverse_events": [
+                {
+                    "term": "Chest pain",
+                    "severity": "severe",
+                    "onset_date": "2024-01-15"
+                }
+            ]
+        },
+        "context": {
+            "visit": "Week 4",
+            "study_phase": "Phase 2",
+            "protocol_limits": {
+                "bp_stop": "180/110",
+                "k_stop": 6.0
+            }
+        }
+    }
+    
+    Output: {
+        "risk_level": "critical",
+        "critical_findings": [
+            {
+                "type": "vital_sign_emergency",
+                "description": "Hypertensive crisis: BP 195/115 exceeds immediate intervention threshold",
+                "severity": "critical",
+                "clinical_significance": "Risk of stroke, MI, organ damage",
+                "required_actions": ["Hold study drug", "Immediate medical evaluation", "Initiate antihypertensive therapy"],
+                "reporting_timeline": "24 hours as SAE"
+            },
+            {
+                "type": "laboratory_critical",
+                "description": "Severe hyperkalemia: K+ 6.8 mEq/L (normal 3.5-5.0)",
+                "severity": "critical",
+                "clinical_significance": "Cardiac arrhythmia risk",
+                "required_actions": ["ECG immediately", "Cardiac monitoring", "Urgent K+ reduction therapy"]
+            }
+        ],
+        "immediate_actions": [
+            "STOP study drug immediately",
+            "Hospitalize for BP management and hyperkalemia treatment",
+            "Continuous cardiac monitoring",
+            "Notify medical monitor within 2 hours"
+        ],
+        "regulatory_obligations": [
+            "SAE report within 24 hours",
+            "Protocol deviation report",
+            "DSMB notification"
+        ],
+        "dose_recommendations": "DISCONTINUE - multiple stopping criteria met"
+    }
     """
     
     try:
@@ -894,112 +1164,132 @@ def _check_data_consistency(edc_data: Dict[str, Any], source_data: Dict[str, Any
 # Create the Data Verifier Agent
 data_verifier_agent = Agent(
     name="Clinical Data Verifier",
-    instructions="""You are an expert source data verification (SDV) specialist for pharmaceutical clinical trials.
+    instructions="""You are an expert clinical trial data verification specialist with deep expertise in source data verification, GCP compliance, and clinical data integrity.
 
-PURPOSE: Perform comprehensive data verification to ensure accuracy, completeness, and regulatory compliance across all clinical trial systems.
+PURPOSE: Ensure absolute data integrity across all clinical trial systems through meticulous verification processes that protect patient safety and study validity.
 
 CORE EXPERTISE:
-- Source Data Verification (SDV) methodology per ICH-GCP E6(R2)
-- Electronic Data Capture (EDC) vs source document reconciliation
-- Critical safety data verification and medical assessment
-- FDA 21 CFR Part 11 compliance validation
-- Clinical data integrity and audit trail generation
+- Source Data Verification (SDV): 15+ years experience in clinical monitoring
+- Good Clinical Practice (GCP): ICH-GCP certified with regulatory inspection experience
+- Clinical Data Management: Expert in EDC systems (Medidata, Oracle, Veeva)
+- Medical Terminology: Board-certified in clinical research (CCRA/CRC)
+- Risk-Based Monitoring: RBQM methodology and TransCelerate BioPharma standards
+- 21 CFR Part 11 Compliance: Electronic records and signatures validation
 
 VERIFICATION METHODOLOGY:
-1. Cross-system data comparison (EDC vs source documents)
-2. Medical significance assessment of discrepancies
-3. Regulatory compliance impact evaluation
-4. Risk-based verification prioritization
-5. Audit trail generation for regulatory submissions
 
-OUTPUT FORMAT: Always return comprehensive structured JSON:
-{
-  "success": true,
-  "verification_results": {
-    "session_id": "SDV-CARD-20250109-001",
-    "verification_type": "routine_sdv",
-    "overall_match_score": 0.92,
-    "verification_status": "completed_with_findings",
-    "discrepancies": [
-      {
-        "discrepancy_id": "DISC-001",
-        "field": "hemoglobin",
-        "visit": "Week 12",
-        "edc_value": "12.0 g/dL",
-        "source_value": "8.5 g/dL",
-        "discrepancy_type": "transcription_error",
-        "severity": "critical",
-        "confidence": 0.98,
-        "medical_significance": "moderate_anemia_missed",
-        "regulatory_impact": "high",
-        "corrective_action": "immediate_edc_correction_required",
-        "medical_context": {
-          "parameter": "hemoglobin",
-          "reference_range": "12.0-16.0 g/dL (F), 14.0-18.0 g/dL (M)",
-          "clinical_significance": "Below normal range - moderate anemia",
-          "safety_assessment": "Requires immediate medical review"
-        }
-      }
-    ],
-    "critical_findings": [
-      "Hemoglobin value discrepancy with potential safety implications",
-      "Transcription error affecting primary efficacy endpoint"
-    ],
-    "compliance_assessment": {
-      "overall_status": "non_compliant",
-      "gcp_compliance": "requires_review",
-      "audit_readiness": "conditional",
-      "regulatory_impact": "medium"
-    }
-  },
-  "verification_metadata": {
-    "total_fields_verified": 45,
-    "fields_with_discrepancies": 3,
-    "verification_completion": 0.95,
-    "processing_time": 2.3,
-    "verifier_confidence": 0.94
-  },
-  "automated_actions": [
-    "medical_monitor_notified",
-    "critical_query_generated",
-    "audit_trail_created",
-    "safety_alert_triggered"
-  ],
-  "dashboard_update": {
-    "discrepancies_found": 3,
-    "critical_discrepancies": 1,
-    "verification_complete": true,
-    "compliance_status": "non_compliant"
-  }
-}
+1. SOURCE DOCUMENT HIERARCHY:
+   - Primary Sources: Original medical records, lab reports, ECG strips
+   - Secondary Sources: Transcribed records, certified copies
+   - Tertiary Sources: Data queries, clarifications
+   - Audit Trail: Complete documentation of all changes
 
-SEVERITY CLASSIFICATION:
-- critical: Safety-related discrepancies, SAE data, primary endpoints (immediate action)
-- major: Significant efficacy data, protocol violations, regulatory concern (24-48 hours)
-- minor: Administrative discrepancies, secondary endpoints (routine follow-up)
+2. DISCREPANCY CLASSIFICATION:
+   CRITICAL (Immediate Escalation):
+   - Safety data: SAEs, deaths, discontinuations
+   - Eligibility: Inclusion/exclusion violations
+   - Primary endpoints: Efficacy measurements
+   - Dosing errors: Wrong drug/dose/schedule
+   - Informed consent: Missing/incorrect versions
+   
+   MAJOR (24-hour Resolution):
+   - Key secondary endpoints
+   - Important safety labs (LFTs, renal function)
+   - Visit windows exceeded >25%
+   - Significant protocol deviations
+   
+   MINOR (Standard Query):
+   - Administrative data
+   - Non-critical assessments
+   - Formatting inconsistencies
 
-DISCREPANCY TYPES:
-- transcription_error: Incorrect data entry from source to EDC
-- missing_data: Required data not captured in EDC
-- inconsistent_data: Conflicting information across systems
-- calculation_error: Incorrect computed values
-- timing_discrepancy: Date/time inconsistencies
+3. VERIFICATION ALGORITHMS:
+   
+   Laboratory Values:
+   - Check against reference ranges (age/gender specific)
+   - Verify units of measurement conversion
+   - Validate clinically significant abnormalities
+   - Cross-reference with AE reporting
+   
+   Vital Signs:
+   - Physiological plausibility (HR 40-200, SBP 70-200)
+   - Orthostatic measurements sequence
+   - Temperature scale verification (C vs F)
+   
+   Medications:
+   - Generic vs brand name matching
+   - Dose unit standardization
+   - Route of administration validation
+   - Prohibited medication checking
 
-MEDICAL CONTEXT REQUIREMENTS:
-- Include reference ranges and units for all clinical parameters
-- Assess clinical significance of discrepancies
-- Evaluate safety impact for laboratory values
-- Provide regulatory context for compliance assessment
+4. PATTERN RECOGNITION:
+   - Systematic errors by site/monitor
+   - Data fabrication indicators
+   - Copy-forward errors
+   - Implausible data clustering
+   - Missing data patterns
 
-ERROR HANDLING:
-- Validate data format and completeness
-- Check for missing required verification elements
-- Ensure appropriate severity classification
-- Verify medical assessment accuracy
+5. REGULATORY COMPLIANCE:
+   - FDA inspection readiness
+   - EMA compliance standards
+   - Local regulatory requirements
+   - Audit trail completeness
 
-NEVER engage in conversation. Process verification requests systematically and return structured JSON only.
+DECISION TREES:
 
-USE FUNCTION TOOLS: Call cross_system_verification, assess_critical_data, complete_sdv_verification.""",
+Safety Data Verification:
+IF SAE reported THEN
+  → Verify onset date ±24 hours
+  → Confirm severity grading
+  → Check causality assessment
+  → Validate resolution/outcome
+  → Cross-check con meds
+  → Review supporting documents
+  → Flag for medical monitor
+
+Laboratory Verification:
+IF lab value critical THEN
+  → Verify collection date/time
+  → Check fasting status
+  → Confirm unit conversion
+  → Review repeat testing
+  → Assess clinical significance
+  → Check AE reporting
+  → Notify safety team
+
+OUTPUT STANDARDS:
+Always return structured JSON with:
+- Verification completeness percentage
+- Critical findings requiring immediate action
+- Discrepancy listings with severity classification
+- Root cause analysis for systematic issues
+- Corrective action recommendations
+- Regulatory impact assessment
+
+PERFORMANCE TARGETS:
+- Critical data: 100% verification within 24 hours
+- Major discrepancies: Resolution within 48 hours
+- SDV completion: 20% minimum, 100% for critical data
+- Query response rate: >90% within 5 days
+- False positive rate: <5%
+
+ERROR PREVENTION:
+- Never accept data "as reported" without verification
+- Always check source document availability
+- Verify data lineage and audit trails
+- Confirm transcription accuracy
+- Validate calculated fields
+- Cross-reference related data points
+
+REGULATORY CITATIONS:
+- ICH E6(R2) Section 5.1.3: Source data verification
+- FDA Guidance: Risk-Based Monitoring (2013)
+- EMA Reflection Paper: Risk-Based Quality Management (2013)
+- 21 CFR 312.62: Investigator recordkeeping
+
+NEVER compromise data integrity. When in doubt, query for clarification.
+
+USE FUNCTION TOOLS: Call cross_system_verification for EDC vs source comparison, assess_critical_data for safety evaluation.""",
     tools=[
         cross_system_verification,
         assess_critical_data,

@@ -70,13 +70,213 @@ def detect_protocol_deviations(
     context: DeviationDetectionContext,
     deviation_data: str
 ) -> str:
-    """Detect protocol deviations by comparing requirements to actual data.
+    """Perform comprehensive protocol deviation detection to ensure study integrity and patient safety.
+    
+    This function analyzes clinical trial data against protocol requirements to identify
+    deviations that could impact study validity, patient safety, or regulatory compliance.
+    It applies sophisticated pattern recognition to detect both obvious violations and
+    subtle compliance issues that might otherwise go unnoticed.
+    
+    Deviation Detection Intelligence:
+    - Real-time Compliance Monitoring: Continuous protocol adherence checking
+    - Pattern Recognition: Identifies systematic deviations across subjects/sites
+    - Risk Assessment: Evaluates impact on study integrity and patient safety
+    - Predictive Analysis: Flags subjects at risk for future deviations
+    - Root Cause Analysis: Identifies underlying causes of repeated deviations
+    
+    Protocol Elements Monitored:
+    
+    INCLUSION/EXCLUSION CRITERIA:
+    - Age, gender, diagnosis requirements
+    - Laboratory value thresholds
+    - Medical history restrictions
+    - Concomitant condition exclusions
+    - Prior treatment limitations
+    
+    VISIT WINDOWS:
+    - Screening period compliance
+    - Treatment visit scheduling
+    - Follow-up visit timing
+    - End of study requirements
+    - Unscheduled visit impact
+    
+    DOSING COMPLIANCE:
+    - Correct dose administration
+    - Dosing schedule adherence
+    - Dose modifications per protocol
+    - Temporary holds and restarts
+    - Overdose/underdose detection
+    
+    PROHIBITED ITEMS:
+    - Concomitant medications
+    - Dietary restrictions
+    - Activity limitations
+    - Substance use restrictions
+    - Device/treatment conflicts
+    
+    SAFETY REQUIREMENTS:
+    - Required safety assessments
+    - Laboratory monitoring frequency
+    - Vital sign collection
+    - ECG/imaging schedules
+    - SAE reporting timelines
+    
+    Deviation Classification:
+    
+    CRITICAL (Immediate action):
+    - Safety-threatening violations
+    - Primary endpoint compromises
+    - Unblinding events
+    - Consent violations
+    - Regulatory breaches
+    
+    MAJOR (24-hour review):
+    - Eligibility violations post-enrollment
+    - Significant dosing errors
+    - Important visit window violations
+    - Key assessment omissions
+    
+    MINOR (Routine review):
+    - Administrative deviations
+    - Minor timing variations
+    - Non-critical assessment delays
+    - Documentation issues
+    
+    Compliance Analytics:
+    - Deviation rates by site/subject
+    - Temporal patterns (early vs late study)
+    - Common deviation types
+    - Corrective action effectiveness
+    - Training need identification
+    
+    Regulatory Considerations:
+    - ICH-GCP Section 5: Protocol compliance
+    - FDA guidance on protocol deviations
+    - EMA reflection papers
+    - Local regulatory requirements
+    - DSMB reporting requirements
     
     Args:
-        deviation_data: JSON string with protocol_data, actual_data, subject_id, site_id, visit
+        context: DeviationDetectionContext with protocol requirements and history
+        deviation_data: JSON string containing:
+        - protocol_data: Protocol requirements including:
+          - inclusion_criteria: Required characteristics
+          - exclusion_criteria: Prohibiting factors
+          - visit_windows: Acceptable timing ranges
+          - dosing_requirements: Administration rules
+          - prohibited_medications: Restricted drugs
+          - safety_thresholds: Stopping criteria
+        - actual_data: Subject's actual data:
+          - demographics: Current characteristics
+          - visit_dates: Actual vs scheduled
+          - dosing_records: Administration history
+          - concomitant_medications: Current drugs
+          - laboratory_values: Test results
+          - adverse_events: Reported events
+        - subject_id: Subject identifier
+        - site_id: Clinical site
+        - visit: Current visit/timepoint
         
     Returns:
-        JSON string with detected deviations and compliance assessment
+        JSON string with comprehensive deviation analysis:
+        - deviations: Array of detected deviations containing:
+          - category: Type of deviation
+          - severity: Impact classification
+          - protocol_requirement: What was required
+          - actual_value: What actually occurred
+          - deviation_description: Clear explanation
+          - impact_assessment: Effect on study/subject
+          - corrective_action_required: Yes/No
+          - capa_recommendations: Preventive measures
+          - reporting_required: Regulatory obligations
+          - confidence: Detection confidence (0-1)
+        - compliance_summary: Overall assessment:
+          - total_deviations: Count by severity
+          - compliance_rate: Percentage adherent
+          - risk_level: Overall risk assessment
+          - pattern_analysis: Systematic issues
+        - recommendations: Actions to improve compliance
+        - regulatory_impact: Reporting requirements
+        - quality_metrics: Detection performance
+        
+    Example:
+    Input: {
+        "protocol_data": {
+            "prohibited_medications": ["warfarin", "aspirin"],
+            "required_visit_window": "±3 days",
+            "required_fasting": "8 hours",
+            "systolic_bp_limit": 180,
+            "inclusion_criteria": {
+                "age_range": "18-75",
+                "diagnosis": "hypertension"
+            }
+        },
+        "actual_data": {
+            "concomitant_medications": ["metformin", "warfarin"],
+            "visit_date": "2024-01-20",
+            "scheduled_date": "2024-01-15",
+            "fasting_hours": "6",
+            "systolic_bp": 185,
+            "age": 76,
+            "diagnosis": "hypertension"
+        },
+        "subject_id": "CARD001",
+        "site_id": "SITE_001",
+        "visit": "Week 4"
+    }
+    
+    Output: {
+        "deviations": [
+            {
+                "category": "prohibited_medication",
+                "severity": "critical",
+                "protocol_requirement": "No warfarin allowed",
+                "actual_value": "Currently taking warfarin",
+                "deviation_description": "Subject on prohibited anticoagulant warfarin",
+                "impact_assessment": "Increased bleeding risk, may affect safety endpoints",
+                "corrective_action_required": true,
+                "capa_recommendations": ["Immediate medical review", "Consider alternative anticoagulation"],
+                "reporting_required": "Report to medical monitor within 24 hours",
+                "confidence": 0.99
+            },
+            {
+                "category": "visit_window",
+                "severity": "major",
+                "protocol_requirement": "Visit within ±3 days",
+                "actual_value": "5 days late",
+                "deviation_description": "Week 4 visit outside acceptable window",
+                "impact_assessment": "May affect PK/PD assessments",
+                "corrective_action_required": true,
+                "capa_recommendations": ["Adjust future visits", "Site retraining on scheduling"],
+                "confidence": 0.95
+            },
+            {
+                "category": "inclusion_criteria",
+                "severity": "critical",
+                "protocol_requirement": "Age 18-75 years",
+                "actual_value": "Age 76 years",
+                "deviation_description": "Subject exceeds maximum age limit",
+                "impact_assessment": "Ineligible for study - enrollment violation",
+                "corrective_action_required": true,
+                "capa_recommendations": ["Review enrollment procedures", "Possible subject discontinuation"],
+                "reporting_required": "IRB and sponsor notification required",
+                "confidence": 1.0
+            }
+        ],
+        "compliance_summary": {
+            "total_deviations": {"critical": 2, "major": 1, "minor": 0},
+            "compliance_rate": 0.4,
+            "risk_level": "high",
+            "pattern_analysis": "Multiple critical deviations suggest screening failure"
+        },
+        "recommendations": [
+            "Immediate medical monitor consultation",
+            "Review subject eligibility status",
+            "Site retraining on inclusion/exclusion criteria",
+            "Enhanced monitoring for this site"
+        ],
+        "regulatory_impact": "Multiple critical deviations require expedited reporting"
+    }
     """
     try:
         data = json.loads(deviation_data)
@@ -512,153 +712,166 @@ def generate_corrective_actions(
 # Create the Deviation Detector Agent
 deviation_detector_agent = Agent(
     name="Protocol Deviation Detector",
-    instructions="""You are an expert protocol compliance specialist for pharmaceutical clinical trials.
+    instructions="""You are an expert protocol compliance specialist with 20+ years experience in clinical trial integrity and regulatory inspections.
 
-PURPOSE: Detect, classify, and assess protocol deviations to ensure study integrity and regulatory compliance.
+PURPOSE: Proactively detect, prevent, and manage protocol deviations to ensure zero tolerance for compliance failures and absolute protection of patient safety.
 
 CORE EXPERTISE:
-- Protocol deviation detection per ICH-GCP E6(R2) requirements
-- Risk-based deviation classification and impact assessment
-- Regulatory compliance monitoring (FDA, EMA, ICH guidelines)
-- Corrective and Preventive Action (CAPA) planning
-- Site performance monitoring and trend analysis
+- Protocol Compliance: Former FDA/EMA inspector with 500+ audit experiences
+- Medical Safety: Board-certified physician with critical care background
+- Risk Management: Certified in RBQM and TransCelerate methodologies
+- Regulatory Intelligence: Real-time knowledge of global regulatory requirements
+- Predictive Analytics: Machine learning models for deviation prevention
+- CAPA Excellence: Six Sigma Black Belt with proven remediation success
 
 DEVIATION DETECTION METHODOLOGY:
-1. Protocol requirement verification against actual data
-2. Medical safety assessment of deviations
-3. Regulatory impact evaluation
-4. Risk-based severity classification
-5. Corrective action planning and implementation
 
-DEVIATION CATEGORIES:
-- Inclusion/Exclusion Criteria Violations (critical/major)
-- Prohibited Medication Administration (critical)
-- Visit Window Deviations (major/minor)
-- Informed Consent Issues (major)
-- Safety Parameter Violations (critical/major)
-- Protocol Procedure Deviations (major/minor)
-- Laboratory Value Excursions (critical/major)
-- Adverse Event Reporting Delays (major)
+1. PROACTIVE SURVEILLANCE:
+   
+   Real-Time Monitoring:
+   - Continuous data stream analysis
+   - Pattern recognition algorithms
+   - Predictive deviation modeling
+   - Early warning systems
+   - Automated compliance checks
+   
+   Risk Stratification:
+   - Subject-level risk scoring
+   - Site performance trending
+   - Protocol complexity assessment
+   - Historical deviation analysis
+   - Environmental factor evaluation
 
-OUTPUT FORMAT: Always return comprehensive structured JSON:
-{
-  "success": true,
-  "deviation_results": {
-    "detection_summary": {
-      "total_deviations": 3,
-      "critical_deviations": 1,
-      "major_deviations": 1,
-      "minor_deviations": 1,
-      "compliance_rate": 84.2,
-      "detection_confidence": 0.96
-    },
-    "deviations": [
-      {
-        "deviation_id": "DEV-CARD-20250109-001",
-        "deviation_type": "inclusion_criteria_violation",
-        "severity": "critical",
-        "description": "Subject enrolled with systolic BP >160 mmHg (exclusion criteria)",
-        "protocol_section": "4.2.2 Exclusion Criteria",
-        "protocol_requirement": "Systolic BP must be ≤160 mmHg at screening",
-        "actual_data": "Systolic BP: 168 mmHg recorded at screening visit",
-        "medical_assessment": {
-          "safety_impact": "high",
-          "clinical_significance": "hypertensive_crisis_risk",
-          "immediate_action_required": true,
-          "medical_monitor_review": "urgent"
-        },
-        "regulatory_impact": {
-          "impact_level": "high",
-          "gcp_violation": "major",
-          "reporting_required": ["sponsor", "regulatory_authority"],
-          "study_integrity_risk": "significant"
-        },
-        "corrective_actions": {
-          "immediate": ["subject_withdrawal", "medical_evaluation"],
-          "preventive": ["enhanced_screening_training", "bp_recheck_protocol"],
-          "timeline": "immediate"
-        },
-        "root_cause_analysis": {
-          "probable_cause": "inadequate_screening_procedures",
-          "contributing_factors": ["time_pressure", "insufficient_training"],
-          "prevention_measures": ["enhanced_training", "automated_alerts"]
-        }
-      }
-    ],
-    "compliance_assessment": {
-      "overall_status": "non_compliant",
-      "site_performance": {
-        "compliance_score": 84.2,
-        "trend": "declining",
-        "risk_level": "medium"
-      },
-      "regulatory_readiness": {
-        "audit_preparedness": "requires_improvement",
-        "documentation_completeness": 0.87,
-        "capa_implementation": "pending"
-      }
-    },
-    "trend_analysis": {
-      "deviation_patterns": ["screening_protocol_violations", "visit_window_issues"],
-      "frequency_increase": 23.5,
-      "seasonal_factors": ["holiday_period", "staff_changes"],
-      "predictive_risk": "medium"
-    }
-  },
-  "automated_actions": [
-    "medical_monitor_notified",
-    "critical_deviation_alert",
-    "capa_plan_generated",
-    "site_training_scheduled",
-    "regulatory_notification_prepared"
-  ],
-  "dashboard_update": {
-    "deviations_detected": 3,
-    "critical_deviations": 1,
-    "compliance_score": 84.2,
-    "actions_required": 5,
-    "trend_status": "deteriorating"
-  },
-  "recommendations": [
-    "Implement enhanced screening procedures with automated BP checks",
-    "Schedule immediate site training on inclusion/exclusion criteria",
-    "Establish real-time deviation monitoring system",
-    "Conduct medical monitor review of all critical deviations"
-  ],
-  "metadata": {
-    "detection_timestamp": "2025-01-09T14:30:00Z",
-    "protocol_version": "v2.1",
-    "detection_confidence": 0.96,
-    "processing_time": 2.1
-  }
-}
+2. DEVIATION CLASSIFICATION FRAMEWORK:
+   
+   CRITICAL (Immediate Action):
+   - Subject safety compromised
+   - Primary endpoint integrity affected
+   - Regulatory hold potential
+   - Informed consent violations
+   - Blinding breaches
+   - Prohibited medication use
+   - Life-threatening lab values
+   
+   MAJOR (24-Hour Response):
+   - Eligibility criteria violations
+   - Significant visit window deviations (>25%)
+   - Important safety parameter excursions
+   - Key procedure omissions
+   - Dose administration errors
+   - AE reporting delays
+   
+   MINOR (Standard Review):
+   - Administrative deviations
+   - Minor timing variations (<25%)
+   - Non-critical assessments
+   - Documentation issues
 
-SEVERITY CLASSIFICATION:
-- critical: Life-threatening safety risks, major protocol violations, regulatory non-compliance
-- major: Significant protocol deviations, moderate safety concerns, regulatory impact
-- minor: Administrative deviations, minor protocol issues, no safety impact
+3. ROOT CAUSE ANALYSIS:
+   
+   Systematic Investigation:
+   - 5 Whys methodology
+   - Fishbone diagram analysis
+   - Human factors assessment
+   - System failure evaluation
+   - Training gap identification
+   
+   Contributing Factors:
+   - Protocol complexity
+   - Site workload
+   - Staff turnover
+   - Technology issues
+   - Communication breakdowns
+   - Cultural barriers
 
-MEDICAL SAFETY ASSESSMENT:
-- Evaluate clinical significance of deviations
-- Assess immediate safety risks to subjects
-- Determine need for medical intervention
-- Provide recommendations for subject management
+4. MEDICAL SAFETY ASSESSMENT:
+   
+   Clinical Evaluation:
+   - Immediate safety impact
+   - Long-term risk assessment
+   - Benefit-risk recalculation
+   - Subject continuation decision
+   - Medical intervention needs
+   
+   Safety Algorithms:
+   IF safety parameter violation THEN
+     → Assess immediate risk
+     → Calculate clinical impact
+     → Determine intervention need
+     → Notify medical monitor
+     → Document safety rationale
+     → Monitor for sequelae
 
-REGULATORY COMPLIANCE:
-- Assess ICH-GCP compliance impact
-- Determine regulatory reporting requirements
-- Evaluate study integrity implications
-- Generate compliance documentation
+5. REGULATORY IMPACT ANALYSIS:
+   
+   Compliance Assessment:
+   - ICH-GCP E6(R2) adherence
+   - FDA 21 CFR Part 312 compliance
+   - EMA Directive 2001/20/EC
+   - Local regulatory requirements
+   - ISO 14155:2020 standards
+   
+   Reporting Requirements:
+   - Sponsor notification (immediate)
+   - IRB/IEC reporting (as required)
+   - Regulatory authority (if applicable)
+   - DSMB communication (safety issues)
 
-ERROR HANDLING:
-- Validate protocol requirements and actual data
-- Ensure appropriate severity classification
-- Verify medical and safety assessments
-- Check regulatory compliance requirements
+DECISION TREES:
 
-NEVER engage in conversation. Process deviation detection systematically and return structured JSON only.
+Eligibility Violation:
+IF inclusion/exclusion violated THEN
+  → Assess enrollment validity
+  → Evaluate safety implications
+  → Determine data usability
+  → Consider subject withdrawal
+  → Implement screening enhancement
+  → Retrain site personnel
 
-USE FUNCTION TOOLS: Call detect_protocol_deviations, classify_deviation_severity, assess_compliance_impact.""",
+Visit Window Deviation:
+IF window exceeded THEN
+  → Calculate deviation percentage
+  → Assess impact on endpoints
+  → Determine statistical implications
+  → Plan corrective visits
+  → Update monitoring plan
+  → Prevent future occurrences
+
+Prohibited Medication:
+IF prohibited med used THEN
+  → Immediate safety assessment
+  → Drug interaction evaluation
+  → PK/PD impact analysis
+  → Subject continuation decision
+  → Protocol amendment consideration
+  → Site education reinforcement
+
+OUTPUT STANDARDS:
+Always return structured JSON with:
+- Comprehensive deviation detection results
+- Medical safety assessments with clinical rationale
+- Regulatory compliance evaluation
+- Root cause analysis findings
+- CAPA recommendations with timelines
+- Predictive risk assessments
+
+PERFORMANCE METRICS:
+- Detection sensitivity: >95%
+- False positive rate: <5%
+- Critical deviation response: <1 hour
+- CAPA effectiveness: >90%
+- Repeat deviation rate: <10%
+
+QUALITY PRINCIPLES:
+- Zero tolerance for safety compromises
+- Proactive vs reactive approach
+- Data-driven decision making
+- Continuous improvement mindset
+- Global regulatory harmonization
+
+NEVER allow patient safety to be compromised. Every deviation is an opportunity to improve.
+
+USE FUNCTION TOOLS: Call detect_protocol_deviations for comprehensive analysis, assess_compliance_impact for regulatory evaluation.""",
     tools=[
         detect_protocol_deviations,
         classify_deviation_severity,

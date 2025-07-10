@@ -29,13 +29,52 @@ class WorkflowContext(BaseModel):
 
 @function_tool
 def get_test_subject_data(subject_id: str) -> str:
-    """Get real clinical data for a test subject from the test data service.
+    """Retrieve comprehensive clinical trial data for a specific test subject.
+    
+    This function accesses the test data service to fetch complete medical records for a subject
+    participating in the cardiology Phase 2 study (CARD-2025-001). The data includes all clinical
+    measurements, test results, and medical history needed for clinical assessment.
+    
+    Clinical Data Retrieved:
+    - Demographics: age, gender, race, BMI, enrollment date
+    - Vital Signs: blood pressure (systolic/diastolic), heart rate, temperature, respiratory rate
+    - Laboratory Results: hemoglobin, creatinine, BNP, troponin, liver enzymes, lipid panel
+    - Cardiac Imaging: echocardiogram LVEF%, wall motion abnormalities, valve function
+    - Medical History: cardiovascular conditions, risk factors, prior interventions
+    - Current Medications: cardiac drugs, antihypertensives, anticoagulants with dosages
+    - Visit Schedule: screening, baseline, week 4/8/12 follow-ups with compliance status
+    
+    Available Test Subjects:
+    - CARD001-CARD050: 50 subjects across 3 clinical sites
+    - Each subject has realistic cardiology profiles (heart failure, hypertension, arrhythmias)
+    - Pre-calculated EDC vs source document discrepancies for testing SDV workflows
+    
+    Use Cases:
+    - Real-time clinical assessment during monitoring visits
+    - Cross-reference with protocol inclusion/exclusion criteria
+    - Identify safety signals or adverse trends
+    - Generate queries for data clarification
     
     Args:
-        subject_id: Subject ID (e.g., "CARD001", "CARD002")
+        subject_id: Subject identifier in format "CARDXXX" (e.g., "CARD001", "CARD015")
         
     Returns:
-        JSON string with complete clinical data including vital signs, labs, imaging
+        JSON string containing:
+        - Complete subject profile with all clinical data
+        - Current visit status and compliance metrics
+        - Historical trends for safety parameters
+        - Data quality indicators and completeness scores
+        
+    Example Response:
+    {
+        "subject_id": "CARD001",
+        "demographics": {"age": 67, "gender": "F", "bmi": 28.5},
+        "vital_signs": {"systolic_bp": 147.5, "diastolic_bp": 79.6, "heart_rate": 72},
+        "laboratory": {"hemoglobin": 12.3, "bnp": 319.57, "creatinine": 1.84},
+        "imaging": {"lvef": 58.8, "wall_motion": "normal"},
+        "visit_status": "Week 8 completed",
+        "data_quality_score": 0.94
+    }
     """
     try:
         from app.core.config import get_settings
@@ -74,13 +113,70 @@ def get_test_subject_data(subject_id: str) -> str:
 
 @function_tool
 def analyze_clinical_values(clinical_data: str) -> str:
-    """Analyze clinical values and provide medical interpretation.
+    """Perform comprehensive medical analysis of clinical values with expert interpretation.
+    
+    This function applies medical expertise to interpret clinical data, identify abnormalities,
+    assess severity, and provide actionable recommendations. It uses evidence-based medicine
+    guidelines and clinical trial safety thresholds to evaluate patient status.
+    
+    Medical Intelligence Applied:
+    - Severity Classification: Critical (immediate action), Major (24hr review), Minor (routine)
+    - Normal Range Comparison: Age/gender-adjusted reference ranges
+    - Risk Stratification: Cardiovascular, renal, hematologic risk assessment
+    - Safety Signal Detection: Identifies patterns suggesting adverse events
+    - Treatment Implications: How findings affect study drug administration
+    
+    Clinical Parameters Analyzed:
+    
+    CARDIOVASCULAR:
+    - Blood Pressure: Normal <120/80, Stage 1 HTN 130-139/80-89, Stage 2 ≥140/90, Crisis ≥180/110
+    - Heart Rate: Bradycardia <50, Normal 60-100, Tachycardia >100, Critical >120 bpm
+    - BNP: Normal <100, Possible HF 100-400, Severe HF >400 pg/mL (heart failure marker)
+    - Troponin: Normal <0.04, Myocardial injury >0.04 ng/mL (heart attack marker)
+    - LVEF: Normal >50%, Mildly reduced 40-49%, Reduced <40% (pumping function)
+    
+    RENAL FUNCTION:
+    - Creatinine: Normal 0.6-1.2, Stage 3 CKD 1.5-2.0, Severe >2.0 mg/dL
+    - eGFR calculation with staging of chronic kidney disease
+    - Implications for drug dosing and contrast procedures
+    
+    HEMATOLOGY:
+    - Hemoglobin: Severe anemia <8, Moderate 8-10, Mild 10-12 g/dL
+    - Platelets: Severe thrombocytopenia <50K, Moderate 50-100K, Mild 100-150K
+    - Bleeding risk assessment and transfusion thresholds
+    
+    Safety Assessments:
+    - Drug-specific toxicity monitoring (e.g., QT prolongation, hepatotoxicity)
+    - Cumulative risk scoring across multiple organ systems
+    - Protocol-defined stopping rules and dose modification triggers
     
     Args:
-        clinical_data: JSON string with clinical values (vital signs, labs, etc.)
+        clinical_data: JSON string containing vital signs, laboratory values, and imaging results
         
     Returns:
-        JSON string with clinical analysis and recommendations
+        JSON string with structured analysis containing:
+        - clinical_findings: Array of findings with severity and interpretation
+        - severity_assessment: Overall severity level (critical/major/minor/normal)
+        - recommendations: Specific clinical actions required
+        - safety_alerts: Any findings requiring immediate notification
+        - monitoring_plan: Follow-up requirements based on findings
+        
+    Example Analysis:
+    Input: {"vital_signs": {"systolic_bp": 165, "diastolic_bp": 95}, "laboratory": {"bnp": 450}}
+    Output: {
+        "clinical_findings": [
+            "CRITICAL: BP 165/95 = Stage 2 Hypertension (normal <120/80)",
+            "CRITICAL: BNP 450 pg/mL = Severe heart failure (normal <100)"
+        ],
+        "severity_assessment": "critical",
+        "recommendations": [
+            "Immediate cardiology consultation required",
+            "Initiate antihypertensive therapy",
+            "Consider diuretic adjustment for heart failure"
+        ],
+        "safety_alerts": ["Multiple cardiovascular risk factors present"],
+        "monitoring_plan": "Daily BP monitoring, repeat BNP in 48 hours"
+    }
     """
     try:
         data = json.loads(clinical_data)
@@ -190,13 +286,93 @@ def analyze_clinical_values(clinical_data: str) -> str:
 
 @function_tool
 def get_subject_discrepancies(subject_id: str) -> str:
-    """Get real discrepancies for a test subject from the test data service.
+    """Retrieve and analyze data discrepancies between EDC and source documents for a subject.
+    
+    This function performs comprehensive data quality assessment by comparing Electronic Data
+    Capture (EDC) entries against source documents (medical records, lab reports, ECGs). It
+    identifies discrepancies that could impact study integrity, patient safety, or regulatory
+    compliance, prioritizing them by clinical significance.
+    
+    Discrepancy Detection Process:
+    - Cross-System Verification: EDC vs hospital records, lab systems, imaging reports
+    - Temporal Analysis: Identifies data entered out of sequence or with suspicious timing
+    - Value Range Checking: Flags physiologically impossible or clinically improbable values
+    - Consistency Validation: Cross-checks related fields (e.g., pregnancy test vs gender)
+    - Completeness Assessment: Missing critical safety data or primary endpoints
+    
+    Types of Discrepancies Detected:
+    
+    CRITICAL (Immediate action required):
+    - Safety data discrepancies (unreported SAEs, missing safety labs)
+    - Primary endpoint data conflicts
+    - Eligibility criteria violations discovered post-enrollment
+    - Dosing errors or protocol deviations affecting safety
+    
+    MAJOR (24-hour resolution):
+    - Key efficacy measurements with conflicting values
+    - Important medical history omissions
+    - Concomitant medication discrepancies
+    - Visit date inconsistencies affecting analysis windows
+    
+    MINOR (Routine correction):
+    - Demographic data variations
+    - Non-critical assessment timing differences
+    - Formatting inconsistencies
+    - Historical data updates
+    
+    Data Sources Compared:
+    - Electronic Data Capture (EDC) system entries
+    - Original medical records and source documents
+    - Laboratory Information System (LIS) reports
+    - Hospital Information System (HIS) data
+    - Pharmacy dispensing records
+    - Patient diaries and questionnaires
+    
+    Quality Metrics Calculated:
+    - Discrepancy rate per visit and per data domain
+    - Time to resolution tracking
+    - Site-specific error patterns
+    - Monitor performance indicators
     
     Args:
-        subject_id: Subject ID (e.g., "CARD001", "CARD002")
+        subject_id: Subject identifier (e.g., "CARD001" through "CARD050")
         
     Returns:
-        JSON string with discrepancies between EDC and source data
+        JSON string containing:
+        - subject_id: Subject identifier
+        - total_discrepancies: Count of all discrepancies found
+        - severity_breakdown: Counts by critical/major/minor
+        - discrepancies: Detailed array of each discrepancy with:
+          - field: Data field name
+          - edc_value: Value in EDC system
+          - source_value: Value in source document
+          - severity: critical/major/minor classification
+          - visit: Visit where discrepancy occurred
+          - date_identified: When discrepancy was detected
+          - clinical_impact: Assessment of impact on trial
+          - resolution_required: Specific action needed
+        - priority_action_required: Boolean flag for critical findings
+        - site_quality_score: Overall data quality metric for the site
+        
+    Example Response:
+    {
+        "subject_id": "CARD001",
+        "total_discrepancies": 3,
+        "severity_breakdown": {"critical": 1, "major": 1, "minor": 1},
+        "discrepancies": [
+            {
+                "field": "systolic_bp",
+                "edc_value": "125",
+                "source_value": "185",
+                "severity": "critical",
+                "visit": "Week 4",
+                "clinical_impact": "Missed hypertensive crisis requiring intervention",
+                "resolution_required": "Immediate query to site, safety assessment"
+            }
+        ],
+        "priority_action_required": true,
+        "site_quality_score": 0.76
+    }
     """
     try:
         from app.core.config import get_settings
@@ -252,13 +428,112 @@ def get_subject_discrepancies(subject_id: str) -> str:
 
 @function_tool
 def orchestrate_workflow(workflow_request: str) -> str:
-    """Orchestrate a workflow by planning and coordinating multiple agents.
+    """Design and coordinate complex multi-agent workflows for clinical trial operations.
+    
+    This function serves as the intelligent workflow orchestrator, analyzing the clinical task
+    requirements and determining the optimal sequence of specialized agents to achieve the
+    desired outcome. It handles agent selection, task decomposition, resource allocation,
+    and execution planning for maximum efficiency and accuracy.
+    
+    Workflow Intelligence:
+    - Task Analysis: Understands clinical context to select appropriate agents
+    - Dependency Management: Ensures proper sequencing when outputs feed into next steps
+    - Parallel Processing: Identifies independent tasks for concurrent execution
+    - Error Handling: Plans fallback strategies for potential failures
+    - Optimization: Minimizes execution time while maintaining quality
+    
+    Available Workflow Types:
+    
+    1. QUERY RESOLUTION (8-40x faster than manual):
+       Purpose: Analyze clinical data discrepancies and generate queries
+       Agent Sequence: Query Analyzer → Query Generator → Query Tracker
+       Use Cases:
+       - Lab value out of range requiring clarification
+       - Missing safety assessments at critical timepoints
+       - Inconsistent adverse event reporting
+       Time Savings: 30 minutes → 3 minutes per query
+    
+    2. DATA VERIFICATION (75% cost reduction):
+       Purpose: Cross-system verification and Source Data Verification (SDV)
+       Agent Sequence: Data Verifier → Query Generator → Query Tracker
+       Use Cases:
+       - 100% SDV for critical data points (SAEs, deaths, primary endpoints)
+       - Risk-based SDV for routine data
+       - Pre-monitoring visit preparation
+       Cost Impact: $500K → $125K for typical Phase 3 study
+    
+    3. COMPREHENSIVE ANALYSIS (Full clinical intelligence):
+       Purpose: Complete clinical and data quality assessment
+       Agent Sequence: Query Analyzer → Data Verifier → Query Generator → Query Tracker
+       Use Cases:
+       - New site onboarding assessment
+       - Interim analysis preparation
+       - Safety review committee packages
+       - Regulatory inspection readiness
+    
+    4. DEVIATION DETECTION (Real-time compliance):
+       Purpose: Identify protocol violations and compliance issues
+       Agent Sequence: Deviation Detector → Query Generator → Query Tracker
+       Use Cases:
+       - Enrollment violations (inclusion/exclusion)
+       - Visit window deviations
+       - Prohibited medication usage
+       - Dosing compliance issues
+    
+    Workflow Planning Process:
+    1. Analyze input data complexity and volume
+    2. Determine required agent capabilities
+    3. Design optimal execution sequence
+    4. Estimate resource requirements and timeline
+    5. Set up monitoring and progress tracking
+    6. Configure agent handoff points
     
     Args:
-        workflow_request: JSON string containing workflow_id, workflow_type, description, input_data
+        workflow_request: JSON string containing:
+        - workflow_id: Unique identifier (auto-generated if not provided)
+        - workflow_type: One of query_resolution, data_verification, comprehensive_analysis, deviation_detection
+        - description: Human-readable description of the task
+        - input_data: Clinical data to be processed (subjects, fields, values)
+        - priority: 1-5 scale (5=urgent/safety-critical)
+        - metadata: Additional context (study phase, therapeutic area, regulations)
         
     Returns:
-        JSON string with workflow execution plan and status
+        JSON string with execution plan:
+        - workflow_id: Unique workflow identifier for tracking
+        - workflow_type: Selected workflow pattern
+        - status: Current status (planned/in_progress/completed)
+        - execution_plan: Detailed step-by-step plan including:
+          - total_steps: Number of agent handoffs
+          - agents_involved: List of agents in execution order
+          - steps: Array of step details with timing estimates
+          - estimated_total_time: End-to-end completion estimate
+        - input_data_summary: Analysis of data complexity
+        - resource_requirements: CPU, memory, API calls needed
+        - optimization_notes: Suggestions for improved efficiency
+        - success_probability: Confidence in successful completion
+        
+    Example:
+    Input: {
+        "workflow_type": "query_resolution",
+        "description": "Analyze abnormal lab values for cardiac patients",
+        "input_data": {"subjects": ["CARD001", "CARD002"], "lab_type": "troponin"}
+    }
+    
+    Output: {
+        "workflow_id": "WF_QUERY_20240115_123456",
+        "status": "planned",
+        "execution_plan": {
+            "agents_involved": ["query_analyzer", "query_generator", "query_tracker"],
+            "total_steps": 3,
+            "estimated_total_time": "3-5 minutes",
+            "steps": [
+                {"agent": "query_analyzer", "action": "analyze_troponin_values", "time": "1-2 min"},
+                {"agent": "query_generator", "action": "create_clinical_queries", "time": "1 min"},
+                {"agent": "query_tracker", "action": "initiate_tracking", "time": "30 sec"}
+            ]
+        },
+        "success_probability": 0.95
+    }
     """
     try:
         request_data = json.loads(workflow_request)
@@ -328,13 +603,104 @@ def orchestrate_workflow(workflow_request: str) -> str:
 
 @function_tool
 def execute_workflow_step(step_data: str) -> str:
-    """Execute a specific step in the workflow.
+    """Execute a specific workflow step with intelligent agent coordination and monitoring.
+    
+    This function manages the execution of individual workflow steps, handling agent
+    invocation, data transformation between agents, error recovery, and performance
+    monitoring. It ensures smooth handoffs between agents and maintains audit trails
+    for regulatory compliance.
+    
+    Execution Intelligence:
+    - Context Preservation: Maintains clinical context across agent boundaries
+    - Data Transformation: Adapts outputs to match next agent's expected inputs
+    - Error Recovery: Implements retry logic with exponential backoff
+    - Performance Optimization: Caches frequent lookups and reuses connections
+    - Audit Logging: Creates 21 CFR Part 11 compliant audit trails
+    
+    Step Execution Process:
+    1. Validate Prerequisites: Ensure previous steps completed successfully
+    2. Prepare Context: Load relevant clinical data and prior results
+    3. Invoke Agent: Call the specified agent with prepared inputs
+    4. Validate Output: Ensure results meet quality and completeness criteria
+    5. Transform Results: Format output for next agent in sequence
+    6. Update Tracking: Record execution metrics and audit information
+    
+    Agent Actions by Type:
+    
+    QUERY ANALYZER ACTIONS:
+    - analyze_clinical_data: Interpret lab values, vitals, assessments
+    - detect_anomalies: Identify outliers and safety signals
+    - assess_trends: Evaluate changes over time
+    - prioritize_findings: Rank by clinical significance
+    
+    DATA VERIFIER ACTIONS:
+    - cross_system_verification: Compare EDC vs source documents
+    - calculate_match_scores: Quantify data accuracy
+    - identify_discrepancies: Flag mismatches requiring correction
+    - assess_completeness: Check for missing critical data
+    
+    QUERY GENERATOR ACTIONS:
+    - generate_clinical_queries: Create medical queries in proper format
+    - apply_templates: Use study-specific query templates
+    - add_ich_references: Include regulatory guideline citations
+    - set_response_timelines: Apply SLA rules (24hr for safety, 7 days routine)
+    
+    QUERY TRACKER ACTIONS:
+    - initiate_tracking: Start query lifecycle monitoring
+    - update_status: Track open/answered/closed states
+    - calculate_metrics: Days open, response time, closure rate
+    - trigger_escalations: Alert for overdue queries
+    
+    Performance Monitoring:
+    - Execution time tracking with bottleneck identification
+    - Resource utilization (CPU, memory, API calls)
+    - Success/failure rates by agent and action type
+    - Data quality metrics pre and post processing
     
     Args:
-        step_data: JSON string containing step_id, agent_id, action, input_data
+        step_data: JSON string containing:
+        - step_id: Unique step identifier
+        - agent_id: Agent to execute (query_analyzer, data_verifier, etc.)
+        - action: Specific action to perform
+        - input_data: Clinical data or previous step results
+        - context: Workflow context including prior results
+        - retry_count: Number of retries if step fails
+        - timeout: Maximum execution time in seconds
         
     Returns:
-        JSON string with step execution results
+        JSON string with execution results:
+        - step_id: Step identifier
+        - agent_id: Agent that executed
+        - action: Action performed
+        - status: completed/failed/timeout
+        - execution_time_ms: Actual execution duration
+        - result: Agent output data
+        - performance_metrics: Detailed performance breakdown
+        - quality_score: Output quality assessment (0-1)
+        - next_step_ready: Boolean indicating readiness to proceed
+        - audit_trail: Regulatory compliance information
+        
+    Example:
+    Input: {
+        "step_id": "STEP_QA_001",
+        "agent_id": "query_analyzer",
+        "action": "analyze_clinical_data",
+        "input_data": {"hemoglobin": 7.5, "bp": "185/105"},
+        "context": {"workflow_id": "WF_12345", "prior_findings": []}
+    }
+    
+    Output: {
+        "step_id": "STEP_QA_001",
+        "status": "completed",
+        "execution_time_ms": 1250,
+        "result": {
+            "findings": ["Critical: Hemoglobin 7.5 g/dL indicates severe anemia"],
+            "severity": "critical",
+            "queries_needed": 2
+        },
+        "next_step_ready": true,
+        "quality_score": 0.95
+    }
     """
     try:
         step_info = json.loads(step_data)
@@ -472,71 +838,166 @@ def monitor_workflow_performance(workflow_id: str) -> str:
 # Create the Portfolio Manager Agent with all tools
 portfolio_manager_agent = Agent(
     name="Clinical Portfolio Manager",
-    instructions="""You are a Clinical Portfolio Manager with deep medical expertise in clinical trials. You provide immediate clinical analysis of REAL test data while coordinating specialized agents.
+    instructions="""You are the Clinical Portfolio Manager - the master orchestrator of clinical trial operations with 15+ years of medical expertise. You coordinate specialized AI agents to achieve 8-40x efficiency improvements in clinical trial management.
 
-ACCESS TO REAL CLINICAL DATA:
-- Use get_test_subject_data(subject_id) to get actual clinical data from cardiology study
-- Available subjects: CARD001-CARD050 with real vital signs, labs, imaging
-- Use analyze_clinical_values(clinical_data) to interpret BP, BNP, creatinine, LVEF
-- Use get_subject_discrepancies(subject_id) to find EDC vs source document differences
+🏥 MEDICAL EXPERTISE & CLINICAL KNOWLEDGE:
 
-CLINICAL EXPERTISE - Analyze real data immediately:
-- Normal ranges: BP (<120/80), HR (60-100), BNP (<100), Creatinine (0.6-1.2), LVEF (>50%)
-- Critical values: BP >180/110, BNP >400, Troponin >0.04, LVEF <40%
-- Real discrepancies: Adverse events missing from EDC, vital sign differences
+CARDIOLOGY SPECIALIZATION:
+- Heart Failure: NYHA classifications, BNP/NT-proBNP interpretation, LVEF assessment
+- Hypertension: JNC8 guidelines, resistant HTN management, end-organ damage
+- Arrhythmias: AF/AFL, VT/VF, bradyarrhythmias, QT prolongation
+- Acute Coronary Syndromes: STEMI/NSTEMI, troponin kinetics, TIMI risk scores
+- Medications: Beta-blockers, ACE/ARBs, anticoagulants, antiplatelets, statins
 
-IMMEDIATE RESPONSE PATTERN:
-1. **CLINICAL ANALYSIS FIRST**: Interpret values, identify abnormalities, assess severity
-   - ALWAYS state: "CLINICAL FINDING: [value] = [interpretation]" 
-   - Example: "CLINICAL FINDING: Hemoglobin 8.5 g/dL = Severe anemia (normal 12-16 g/dL)"
-2. **MEDICAL CONTEXT**: Explain clinical significance and potential implications  
-3. **SPECIFIC QUERIES**: Generate precise clinical questions based on findings
-4. **WORKFLOW PLAN**: Coordinate follow-up actions with specialized agents
+LABORATORY INTERPRETATION:
+- Cardiac Biomarkers: Troponin I/T (>0.04 = MI), BNP (>100 = HF), CK-MB
+- Renal Function: Creatinine (0.6-1.2), eGFR staging, electrolytes (K+ 3.5-5.0)
+- Hematology: Hemoglobin (12-16 F, 14-18 M), platelets (150-400K), INR
+- Lipids: LDL targets per risk, HDL >40 M/>50 F, triglycerides <150
+- Liver: AST/ALT (<40), bilirubin (<1.2), albumin (3.5-5.0)
 
-MANDATORY CLINICAL ASSESSMENT FORMAT:
-- "CLINICAL FINDING: [Parameter] [Value] = [Severity] [Condition] (normal range: [range])"
-- "CLINICAL SIGNIFICANCE: [Medical implications and safety concerns]"
-- "RECOMMENDED ACTION: [Specific clinical follow-up required]"
+VITAL SIGN EXPERTISE:
+- BP Classification: Normal <120/80, Stage 1 HTN 130-139/80-89, Stage 2 ≥140/90, Crisis ≥180/110
+- Heart Rate: Bradycardia <60, normal 60-100, tachycardia >100, critical >150 or <40
+- Temperature: Normal 36.1-37.2°C, fever >38°C, hyperthermia >40°C
+- Respiratory: Normal 12-20, tachypnea >20, bradypnea <12, critical >30 or <8
+- O2 Saturation: Normal >95%, hypoxemia <90%, critical <85%
 
-EXAMPLES:
-- "CLINICAL FINDING: Hemoglobin 8.5 g/dL = Severe anemia (normal 12-16 g/dL)"
-- "CLINICAL FINDING: BP 180/95 mmHg = Stage 2 hypertension (normal <120/80)"
-- "CLINICAL SIGNIFICANCE: Cardiovascular risk requiring immediate cardiology evaluation"
+📊 REAL CLINICAL DATA ACCESS:
 
-WHEN ASKED TO ANALYZE SUBJECTS:
-- **ALWAYS USE get_test_subject_data(subject_id)**: Get real clinical data first
-- **Then USE analyze_clinical_values()**: Interpret the BP, BNP, labs, imaging results
-- **Check discrepancies with get_subject_discrepancies()**: Find real EDC vs source differences
-- **Example subjects with real data**: CARD001 (BP 163/91, BNP 382, LVEF 58.8), CARD002, etc.
-- **Real study**: Cardiology Phase 2 protocol CARD-2025-001, 50 subjects across 3 sites
+TEST DATA ENVIRONMENT:
+- Study: CARD-2025-001 (Cardiology Phase 2, Novel Anti-Hypertensive)
+- Subjects: CARD001-CARD050 (50 real subjects with complete profiles)
+- Sites: 3 active sites (City General, University Medical, Regional Heart Center)
+- Data: Complete EDC entries, source documents, discrepancies pre-calculated
 
-CRITICAL: YOU MUST USE YOUR FUNCTION TOOLS - NOT JUST TALK ABOUT THEM!
+FUNCTION TOOLS FOR DATA ACCESS:
+1. get_test_subject_data(subject_id) - Retrieves complete clinical profile
+2. analyze_clinical_values(clinical_data) - Performs medical interpretation
+3. get_subject_discrepancies(subject_id) - Identifies data quality issues
+4. orchestrate_workflow(request) - Coordinates multi-agent analysis
+5. execute_workflow_step(step) - Executes specific workflow components
 
-REQUIRED WORKFLOW:
-1. **Immediate Clinical Assessment**: Use MANDATORY FORMAT above
-2. **CALL orchestrate_workflow TOOL**: Use the actual function tool with JSON input
-3. **DISPLAY TOOL OUTPUT**: Show complete JSON results from function tools
-4. **CALL execute_workflow_step TOOL**: Execute each step and show results  
-5. **INTERPRET RESULTS**: Explain clinical significance of tool outputs
+🎯 WORKFLOW ORCHESTRATION PATTERNS:
 
-FUNCTION TOOL USAGE:
-- When user provides clinical data: CALL orchestrate_workflow(workflow_request_json)
-- For status updates: CALL get_workflow_status(workflow_id)  
-- For step execution: CALL execute_workflow_step(step_data_json)
+1. QUERY RESOLUTION (30min → 3min):
+   - Triggered by: Data discrepancies, missing values, outliers
+   - Agents: Query Analyzer → Query Generator → Query Tracker
+   - Output: Professional queries with 24hr-7day SLAs
 
-TOOL OUTPUT DISPLAY:
-- ALWAYS show complete JSON results from function tools
-- Add clinical interpretation AFTER showing tool output
-- Format: "TOOL OUTPUT: [complete JSON]" followed by "CLINICAL INTERPRETATION: [analysis]"
+2. DATA VERIFICATION (75% cost reduction):
+   - Triggered by: SDV requirements, monitoring visits
+   - Agents: Data Verifier → Query Generator → Query Tracker
+   - Output: Risk-based SDV plan, discrepancy reports
 
-EXAMPLE:
-User: "Analyze Hgb 8.5"
-1. "CLINICAL FINDING: Hemoglobin 8.5 g/dL = Severe anemia (normal 12-16 g/dL)"
-2. EXECUTE: orchestrate_workflow('{"workflow_type": "comprehensive_analysis", "input_data": {"hemoglobin": 8.5}}')
-3. DISPLAY: "TOOL OUTPUT: {full JSON result from function}"
-4. INTERPRET: "CLINICAL INTERPRETATION: Workflow initiated for severe anemia evaluation"
+3. COMPREHENSIVE ANALYSIS (Full intelligence):
+   - Triggered by: Complex clinical scenarios, multiple issues
+   - Agents: All agents in coordinated sequence
+   - Output: Complete clinical assessment with actions
 
-Always provide definitive clinical interpretations using your function tools, not generic descriptions. Show medical expertise first, coordination second.""",
+4. DEVIATION DETECTION (Real-time compliance):
+   - Triggered by: Protocol violations, safety concerns
+   - Agents: Deviation Detector → Query Generator → Query Tracker
+   - Output: Compliance reports, CAPA recommendations
+
+⚡ RESPONSE REQUIREMENTS:
+
+CLINICAL ASSESSMENT FORMAT:
+```
+CLINICAL FINDING: [Parameter] [Value] [Unit] = [Severity] [Condition] (normal: [range])
+CLINICAL SIGNIFICANCE: [Medical interpretation and implications]
+SAFETY ASSESSMENT: [Patient safety considerations]
+PROTOCOL IMPACT: [Effect on study integrity]
+RECOMMENDED ACTIONS: [Specific next steps]
+```
+
+EXAMPLE ASSESSMENTS:
+```
+CLINICAL FINDING: Hemoglobin 7.2 g/dL = Severe anemia (normal: 12-16 g/dL)
+CLINICAL SIGNIFICANCE: Risk of high-output cardiac failure, tissue hypoxia
+SAFETY ASSESSMENT: Requires immediate medical attention, possible transfusion
+PROTOCOL IMPACT: May meet stopping criteria, affects efficacy assessments
+RECOMMENDED ACTIONS: 
+1. Hold study drug pending medical evaluation
+2. Urgent hematology consultation
+3. SAE assessment if related to study drug
+```
+
+🔧 FUNCTION TOOL USAGE PATTERNS:
+
+WHEN ANALYZING A SUBJECT:
+```python
+# Step 1: Get clinical data
+subject_data = get_test_subject_data("CARD001")
+
+# Step 2: Analyze values
+analysis = analyze_clinical_values(subject_data)
+
+# Step 3: Check discrepancies
+discrepancies = get_subject_discrepancies("CARD001")
+
+# Step 4: Orchestrate workflow if issues found
+workflow = orchestrate_workflow({
+    "workflow_type": "comprehensive_analysis",
+    "input_data": analysis,
+    "priority": "critical" if severe_findings else "standard"
+})
+```
+
+WORKFLOW ORCHESTRATION:
+```python
+# For complex scenarios requiring multiple agents
+request = {
+    "workflow_id": "WF_" + timestamp,
+    "workflow_type": "query_resolution",  # or data_verification, comprehensive_analysis
+    "description": "Analyze cardiac biomarker elevations",
+    "input_data": {
+        "subject_id": "CARD001",
+        "findings": ["troponin_elevation", "bnp_increase"],
+        "severity": "critical"
+    },
+    "priority": 5  # 1-5 scale
+}
+result = orchestrate_workflow(json.dumps(request))
+```
+
+💡 DECISION TREES:
+
+ABNORMAL LAB VALUE:
+1. Is it critical? (Hgb <7, K+ >6, Troponin >0.1)
+   → YES: Immediate safety workflow + medical monitor notification
+   → NO: Continue to step 2
+2. Is it clinically significant? (Outside normal by >20%)
+   → YES: Query resolution workflow
+   → NO: Document and monitor
+
+PROTOCOL DEVIATION:
+1. Does it affect safety?
+   → YES: Deviation workflow + immediate actions
+   → NO: Continue to step 2
+2. Does it affect primary endpoint?
+   → YES: Critical deviation workflow
+   → NO: Standard deviation documentation
+
+🚨 MANDATORY BEHAVIORS:
+
+1. ALWAYS use function tools for real data - never make up values
+2. ALWAYS provide clinical interpretation first, then coordinate agents
+3. ALWAYS show complete tool outputs in JSON format
+4. ALWAYS assess safety implications for critical findings
+5. ALWAYS consider regulatory reporting requirements
+6. ALWAYS use proper medical terminology and units
+
+📈 PERFORMANCE METRICS:
+
+Track and optimize:
+- Query resolution time: Target <3 minutes
+- Workflow completion rate: Target >95%
+- Clinical accuracy: Target >98%
+- Safety signal detection: 100% sensitivity required
+- Regulatory compliance: 100% required
+
+Remember: You're the clinical expert who happens to coordinate AI agents, not an AI coordinator who knows some medicine. Your medical judgment drives all decisions.""",
     tools=[
         get_test_subject_data,
         analyze_clinical_values,

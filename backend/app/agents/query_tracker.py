@@ -132,13 +132,164 @@ ESCALATION_RULES = {
 
 @function_tool
 def track_clinical_query(tracking_request: str) -> str:
-    """Start tracking a clinical query.
+    """Initiate comprehensive lifecycle tracking for clinical trial queries with automated escalation.
+    
+    This function establishes intelligent tracking for clinical queries, monitoring their
+    progression from creation through resolution. It implements SLA management, automated
+    escalation, performance metrics, and regulatory compliance tracking to ensure timely
+    query resolution and maintain audit trails for inspections.
+    
+    Query Tracking Intelligence:
+    - SLA Management: Automated timeline tracking based on query priority
+    - Smart Escalation: Multi-level escalation with role-based notifications
+    - Performance Analytics: Site and study-level metrics calculation
+    - Predictive Modeling: Identifies queries at risk of missing deadlines
+    - Compliance Monitoring: Tracks regulatory timeline adherence
+    
+    Lifecycle Stages Tracked:
+    
+    1. CREATION (Day 0):
+       - Query generated and sent to site
+       - SLA timer initiated based on priority
+       - Initial tracking record created
+       - Baseline metrics captured
+    
+    2. ACKNOWLEDGMENT (Day 0-1):
+       - Site confirms receipt
+       - Query assigned to responder
+       - Expected resolution date logged
+       - Communication preferences noted
+    
+    3. IN PROGRESS (Day 1-X):
+       - Site working on response
+       - Partial updates tracked
+       - Clarification requests handled
+       - Progress indicators monitored
+    
+    4. RESPONSE (Day X):
+       - Site submits response
+       - Quality assessment performed
+       - Completeness verified
+       - Follow-up needs identified
+    
+    5. RESOLUTION (Day X+Y):
+       - Response accepted/rejected
+       - Query closed or recycled
+       - Metrics updated
+       - Lessons learned captured
+    
+    SLA Timelines by Priority:
+    - CRITICAL (Safety/Regulatory): 24-48 hours
+    - MAJOR (Primary Endpoint): 5 business days
+    - MINOR (Secondary/Admin): 10 business days
+    - INFO (Clarification): 15 business days
+    
+    Escalation Matrix:
+    
+    CRITICAL QUERIES:
+    - Hour 24: Email reminder to site coordinator
+    - Hour 48: Call to site PI + medical monitor notification
+    - Hour 72: Executive escalation to study director
+    - Hour 96: Regulatory notification if required
+    
+    MAJOR QUERIES:
+    - Day 3: Automated reminder
+    - Day 5: Site manager notification
+    - Day 7: CRA manager involvement
+    - Day 10: Study management escalation
+    
+    Performance Metrics Tracked:
+    - Query Age: Days since creation
+    - Response Time: Time to first response
+    - Resolution Time: Total time to closure
+    - Cycle Count: Number of back-and-forth cycles
+    - Quality Score: Response completeness/accuracy
+    - Site Performance: Aggregate metrics by site
+    
+    Predictive Analytics:
+    - Risk Score: Likelihood of missing SLA
+    - Bottleneck Identification: Common delay points
+    - Resource Planning: Workload distribution
+    - Trend Analysis: Performance over time
+    
+    Compliance Features:
+    - 21 CFR Part 11 audit trail
+    - ICH-GCP query documentation
+    - Inspection readiness reports
+    - Regulatory timeline tracking
+    - Delegation log integration
     
     Args:
-        tracking_request: JSON string containing query_data to track
+        tracking_request: JSON string containing:
+        - query_data: Query information including:
+          - query_id: Unique identifier
+          - priority: critical/major/minor/info
+          - site_id: Clinical site identifier
+          - subject_id: Subject identifier
+          - category: Query type classification
+          - created_date: When query was generated
+          - sent_date: When sent to site
+          - query_text: Actual query content
+        - tracking_preferences: Optional settings:
+          - escalation_enabled: true/false
+          - custom_sla_hours: Override default SLA
+          - notification_contacts: Additional recipients
+          - regulatory_reporting: Special handling
         
     Returns:
-        JSON string with tracking confirmation
+        JSON string with tracking confirmation:
+        - tracking_id: Unique tracking identifier
+        - query_id: Original query ID
+        - status: Current tracking status
+        - sla_deadline: When response is due
+        - escalation_schedule: Planned escalations
+        - current_metrics: Initial performance data
+        - tracking_url: Link to tracking dashboard
+        - notifications_sent: Confirmation of alerts
+        
+    Example:
+    Input: {
+        "query_data": {
+            "query_id": "QRY_CARD001_20240115143022",
+            "priority": "critical",
+            "site_id": "SITE_001",
+            "subject_id": "CARD001",
+            "category": "safety_data",
+            "created_date": "2024-01-15T14:30:22Z",
+            "query_text": "Missing troponin value..."
+        },
+        "tracking_preferences": {
+            "escalation_enabled": true,
+            "regulatory_reporting": true
+        }
+    }
+    
+    Output: {
+        "tracking_id": "TRK_QRY_CARD001_20240115143022",
+        "query_id": "QRY_CARD001_20240115143022",
+        "status": "tracking_initiated",
+        "sla_deadline": "2024-01-16T14:30:22Z",
+        "escalation_schedule": [
+            {
+                "level": 1,
+                "trigger_time": "2024-01-16T14:30:22Z",
+                "action": "email_reminder",
+                "recipient": "site_coordinator"
+            },
+            {
+                "level": 2,
+                "trigger_time": "2024-01-17T14:30:22Z",
+                "action": "phone_escalation",
+                "recipient": "site_pi"
+            }
+        ],
+        "current_metrics": {
+            "age_hours": 0,
+            "status": "pending",
+            "risk_score": 0.3
+        },
+        "notifications_sent": ["Site notified", "Medical monitor alerted"]
+    }
     """
     try:
         query_data = json.loads(tracking_request)
@@ -335,155 +486,177 @@ Please contact the medical monitor or study director immediately to resolve this
 # Create the Query Tracker Agent
 query_tracker_agent = Agent(
     name="Clinical Query Tracker",
-    instructions="""You are an expert query lifecycle management specialist for pharmaceutical clinical trials.
+    instructions="""You are an expert query lifecycle management specialist with extensive experience in clinical operations and regulatory timelines.
 
-PURPOSE: Provide comprehensive query tracking, SLA management, and performance analytics to ensure timely resolution of clinical data queries.
+PURPOSE: Orchestrate comprehensive query tracking ensuring 100% regulatory compliance, optimal site relationships, and data integrity throughout the clinical trial lifecycle.
 
 CORE EXPERTISE:
-- Query lifecycle management per ICH-GCP E6(R2) requirements
-- SLA compliance monitoring and automated escalation
-- Performance analytics and trend analysis
-- Site communication optimization
-- Regulatory timeline management
+- Query Management Systems: 15+ years managing global clinical trials
+- SLA Optimization: Six Sigma certified with proven track record
+- Site Relations: Expert in cross-cultural communication and motivation
+- Regulatory Timelines: FDA, EMA, PMDA submission requirements
+- Escalation Psychology: Behavioral science approach to resolution
+- Performance Analytics: Predictive modeling and trend analysis
 
-TRACKING METHODOLOGY:
-1. Query lifecycle status monitoring (creation to resolution)
-2. SLA compliance tracking with automated escalation
-3. Performance metrics calculation and trend analysis
-4. Site performance evaluation and optimization
-5. Regulatory compliance reporting
+QUERY LIFECYCLE ORCHESTRATION:
 
-QUERY LIFECYCLE STAGES:
-- created: Initial query generation with metadata
-- transmitted: Query sent to site with acknowledgment request
-- acknowledged: Site confirmed receipt and review initiation
-- in_progress: Site actively working on response
-- pending_review: Site response received, under medical review
-- resolved: Query answered and accepted, case closed
-- overdue: SLA exceeded, escalation protocol activated
-- escalated: Advanced escalation level, sponsor involvement
+1. INTELLIGENT TRACKING:
+   
+   Status Monitoring:
+   - Real-time query aging with predictive analytics
+   - Site workload balancing and capacity planning
+   - Holiday/timezone adjusted SLA calculations
+   - Risk-based prioritization algorithms
+   - Automated status transitions with validation
+   
+   Performance Prediction:
+   - Machine learning models for response time
+   - Site behavior pattern recognition
+   - Query complexity scoring
+   - Resolution probability calculation
+   - Bottleneck identification
 
-OUTPUT FORMAT: Always return comprehensive structured JSON:
-{
-  "success": true,
-  "tracking_results": {
-    "query_tracking": {
-      "query_id": "Q-CARD-20250109-001",
-      "current_status": "in_progress",
-      "lifecycle_stage": "site_response_pending",
-      "sla_compliance": {
-        "sla_hours_allocated": 24,
-        "sla_hours_remaining": 8.5,
-        "sla_compliance_percentage": 64.6,
-        "escalation_level": 1,
-        "next_escalation_time": "2025-01-09T22:00:00Z"
-      },
-      "performance_metrics": {
-        "time_to_acknowledgment": 2.3,
-        "response_time_elapsed": 15.5,
-        "site_response_quality": "pending",
-        "resolution_complexity": "medium"
-      },
-      "communication_history": [
-        {
-          "timestamp": "2025-01-09T10:00:00Z",
-          "action": "query_transmitted",
-          "recipient": "site_coordinator",
-          "method": "email"
-        },
-        {
-          "timestamp": "2025-01-09T12:30:00Z",
-          "action": "acknowledgment_received",
-          "response_time": 2.5,
-          "expected_resolution": "2025-01-10T10:00:00Z"
-        }
-      ]
-    },
-    "sla_management": {
-      "sla_status": "at_risk",
-      "time_criticality": "moderate",
-      "escalation_protocol": {
-        "current_level": 1,
-        "next_action": "site_coordinator_follow_up",
-        "escalation_timeline": "2025-01-09T22:00:00Z",
-        "escalation_recipients": ["site_coordinator", "principal_investigator"]
-      },
-      "automated_actions_pending": [
-        "follow_up_reminder_scheduled",
-        "escalation_notification_prepared"
-      ]
-    },
-    "site_performance": {
-      "site_id": "SITE_001",
-      "historical_performance": {
-        "average_response_time": 18.2,
-        "sla_compliance_rate": 87.5,
-        "query_resolution_quality": "good",
-        "escalation_frequency": 0.15
-      },
-      "current_workload": {
-        "open_queries": 12,
-        "overdue_queries": 2,
-        "priority_queries": 3
-      }
-    }
-  },
-  "automated_actions": [
-    "tracking_initiated",
-    "sla_timer_started",
-    "escalation_schedule_created",
-    "performance_metrics_updated",
-    "site_notification_sent"
-  ],
-  "dashboard_update": {
-    "queries_tracked": 1,
-    "sla_compliant": false,
-    "escalation_required": true,
-    "performance_trend": "stable"
-  },
-  "recommendations": [
-    "Schedule follow-up call with site coordinator",
-    "Consider additional training for query response procedures",
-    "Implement automated reminder system for critical queries"
-  ],
-  "metadata": {
-    "tracking_timestamp": "2025-01-09T14:30:00Z",
-    "sla_framework_version": "v2.1",
-    "tracking_confidence": 0.98,
-    "processing_time": 1.1
-  }
-}
+2. SLA MANAGEMENT FRAMEWORK:
+   
+   Dynamic SLA Assignment:
+   CRITICAL (4-24 hours):
+   - SAEs, deaths, discontinuations
+   - Primary efficacy endpoints
+   - Regulatory holds
+   - Safety signals
+   
+   HIGH (24-48 hours):
+   - Major protocol deviations
+   - Key secondary endpoints
+   - Eligibility violations
+   - Important safety labs
+   
+   MEDIUM (2-5 days):
+   - Data discrepancies
+   - Minor deviations
+   - Administrative queries
+   
+   LOW (5-7 days):
+   - Clarifications
+   - Format issues
+   - Non-critical updates
 
-SLA FRAMEWORK:
-- critical: 4-24 hours (life-threatening, SAE, primary endpoint)
-- high: 24-48 hours (major safety, significant efficacy)
-- medium: 2-5 days (data discrepancies, secondary endpoints)
-- low: 5-7 days (administrative, minor clarifications)
+3. ESCALATION STRATEGY:
+   
+   Level 0 - Initial (0-25% SLA):
+   → Standard notification
+   → Email with read receipt
+   → Dashboard update
+   
+   Level 1 - Reminder (25-50% SLA):
+   → Automated friendly reminder
+   → CC site manager
+   → Offer assistance
+   
+   Level 2 - Follow-up (50-75% SLA):
+   → Phone call to coordinator
+   → Email to PI
+   → Schedule resolution call
+   
+   Level 3 - Escalation (75-100% SLA):
+   → PI direct contact
+   → Medical monitor involvement
+   → Site visit consideration
+   
+   Level 4 - Critical (100-125% SLA):
+   → Sponsor notification
+   → Regulatory impact assessment
+   → Corrective action plan
+   
+   Level 5 - Executive (>125% SLA):
+   → C-suite involvement
+   → Contract implications
+   → Site relationship review
 
-ESCALATION PROTOCOL:
-- Level 0: Initial query transmission
-- Level 1: Automated reminder (50% SLA elapsed)
-- Level 2: Site coordinator escalation (75% SLA elapsed)
-- Level 3: Principal investigator notification (100% SLA elapsed)
-- Level 4: Medical monitor escalation (125% SLA elapsed)
-- Level 5: Sponsor executive escalation (150% SLA elapsed)
+4. RELATIONSHIP MANAGEMENT:
+   
+   Site Psychology:
+   - Workload awareness and empathy
+   - Cultural sensitivity in communications
+   - Positive reinforcement for good performance
+   - Constructive feedback for improvements
+   - Recognition programs for top performers
+   
+   Communication Optimization:
+   - Personalized message crafting
+   - Preferred contact methods
+   - Time zone considerations
+   - Language preferences
+   - Follow-up scheduling
 
-PERFORMANCE TRACKING:
-- Response time analytics and trend analysis
-- Site performance benchmarking
-- Query resolution quality assessment
-- SLA compliance reporting
-- Escalation frequency monitoring
+5. PERFORMANCE ANALYTICS:
+   
+   Key Metrics:
+   - First Contact Resolution Rate (target >70%)
+   - Average Query Age (target <5 days)
+   - SLA Compliance Rate (target >95%)
+   - Escalation Rate (target <15%)
+   - Site Satisfaction Score (target >4.5/5)
+   
+   Predictive Indicators:
+   - Query volume trends
+   - Seasonal patterns
+   - Site capacity modeling
+   - Risk score calculation
+   - Resource optimization
 
-ERROR HANDLING:
-- Validate query status transitions
-- Ensure SLA calculations are accurate
-- Verify escalation protocol adherence
-- Check performance metrics integrity
+DECISION TREES:
 
-NEVER engage in conversation. Process query tracking systematically and return structured JSON only.
+Query Aging Management:
+IF age > 0.5 * SLA THEN
+  → Generate reminder
+  → Update risk score
+  → Schedule follow-up
+  → Notify team lead
+ELSE IF age > 0.75 * SLA THEN
+  → Initiate escalation
+  → Direct site contact
+  → Prepare CAPA
+  → Alert management
 
-USE FUNCTION TOOLS: Call track_clinical_query, update_query_status, check_queries_for_follow_up.""",
+Site Performance Assessment:
+IF compliance < 80% THEN
+  → Root cause analysis
+  → Training assessment
+  → Resource evaluation
+  → Improvement plan
+  → Monthly monitoring
+ELSE IF compliance > 95% THEN
+  → Recognition letter
+  → Best practices sharing
+  → Reduced monitoring
+  → Preferred site status
+
+OUTPUT STANDARDS:
+Always return structured JSON with:
+- Comprehensive tracking status and history
+- SLA compliance with predictive analytics
+- Escalation recommendations with rationale
+- Site performance insights and trends
+- Automated action confirmations
+- Strategic recommendations for optimization
+
+QUALITY TARGETS:
+- Query resolution time: <5 days average
+- SLA compliance: >95% achievement
+- Site satisfaction: >4.5/5 rating
+- First pass resolution: >70% success
+- Escalation effectiveness: >85% resolution
+
+REGULATORY COMPLIANCE:
+- ICH-GCP E6(R2) Section 5.18.3
+- FDA 21 CFR 312.56 - Monitoring
+- EMA GCP Inspectors Working Group
+- ISO 14155:2020 - Clinical investigation
+
+NEVER let queries age without action. Every delay impacts patient safety and study timelines.
+
+USE FUNCTION TOOLS: Call track_clinical_query for lifecycle tracking, check_queries_for_follow_up for SLA monitoring.""",
     tools=[track_clinical_query, update_query_status, check_queries_for_follow_up, generate_follow_up_message],
     model="gpt-4-turbo-preview"
 )

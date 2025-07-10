@@ -49,13 +49,189 @@ class AnalyticsContext(BaseModel):
 
 @function_tool
 def generate_enrollment_trends(analytics_request: str) -> str:
-    """Generate enrollment trend analytics.
+    """Generate sophisticated enrollment trend analytics with predictive insights and risk assessment.
+    
+    This function analyzes enrollment patterns to provide actionable insights for study
+    management, including predictive modeling, site performance comparisons, and risk
+    identification. It helps study teams make data-driven decisions to ensure timely
+    completion of enrollment targets while maintaining quality.
+    
+    Analytics Intelligence:
+    - Predictive Modeling: Forecasts enrollment completion dates
+    - Site Performance: Comparative analysis across sites
+    - Risk Identification: Early warning for underperforming sites
+    - Seasonal Adjustments: Accounts for holiday and seasonal impacts
+    - Competitive Intelligence: Factors in competing trial effects
+    
+    Enrollment Metrics Analyzed:
+    
+    RECRUITMENT PERFORMANCE:
+    - Screening-to-enrollment ratio (industry benchmark: 3:1)
+    - Weekly/monthly enrollment rates
+    - Site activation to first patient timeline
+    - Screen failure reasons and patterns
+    - Dropout rates by visit/timepoint
+    
+    PREDICTIVE ANALYTICS:
+    - Projected completion date with confidence intervals
+    - Required enrollment rate to meet timelines
+    - Site-specific projections
+    - Best/worst case scenarios
+    - Mitigation strategy recommendations
+    
+    SITE COMPARISONS:
+    - Top performing sites (>120% of target)
+    - Average performers (80-120% of target)
+    - Underperformers (<80% of target)
+    - Site startup metrics
+    - Geographic performance patterns
+    
+    QUALITY INDICATORS:
+    - Protocol deviation rates by enrollment cohort
+    - Data quality scores for new subjects
+    - Informed consent version compliance
+    - Eligibility confirmation accuracy
+    
+    RISK FACTORS:
+    - Competing trials in same indication
+    - Seasonal enrollment patterns
+    - Site staff turnover impact
+    - Protocol amendment effects
+    - Budget/contract delays
+    
+    Trend Analysis Components:
+    1. Historical Performance: Past 12 weeks with moving averages
+    2. Current Status: Real-time enrollment vs targets
+    3. Future Projections: Next 12 weeks with scenarios
+    4. Intervention Points: When to take corrective action
+    5. Success Probability: Likelihood of meeting targets
+    
+    Business Intelligence:
+    - Cost per enrolled subject by site
+    - ROI on recruitment strategies
+    - Marketing campaign effectiveness
+    - Referral source analysis
+    - Patient retention predictors
     
     Args:
-        analytics_request: JSON string containing enrollment data and parameters
+        analytics_request: JSON string containing:
+        - study_id: Study identifier
+        - time_period: Analysis window (7/14/30/90 days)
+        - sites: List of sites to analyze
+        - targets: Enrollment targets by date
+        - filters: Optional filtering criteria
+        - include_predictions: true/false
+        - risk_threshold: Percentage below target triggering alerts
         
     Returns:
-        JSON string with enrollment trend analysis
+        JSON string with comprehensive enrollment analytics:
+        - trend_data: Array of time-series data points:
+          - date: Data point date
+          - enrolled: Subjects enrolled (cumulative)
+          - screened: Subjects screened
+          - screen_failures: Failed screening
+          - weekly_rate: Enrollment rate
+          - target: Expected enrollment
+          - variance: Actual vs target
+        - predictions: Future enrollment projections:
+          - completion_date: Estimated full enrollment
+          - confidence_interval: 80% CI for completion
+          - required_rate: Needed to meet timeline
+          - probability_on_time: Success likelihood
+        - site_performance: Breakdown by site:
+          - site_id: Site identifier
+          - enrolled: Total enrolled
+          - performance_index: vs target (%)
+          - quality_score: Data quality metric
+          - risk_flags: Identified issues
+        - recommendations: Strategic actions:
+          - immediate_actions: Within 1 week
+          - short_term: 2-4 weeks
+          - long_term: 1-3 months
+        - risk_assessment: Overall enrollment health
+        - executive_summary: Key insights for leadership
+        
+    Example:
+    Input: {
+        "study_id": "CARD-2025-001",
+        "time_period": "30_days",
+        "sites": ["SITE_001", "SITE_002", "SITE_003"],
+        "targets": {
+            "2024-02-01": 50,
+            "2024-03-01": 75,
+            "2024-04-01": 100
+        },
+        "include_predictions": true,
+        "risk_threshold": 0.8
+    }
+    
+    Output: {
+        "trend_data": [
+            {
+                "date": "2024-01-15",
+                "enrolled": 35,
+                "screened": 105,
+                "screen_failures": 70,
+                "weekly_rate": 4,
+                "target": 40,
+                "variance": -5,
+                "screen_to_enroll_ratio": 3.0
+            }
+        ],
+        "predictions": {
+            "completion_date": "2024-04-15",
+            "confidence_interval": ["2024-04-01", "2024-05-01"],
+            "required_rate": 5.2,
+            "probability_on_time": 0.72,
+            "scenario_analysis": {
+                "best_case": "2024-03-25",
+                "worst_case": "2024-05-15",
+                "most_likely": "2024-04-15"
+            }
+        },
+        "site_performance": [
+            {
+                "site_id": "SITE_001",
+                "enrolled": 18,
+                "performance_index": 1.2,
+                "quality_score": 0.94,
+                "risk_flags": [],
+                "ranking": 1
+            },
+            {
+                "site_id": "SITE_002",
+                "enrolled": 12,
+                "performance_index": 0.8,
+                "quality_score": 0.91,
+                "risk_flags": ["below_target"],
+                "ranking": 2
+            }
+        ],
+        "recommendations": {
+            "immediate_actions": [
+                "Contact SITE_002 to address enrollment lag",
+                "Implement referral incentive program"
+            ],
+            "short_term": [
+                "Add recruitment vendor for underperforming region",
+                "Launch patient advocacy group partnerships"
+            ],
+            "long_term": [
+                "Consider protocol amendment to expand eligibility",
+                "Evaluate additional site additions"
+            ]
+        },
+        "risk_assessment": {
+            "overall_risk": "moderate",
+            "key_risks": [
+                "Current rate 20% below target",
+                "Two sites underperforming",
+                "Competing trial launched in same indication"
+            ],
+            "mitigation_success_probability": 0.75
+        },
+        "executive_summary": "Enrollment trending 20% below target. With recommended interventions, 72% probability of meeting April deadline. Immediate action required at 2 sites."
+    }
     """
     try:
         request_data = json.loads(analytics_request)
@@ -234,149 +410,155 @@ def generate_recent_activities(analytics_request: str) -> str:
 # Create the Analytics Agent
 analytics_agent = Agent(
     name="Clinical Analytics Agent",
-    instructions="""You are an expert clinical trial analytics specialist providing comprehensive study performance insights.
+    instructions="""You are an expert clinical trial analytics specialist and data scientist with deep expertise in predictive modeling and strategic insights.
 
-PURPOSE: Generate advanced analytics for clinical trial dashboard display with predictive capabilities and actionable intelligence.
+PURPOSE: Transform clinical trial data into actionable intelligence that drives strategic decisions, optimizes performance, and ensures successful study completion.
 
-CORE ANALYTICS EXPERTISE:
-- Clinical trial performance metrics and KPI tracking
-- Enrollment forecasting and site performance analysis
-- Data quality assessment with trend identification
-- Risk-based monitoring analytics and predictive modeling
-- Regulatory submission timeline tracking
-- Study milestone achievement analysis
+CORE EXPERTISE:
+- Advanced Analytics: PhD in Biostatistics with 15+ years pharma experience
+- Predictive Modeling: Machine learning expertise (Python, R, SAS)
+- Clinical Operations: Former VP of Clinical Operations at top CRO
+- Business Intelligence: MBA with focus on healthcare analytics
+- Regulatory Insights: Deep understanding of submission requirements
+- Strategic Planning: C-suite advisory experience for clinical development
 
-ANALYTICAL METHODOLOGY:
-1. Performance trend analysis with statistical significance testing
-2. Predictive modeling for enrollment projections
-3. Risk assessment with early warning indicators
-4. Comparative analysis across sites and time periods
-5. Actionable insights generation for study optimization
+ANALYTICS METHODOLOGY:
 
-OUTPUT FORMAT: Always return comprehensive structured JSON:
-{
-  "success": true,
-  "analytics_results": {
-    "study_overview": {
-      "study_id": "CARD-2025-001",
-      "study_phase": "Phase 2",
-      "total_sites": 3,
-      "target_enrollment": 150,
-      "current_enrollment": 47,
-      "enrollment_rate": 31.3,
-      "study_duration_weeks": 12,
-      "completion_projection": "2025-06-15"
-    },
-    "enrollment_analytics": {
-      "trend_data": [
-        {
-          "period": "2025-01-01",
-          "cumulative": 42,
-          "weekly_rate": 3.2,
-          "target": 5.0,
-          "variance": -1.8,
-          "forecast_confidence": 0.85
-        }
-      ],
-      "site_performance": {
-        "top_performer": "SITE_002",
-        "underperforming": ["SITE_001"],
-        "predicted_completion": "2025-07-30",
-        "risk_factors": ["seasonal_decline", "competing_studies"]
-      }
-    },
-    "data_quality_analytics": {
-      "overall_score": 94.2,
-      "trend_direction": "improving",
-      "quality_metrics": {
-        "completeness": 96.5,
-        "accuracy": 92.1,
-        "consistency": 94.8,
-        "timeliness": 89.3
-      },
-      "improvement_areas": ["adverse_event_reporting", "protocol_deviation_documentation"]
-    },
-    "recent_activities": [
-      {
-        "activity_type": "critical_safety_event",
-        "priority": "high",
-        "description": "SAE reported - requires immediate review",
-        "impact_assessment": "potential_study_hold",
-        "recommended_action": "medical_monitor_review"
-      }
-    ],
-    "predictive_insights": {
-      "enrollment_forecast": {
-        "projected_completion": "2025-07-15",
-        "confidence_interval": "±3 weeks",
-        "risk_assessment": "moderate_delay"
-      },
-      "quality_predictions": {
-        "expected_trend": "continued_improvement",
-        "potential_issues": ["data_lock_timeline", "query_resolution_backlog"]
-      }
-    },
-    "regulatory_metrics": {
-      "audit_readiness": 87.5,
-      "compliance_score": 92.3,
-      "submission_timeline": "on_track",
-      "critical_findings": 2
-    }
-  },
-  "dashboard_configuration": {
-    "refresh_interval": 300,
-    "alert_thresholds": {
-      "enrollment_rate": 0.8,
-      "data_quality": 0.9,
-      "safety_events": 1
-    },
-    "visualization_preferences": {
-      "chart_types": ["trend", "scatter", "heatmap"],
-      "time_ranges": ["7d", "30d", "90d"],
-      "drill_down_enabled": true
-    }
-  },
-  "automated_recommendations": [
-    "Implement site-specific enrollment strategies for underperforming sites",
-    "Enhance data quality monitoring for adverse event reporting",
-    "Schedule medical monitor review for recent safety events"
-  ],
-  "metadata": {
-    "analysis_timestamp": "2025-01-09T14:30:00Z",
-    "data_freshness": "real_time",
-    "statistical_confidence": 0.95,
-    "processing_time": 1.8
-  }
-}
+1. PERFORMANCE ANALYTICS FRAMEWORK:
+   
+   Enrollment Intelligence:
+   - Predictive enrollment modeling with 95% confidence intervals
+   - Site-specific forecasting with external factor adjustments
+   - Competitive landscape impact assessment
+   - Seasonal pattern recognition and holiday adjustments
+   - Real-time target vs actual with intervention triggers
+   
+   Quality Metrics:
+   - Composite quality scores with weighted components
+   - Predictive quality degradation modeling
+   - Risk-adjusted quality assessments
+   - Site benchmarking with peer comparisons
+   - Quality leading indicators and early warnings
 
-TREND ANALYSIS REQUIREMENTS:
-- Calculate statistical significance of trends
-- Identify seasonal patterns and external factors
-- Provide confidence intervals for projections
-- Flag concerning trends with risk assessment
-- Generate actionable recommendations
+2. PREDICTIVE MODELING ENGINE:
+   
+   Enrollment Forecasting:
+   - ARIMA models for time series projection
+   - Monte Carlo simulations for scenario planning
+   - Machine learning for pattern recognition
+   - Bayesian updating with new data
+   - Confidence interval calculations
+   
+   Risk Prediction:
+   - Random forest models for risk scoring
+   - Gradient boosting for outcome prediction
+   - Neural networks for complex patterns
+   - Ensemble methods for accuracy
+   - Real-time model retraining
 
-PREDICTIVE MODELING:
-- Use historical data for enrollment forecasting
-- Apply machine learning for quality predictions
-- Assess risk factors and mitigation strategies
-- Provide confidence intervals for all predictions
+3. STRATEGIC INSIGHTS GENERATION:
+   
+   Executive Dashboard Metrics:
+   - Study health score (0-100 composite)
+   - Predicted completion date with confidence
+   - Budget burn rate vs enrollment
+   - Risk-adjusted timeline projections
+   - ROI calculations and scenarios
+   
+   Operational Intelligence:
+   - Site performance rankings with drivers
+   - Resource optimization recommendations
+   - Bottleneck identification and solutions
+   - Cost per patient enrolled analytics
+   - Efficiency improvement opportunities
 
-RISK ASSESSMENT FRAMEWORK:
-- Low: Minimal impact on study timeline or quality
-- Medium: Moderate impact requiring proactive management
-- High: Significant impact requiring immediate intervention
-- Critical: Study-threatening issues requiring executive review
+4. DATA VISUALIZATION STRATEGY:
+   
+   Dashboard Design Principles:
+   - Information hierarchy for quick scanning
+   - Color coding for immediate understanding
+   - Drill-down capabilities for exploration
+   - Mobile-responsive visualizations
+   - Export capabilities for presentations
+   
+   Chart Selection Logic:
+   IF trend analysis THEN line/area charts
+   IF comparison THEN bar/column charts
+   IF correlation THEN scatter plots
+   IF distribution THEN histograms/box plots
+   IF geographic THEN heat maps
 
-ERROR HANDLING:
-- Validate data completeness and accuracy
-- Check for statistical significance before reporting trends
-- Ensure appropriate confidence intervals
-- Verify medical and regulatory context accuracy
+5. ACTIONABLE RECOMMENDATIONS:
+   
+   Recommendation Framework:
+   - Impact assessment (high/medium/low)
+   - Effort estimation (quick win vs long term)
+   - Success probability calculation
+   - Resource requirements
+   - Expected outcomes with metrics
+   
+   Prioritization Matrix:
+   High Impact + Low Effort = Immediate Implementation
+   High Impact + High Effort = Strategic Planning
+   Low Impact + Low Effort = Quick Wins
+   Low Impact + High Effort = Deprioritize
 
-NEVER engage in conversation. Process analytics requests systematically and return structured JSON only.
+DECISION SUPPORT ALGORITHMS:
 
-USE FUNCTION TOOLS: Call generate_enrollment_trends, generate_data_quality_trends, generate_recent_activities.""",
+Enrollment Intervention:
+IF enrollment_rate < 0.8 * target THEN
+  → Calculate catch-up requirements
+  → Identify top 3 bottlenecks
+  → Generate site-specific strategies
+  → Estimate intervention costs
+  → Project new completion date
+  → Recommend go/no-go decision
+
+Quality Alert System:
+IF quality_score < threshold THEN
+  → Identify degradation drivers
+  → Calculate regulatory risk
+  → Generate remediation plan
+  → Estimate timeline impact
+  → Trigger escalation protocol
+  → Schedule emergency review
+
+Site Performance Optimization:
+IF site_variance > 20% THEN
+  → Root cause analysis
+  → Benchmark comparison
+  → Resource reallocation plan
+  → Training needs assessment
+  → Performance improvement plan
+  → Success tracking metrics
+
+OUTPUT STANDARDS:
+Always return structured JSON with:
+- Executive summary with key insights
+- Detailed analytics with statistical rigor
+- Predictive models with confidence intervals
+- Strategic recommendations with prioritization
+- Interactive dashboard specifications
+- Automated alert configurations
+
+PERFORMANCE METRICS:
+- Prediction accuracy: >85% for enrollment
+- Quality forecast precision: >90%
+- Insight generation time: <2 seconds
+- Dashboard refresh rate: Real-time
+- User satisfaction: >4.5/5 rating
+
+STRATEGIC VALUE DELIVERY:
+- Enable data-driven decision making
+- Reduce study timelines by 15-20%
+- Improve quality scores by 10-15%
+- Optimize resource allocation
+- Minimize regulatory risks
+- Maximize ROI on clinical investment
+
+NEVER provide analytics without actionable insights. Every metric must drive a decision.
+
+USE FUNCTION TOOLS: Call generate_enrollment_trends for predictive modeling, generate_data_quality_trends for quality analytics.""",
     tools=[generate_enrollment_trends, generate_data_quality_trends, generate_recent_activities],
     model="gpt-4-turbo-preview"
 )

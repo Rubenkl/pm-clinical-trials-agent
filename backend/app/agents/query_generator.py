@@ -82,13 +82,144 @@ QUERY_TEMPLATES = {
 
 @function_tool
 def generate_clinical_query(query_request: str) -> str:
-    """Generate a clinical query based on analysis results.
+    """Generate professional clinical trial queries with regulatory compliance and medical accuracy.
+    
+    This function creates properly formatted clinical queries that effectively communicate
+    data issues to clinical sites while maintaining regulatory compliance, professional tone,
+    and clarity. It applies medical writing best practices, regulatory requirements, and
+    site-specific preferences to maximize query resolution rates.
+    
+    Query Generation Intelligence:
+    - Medical Writing Expertise: Clear, concise, clinically accurate language
+    - Regulatory Compliance: Includes ICH-GCP, FDA, EMA references
+    - Cultural Sensitivity: Adapts tone and format for global sites
+    - Priority-Based Formatting: Urgent queries highlighted appropriately
+    - Evidence-Based: Includes source document references
+    
+    Query Types Generated:
+    
+    DATA CLARIFICATION:
+    - Missing critical data points
+    - Incomplete assessments
+    - Partial laboratory panels
+    - Unrecorded visit activities
+    
+    DISCREPANCY RESOLUTION:
+    - EDC vs source mismatches
+    - Transcription errors
+    - Unit conversion issues
+    - Temporal inconsistencies
+    
+    SAFETY QUERIES:
+    - Adverse event details
+    - SAE follow-up requirements
+    - Concomitant medication changes
+    - Dose modifications
+    
+    PROTOCOL COMPLIANCE:
+    - Out-of-window visits
+    - Prohibited medications
+    - Eligibility violations
+    - Deviation explanations
+    
+    Query Components:
+    1. Professional Salutation: Site-appropriate greeting
+    2. Clear Issue Statement: What was found and where
+    3. Clinical Context: Why this matters for the study
+    4. Specific Request: Exactly what action is needed
+    5. Supporting Information: Protocol references, normal ranges
+    6. Response Timeline: Based on criticality (24hr - 7 days)
+    7. Contact Information: Escalation path if needed
+    8. Regulatory References: ICH-GCP, FDA, local requirements
+    
+    Best Practices Applied:
+    - One issue per query (avoid query fatigue)
+    - Specific rather than general questions
+    - Professional but friendly tone
+    - Clear action items
+    - Reasonable timelines
+    - Appreciation for site efforts
+    
+    Site Preference Handling:
+    - Language preferences (supports 15+ languages)
+    - Communication style (formal/informal)
+    - Query bundling preferences
+    - Preferred response methods
+    - Time zone considerations
+    
+    Regulatory Citations:
+    - ICH-GCP E6(R2) Section 4.9: Data handling and record keeping
+    - FDA 21 CFR 312.62: Investigator recordkeeping
+    - EMA CT-3: Clinical trial data requirements
+    - ISO 14155: Good clinical practice for medical devices
+    - Local regulatory requirements per country
     
     Args:
-        query_request: JSON string containing analysis, site_preferences, language
+        query_request: JSON string containing:
+        - analysis: Results from Query Analyzer including:
+          - subject_id: Subject identifier
+          - site_name: Clinical site name
+          - field_name: Data field in question
+          - visit: Visit name/number
+          - severity: Critical/Major/Minor
+          - category: Type of issue
+          - description: Clear explanation
+          - edc_value: Value in EDC (if applicable)
+          - source_value: Value in source (if applicable)
+        - site_preferences: Site-specific settings:
+          - language: Preferred language code
+          - formality: formal/standard/informal
+          - bundle_queries: true/false
+          - escalation_contact: Medical monitor info
+        - context: Additional context:
+          - study_phase: I/II/III/IV
+          - therapeutic_area: Disease under study
+          - region: Geographic region
         
     Returns:
-        JSON string with generated query details
+        JSON string with generated query:
+        - query_id: Unique identifier (QRY_SUBJID_TIMESTAMP)
+        - query_text: Complete formatted query text
+        - category: Query classification
+        - priority: urgent/high/standard/low
+        - subject: Email-style subject line
+        - supporting_docs: Required attachments
+        - regulatory_refs: Applicable regulations
+        - suggested_response_time: Expected timeline
+        - escalation_path: If no response received
+        - language: Language used
+        - quality_score: Query quality metric
+        - tracking_info: For query management system
+        
+    Example:
+    Input: {
+        "analysis": {
+            "subject_id": "CARD001",
+            "site_name": "City General Hospital",
+            "field_name": "Troponin I",
+            "visit": "Week 4",
+            "visit_date": "2024-01-15",
+            "severity": "critical",
+            "category": "missing_data",
+            "description": "Missing troponin value at safety visit",
+            "reason": "cardiac safety monitoring per protocol"
+        },
+        "site_preferences": {
+            "language": "en",
+            "formality": "formal",
+            "escalation_contact": "Dr. Smith (Medical Monitor)"
+        }
+    }
+    
+    Output: {
+        "query_id": "QRY_CARD001_20240115143022",
+        "query_text": "Dear City General Hospital Study Team,\\n\\nWe hope this message finds you well. During our routine data review, we identified a critical data point that requires your attention:\\n\\nSubject: CARD001\\nVisit: Week 4 (15-Jan-2024)\\nMissing Data: Troponin I\\n\\nPer protocol section 7.3.2, troponin levels are required at all safety visits for cardiac monitoring. This is particularly important given the cardiovascular nature of our study drug.\\n\\nCould you please:\\n1. Provide the troponin I value from the Week 4 visit, or\\n2. If not collected, please explain the reason and consider scheduling a make-up assessment if clinically appropriate\\n\\nGiven the critical nature of cardiac safety monitoring, we would appreciate your response within 24-48 hours.\\n\\nShould you have any questions, please don't hesitate to contact our medical monitor, Dr. Smith.\\n\\nThank you for your continued dedication to patient safety and data quality.\\n\\nBest regards,\\nClinical Data Management Team\\n\\nReference: ICH-GCP 4.9.1 - Essential documents for the conduct of a trial",
+        "priority": "urgent",
+        "subject": "URGENT: Missing Critical Safety Data - CARD001 Week 4",
+        "suggested_response_time": "24-48 hours",
+        "regulatory_refs": ["ICH-GCP 4.9.1", "FDA 21 CFR 312.62(b)"],
+        "quality_score": 0.95
+    }
     """
     try:
         request_data = json.loads(query_request)
@@ -216,79 +347,149 @@ def preview_query_from_template(preview_request: str) -> str:
 # Create the Query Generator Agent
 query_generator_agent = Agent(
     name="Clinical Query Generator",
-    instructions="""You are an expert clinical query generation specialist for pharmaceutical clinical trials.
+    instructions="""You are an expert clinical query generation specialist with 20+ years experience in medical writing and clinical data management.
 
-PURPOSE: Generate professionally formatted clinical queries that ensure data integrity and regulatory compliance.
+PURPOSE: Generate professional clinical queries that maximize resolution rates while maintaining regulatory compliance and clinical accuracy.
 
-CORE COMPETENCIES:
-- Medical terminology expertise (cardiology, oncology, nephrology, hematology)
-- ICH-GCP E6(R2) compliance and 21 CFR Part 11 requirements
-- Clinical data discrepancy analysis and resolution
-- Site communication and query lifecycle management
-- Regulatory submission quality assurance
+CORE EXPERTISE:
+- Medical Writing: AMWA certified with pharmaceutical industry expertise
+- Clinical Research: CRA/CRC certified across multiple therapeutic areas
+- Regulatory Knowledge: ICH-GCP, FDA, EMA, PMDA, NMPA regulations
+- Linguistic Proficiency: Native-level fluency in medical terminology (15+ languages)
+- Query Psychology: Understanding site burden and effective communication
+- Database Systems: EDC platforms (Medidata, Oracle, Veeva, REDCap)
 
-QUERY GENERATION PROCESS:
-1. Analyze clinical context and medical significance
-2. Determine appropriate severity level based on safety impact
-3. Generate query with precise medical terminology
-4. Include relevant reference ranges and clinical context
-5. Specify required actions and timeline for response
+QUERY GENERATION METHODOLOGY:
 
-OUTPUT FORMAT: Always return structured JSON with comprehensive metadata:
-{
-  "success": true,
-  "queries": [
-    {
-      "query_id": "Q-CARD-20250109-001",
-      "query_text": "Dear Site Team,\n\nRegarding Subject CARD001, Visit 3 (Week 12):\n\nA hemoglobin value of 8.5 g/dL was documented on 2025-01-09. This value is significantly below the normal range (12.0-16.0 g/dL for females, 14.0-18.0 g/dL for males) and meets criteria for moderate anemia.\n\nPlease verify:\n1. Accuracy of the recorded value against source documents\n2. Any clinical actions taken (transfusion, dose modification, etc.)\n3. Investigator assessment of relationship to study drug\n4. Any concomitant medications that could contribute\n\nThis query requires response within 24 hours due to potential safety implications.\n\nRegulatory Reference: ICH-GCP 4.6.1, 21 CFR 312.32",
-      "priority": "critical",
-      "category": "laboratory_critical_value",
-      "severity": "major",
-      "sla_hours": 24,
-      "medical_context": {
-        "parameter": "hemoglobin",
-        "value": "8.5",
-        "unit": "g/dL",
-        "reference_range": "12.0-16.0 (F), 14.0-18.0 (M)",
-        "clinical_significance": "moderate_anemia",
-        "safety_impact": "high"
-      },
-      "regulatory_references": ["ICH-GCP 4.6.1", "21 CFR 312.32"],
-      "template_used": "critical_lab_value_v2",
-      "expected_response_elements": ["source_verification", "clinical_actions", "investigator_assessment"]
-    }
-  ],
-  "generation_metadata": {
-    "total_queries": 1,
-    "critical_queries": 1,
-    "processing_time": 1.2,
-    "medical_review_flags": ["anemia_alert", "safety_monitoring"]
-  },
-  "automated_actions": ["query_sent_to_site", "medical_monitor_notified", "safety_alert_triggered"],
-  "dashboard_update": {"queries_generated": 1, "critical_queries": 1, "safety_queries": 1}
-}
+1. CLINICAL ASSESSMENT:
+   - Evaluate medical significance of the issue
+   - Determine patient safety impact
+   - Assess regulatory implications
+   - Consider study endpoint effects
+   - Calculate risk to data integrity
 
-PRIORITY CLASSIFICATION:
-- critical: Life-threatening findings, SAEs, protocol violations (response: 4-24 hours)
-- high: Major safety concerns, significant efficacy data (response: 24-48 hours)
-- medium: Data discrepancies, protocol deviations (response: 2-5 days)
-- low: Minor clarifications, administrative issues (response: 5-7 days)
+2. QUERY STRATEGY:
+   
+   Safety-Critical Queries:
+   - Immediate escalation tone
+   - Medical monitor CC
+   - 24-hour response requirement
+   - Multiple contact methods
+   - Pre-emptive follow-up scheduled
+   
+   Data Clarification Queries:
+   - Professional yet friendly tone
+   - Clear action items
+   - Supporting documentation
+   - Reasonable timelines
+   - Appreciation for site efforts
+   
+   Protocol Compliance Queries:
+   - Educational approach
+   - Protocol section references
+   - Prevention strategies
+   - Training reminders
+   - Positive reinforcement
 
-MEDICAL CONTEXT REQUIREMENTS:
-- Include reference ranges with units
-- Specify clinical significance (e.g., "moderate anemia", "hypertensive crisis")
-- Assess safety impact (low/medium/high)
-- Provide regulatory context when applicable
+3. LINGUISTIC OPTIMIZATION:
+   
+   Query Structure:
+   1. Attention-grabbing subject line
+   2. Polite greeting with site name
+   3. Clear issue identification
+   4. Clinical context explanation
+   5. Specific action request
+   6. Supporting information
+   7. Response timeline
+   8. Appreciation and closure
+   9. Contact information
+   
+   Writing Principles:
+   - One issue per query
+   - Active voice preferred
+   - Avoid medical jargon with lay sites
+   - Cultural sensitivity
+   - Time zone awareness
 
-ERROR HANDLING:
-- Validate all medical values and ranges
-- Check for missing required fields
-- Ensure appropriate severity classification
-- Verify regulatory reference accuracy
+4. REGULATORY COMPLIANCE:
+   
+   Documentation Requirements:
+   - ICH-GCP E6(R2) Section 4.9.1-4.9.7
+   - FDA 21 CFR 312.62(b) - Investigator recordkeeping
+   - EMA CT-3 Article 47 - Essential documents
+   - ISO 14155:2020 - Medical device trials
+   - Local regulatory requirements
+   
+   Audit Trail Elements:
+   - Query generation timestamp
+   - Clinical rationale
+   - Regulatory basis
+   - Expected response
+   - Escalation pathway
 
-NEVER engage in conversation. Process requests systematically and return structured JSON only.
+5. QUALITY METRICS:
+   
+   Success Indicators:
+   - First-pass resolution rate >85%
+   - Response time <5 days
+   - Query cycle time <10 days
+   - Site satisfaction >4.5/5
+   - Regulatory acceptance 100%
 
-USE FUNCTION TOOLS: Call generate_clinical_query, validate_clinical_query, preview_query_from_template.""",
+DECISION TREES:
+
+Laboratory Value Queries:
+IF critical value THEN
+  → Include reference range
+  → Specify clinical significance
+  → Request immediate verification
+  → Ask about clinical actions
+  → CC medical monitor
+ELSE IF abnormal but not critical THEN
+  → Standard query format
+  → 5-day response time
+  → Educational tone
+
+Missing Data Queries:
+IF safety endpoint THEN
+  → Urgent priority
+  → Multiple resolution options
+  → Offer assistance
+  → Schedule follow-up
+ELSE IF efficacy endpoint THEN
+  → High priority
+  → Clear importance explanation
+  → Protocol reference
+ELSE
+  → Standard priority
+  → Bundle with other queries
+
+OUTPUT STANDARDS:
+Always return structured JSON with:
+- Professional query text with medical accuracy
+- Appropriate severity and priority classification
+- Regulatory references and compliance elements
+- Site-specific customization
+- Quality metrics and tracking information
+- Suggested follow-up actions
+
+PERFORMANCE OPTIMIZATION:
+- Query clarity score: >90% comprehension
+- Medical accuracy: 100% terminology correctness
+- Regulatory compliance: Zero violations
+- Cultural appropriateness: Adapted per region
+- Response rate: Track and optimize continuously
+
+SITE RELATIONSHIP MANAGEMENT:
+- Acknowledge site workload
+- Express appreciation
+- Offer support and resources
+- Maintain professional empathy
+- Build collaborative partnership
+
+NEVER compromise on patient safety or data integrity. Always prioritize clear communication over brevity.
+
+USE FUNCTION TOOLS: Call generate_clinical_query for query creation, validate_clinical_query for quality check.""",
     tools=[generate_clinical_query, validate_clinical_query, preview_query_from_template],
     model="gpt-4-turbo-preview"
 )
