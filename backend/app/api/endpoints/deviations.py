@@ -327,48 +327,8 @@ async def detect_deviations(deviation_input: DeviationDetectionInput):
         raise HTTPException(status_code=500, detail=f"Deviation detection failed: {str(e)}")
 
 
-@router.get("/")
-async def list_deviations(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=1000),
-    severity: Optional[str] = Query(None),
-    site_id: Optional[str] = Query(None),
-    subject_id: Optional[str] = Query(None),
-    status: Optional[str] = Query(None)
-):
-    """List protocol deviations with filtering"""
-    try:
-        # Mock deviation data
-        mock_deviations = []
-        for i in range(min(15, limit)):
-            deviation = {
-                "deviation_id": f"DEV-{i+1:03d}",
-                "subject_id": f"SUBJ{i+1:03d}",
-                "site_id": f"SITE{(i % 3) + 1:02d}",
-                "category": ["visit_window", "fasting_requirement", "prohibited_medication"][i % 3],
-                "severity": ["critical", "major", "minor"][(i + 1) % 3],
-                "status": "pending" if i % 2 == 0 else "resolved",
-                "detected_date": datetime.now().isoformat(),
-                "protocol_requirement": "Visit within ±3 days" if i % 3 == 0 else "12 hour fasting",
-                "actual_value": "6 days late" if i % 3 == 0 else "8 hours fasting"
-            }
-            
-            # Apply filters
-            if severity and deviation["severity"] != severity:
-                continue
-            if site_id and deviation["site_id"] != site_id:
-                continue
-            if subject_id and deviation["subject_id"] != subject_id:
-                continue
-            if status and deviation["status"] != status:
-                continue
-                
-            mock_deviations.append(deviation)
-        
-        return mock_deviations[skip:skip + limit]
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve deviations: {str(e)}")
+# LIST DEVIATIONS ENDPOINT REMOVED - Use /api/v1/test-data/protocol/deviations
+# The test-data endpoint provides comprehensive deviation listings with better integration
 
 
 @router.get("/stats/dashboard", response_model=DeviationStatistics)
@@ -409,51 +369,9 @@ async def get_deviation_dashboard_stats():
         raise HTTPException(status_code=500, detail=f"Failed to retrieve deviation statistics: {str(e)}")
 
 
-@router.get("/{deviation_id}")
-async def get_deviation_details(deviation_id: str):
-    """Get detailed information about a specific deviation"""
-    try:
-        # Mock data for testing
-        mock_deviation = {
-            "deviation_id": deviation_id,
-            "subject_id": "SUBJ001",
-            "site_id": "SITE01",
-            "category": "visit_window",
-            "severity": "major",
-            "protocol_requirement": "Visit must occur within ±3 days of scheduled date",
-            "actual_value": "Visit occurred 6 days after scheduled date",
-            "detected_date": datetime.now().isoformat(),
-            "status": "pending",
-            "impact_assessment": "Significant impact on protocol compliance",
-            "corrective_actions": [
-                "Site staff retraining on visit scheduling",
-                "Enhanced calendar reminders for subjects",
-                "Review site scheduling procedures"
-            ],
-            "monitor_assigned": "Monitor A",
-            "detection_method": "automated_protocol_checker"
-        }
-        
-        return mock_deviation
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve deviation {deviation_id}: {str(e)}")
+# GET DEVIATION DETAILS ENDPOINT REMOVED - Individual deviation details in test-data API
+# Protocol deviations are managed through the test-data endpoints
 
 
-@router.post("/{deviation_id}/resolve")
-async def resolve_deviation(deviation_id: str, resolution: DeviationResolutionInput):
-    """Resolve a deviation with provided resolution"""
-    try:
-        return {
-            "success": True,
-            "deviation_id": deviation_id,
-            "status": "resolved",
-            "resolved_by": resolution.resolved_by,
-            "resolution_date": resolution.resolution_date or datetime.now(),
-            "resolution": resolution.resolution,
-            "corrective_actions": resolution.corrective_actions,
-            "comments": resolution.comments
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to resolve deviation {deviation_id}: {str(e)}")
+# RESOLVE DEVIATION ENDPOINT REMOVED - Deviation resolution handled through test-data API
+# Use the protocol compliance endpoints for deviation management

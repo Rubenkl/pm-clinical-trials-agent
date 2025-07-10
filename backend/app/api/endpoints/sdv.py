@@ -268,60 +268,8 @@ async def verify_sdv_data(sdv_input: SDVVerifyInput):
         raise HTTPException(status_code=500, detail=f"SDV verification failed: {str(e)}")
 
 
-@router.get("/progress")
-async def get_sdv_progress(
-    site_id: Optional[str] = Query(None),
-    subject_id: Optional[str] = Query(None)
-):
-    """Get SDV progress for sites or subjects"""
-    try:
-        if site_id:
-            # Return progress for specific site
-            return {
-                "site_id": site_id,
-                "total_subjects": 25,
-                "verified_subjects": 18,
-                "completion_rate": 0.72,
-                "estimated_time_remaining": 120,  # minutes
-                "last_verification": datetime.now().isoformat(),
-                "monitor_assigned": "Monitor A",
-                "verification_rate": 2.5  # subjects per day
-            }
-        else:
-            # Return progress for all sites
-            return {
-                "total_subjects": 75,
-                "verified_subjects": 60,
-                "completion_rate": 0.8,
-                "sites": [
-                    {
-                        "site_id": "SITE01",
-                        "total_subjects": 25,
-                        "verified_subjects": 18,
-                        "completion_rate": 0.72
-                    },
-                    {
-                        "site_id": "SITE02",
-                        "total_subjects": 30,
-                        "verified_subjects": 22,
-                        "completion_rate": 0.73
-                    },
-                    {
-                        "site_id": "SITE03",
-                        "total_subjects": 20,
-                        "verified_subjects": 20,
-                        "completion_rate": 1.0
-                    }
-                ],
-                "overall_progress": {
-                    "total_subjects": 75,
-                    "verified_subjects": 60,
-                    "completion_rate": 0.8
-                }
-            }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve SDV progress: {str(e)}")
+# SDV PROGRESS ENDPOINT REMOVED - Use /api/v1/test-data/sdv/sessions for progress
+# The test-data endpoint provides comprehensive SDV session and progress information
 
 
 @router.get("/stats/dashboard", response_model=SDVStatistics)
@@ -369,129 +317,13 @@ async def get_sdv_dashboard_stats():
         raise HTTPException(status_code=500, detail=f"Failed to retrieve SDV statistics: {str(e)}")
 
 
-@router.get("/discrepancies")
-async def list_sdv_discrepancies(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=1000),
-    severity: Optional[str] = Query(None),
-    site_id: Optional[str] = Query(None),
-    subject_id: Optional[str] = Query(None)
-):
-    """List SDV discrepancies with filtering"""
-    try:
-        # Mock discrepancy data
-        mock_discrepancies = []
-        for i in range(min(20, limit)):
-            discrepancy = {
-                "discrepancy_id": f"DISC-{i+1:03d}",
-                "subject_id": f"SUBJ{i+1:03d}",
-                "site_id": f"SITE{(i % 3) + 1:02d}",
-                "field": "hemoglobin" if i % 2 == 0 else "blood_pressure",
-                "edc_value": "12.5" if i % 2 == 0 else "120/80",
-                "source_value": "12.0" if i % 2 == 0 else "125/85",
-                "severity": ["critical", "major", "minor"][i % 3],
-                "status": "pending",
-                "detected_date": datetime.now().isoformat(),
-                "monitor": f"Monitor {chr(65 + (i % 3))}"
-            }
-            
-            # Apply filters
-            if severity and discrepancy["severity"] != severity:
-                continue
-            if site_id and discrepancy["site_id"] != site_id:
-                continue
-            if subject_id and discrepancy["subject_id"] != subject_id:
-                continue
-                
-            mock_discrepancies.append(discrepancy)
-        
-        return mock_discrepancies[skip:skip + limit]
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve discrepancies: {str(e)}")
+# SDV DISCREPANCIES ENDPOINT REMOVED - Use /api/v1/test-data/subjects/{id}/discrepancies
+# Subject-specific discrepancies are available through the test-data API
 
 
-@router.get("/report/summary")
-async def get_sdv_summary_report():
-    """Generate SDV summary report"""
-    try:
-        return {
-            "report_id": f"SDV-REPORT-{datetime.now().strftime('%Y%m%d')}",
-            "generated_date": datetime.now().isoformat(),
-            "report_type": "summary",
-            "summary_statistics": {
-                "total_subjects": 75,
-                "verified_subjects": 60,
-                "completion_rate": 0.8,
-                "total_discrepancies": 25,
-                "critical_discrepancies": 3,
-                "major_discrepancies": 8,
-                "minor_discrepancies": 14
-            },
-            "site_breakdown": [
-                {
-                    "site_id": "SITE01",
-                    "completion_rate": 0.72,
-                    "discrepancy_count": 12,
-                    "status": "on_track"
-                },
-                {
-                    "site_id": "SITE02",
-                    "completion_rate": 0.73,
-                    "discrepancy_count": 8,
-                    "status": "on_track"
-                },
-                {
-                    "site_id": "SITE03",
-                    "completion_rate": 1.0,
-                    "discrepancy_count": 5,
-                    "status": "completed"
-                }
-            ],
-            "recommendations": [
-                "Prioritize completion of SITE01 verification",
-                "Review critical discrepancies with medical monitor",
-                "Consider additional training for sites with high discrepancy rates"
-            ]
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to generate SDV report: {str(e)}")
+# SDV SUMMARY REPORT ENDPOINT REMOVED - Reporting functionality not needed for MVP
+# Use /api/v1/sdv/stats/dashboard for summary statistics
 
 
-@router.get("/report/site/{site_id}")
-async def get_sdv_site_report(site_id: str):
-    """Generate SDV report for specific site"""
-    try:
-        return {
-            "site_id": site_id,
-            "report_id": f"SDV-SITE-{site_id}-{datetime.now().strftime('%Y%m%d')}",
-            "generated_date": datetime.now().isoformat(),
-            "verification_statistics": {
-                "total_subjects": 25,
-                "verified_subjects": 18,
-                "completion_rate": 0.72,
-                "average_verification_time": 45,  # minutes per subject
-                "total_discrepancies": 12
-            },
-            "discrepancy_summary": {
-                "critical": 2,
-                "major": 4,
-                "minor": 6,
-                "most_common_fields": ["hemoglobin", "blood_pressure", "weight"]
-            },
-            "monitor_performance": {
-                "monitor_name": "Monitor A",
-                "subjects_per_day": 2.5,
-                "accuracy_rate": 0.95,
-                "efficiency_score": 0.88
-            },
-            "recommendations": [
-                f"Focus on completing remaining {25-18} subjects",
-                "Address critical discrepancies in hemoglobin values",
-                "Consider process improvements for blood pressure measurements"
-            ]
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to generate site report: {str(e)}")
+# SDV SITE REPORT ENDPOINT REMOVED - Reporting functionality not needed for MVP
+# Site-specific data available through test-data endpoints

@@ -355,136 +355,16 @@ async def analyze_query(query_input: QueryInput):
         raise HTTPException(status_code=500, detail=error_detail)
 
 
-@router.get("/", response_model=List[QueryAnalyzerResponse])
-async def list_queries(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=1000),
-    filters: Optional[QueryFilters] = None
-):
-    """List queries with filtering and pagination"""
-    try:
-        # Mock data for testing
-        mock_queries = []
-        for i in range(min(10, limit)):
-            mock_query = QueryAnalyzerResponse(
-                success=True,
-                query_id=f"Q-2025010{i:02d}-SUBJ{i:03d}",
-                created_date=datetime.now(),
-                status=QueryStatus.PENDING if i % 2 == 0 else QueryStatus.RESOLVED,
-                severity=SeverityLevel.CRITICAL if i % 3 == 0 else SeverityLevel.MAJOR,
-                category="laboratory_value",
-                subject=SubjectInfo(
-                    id=f"SUBJ{i:03d}",
-                    initials="JD",
-                    site=f"Site {i % 3 + 1}",
-                    site_id=f"SITE{i % 3 + 1:02d}"
-                ),
-                clinical_context=QueryContext(
-                    visit=f"Week {i * 2}",
-                    field="hemoglobin",
-                    value=f"{8.5 + i * 0.1}",
-                    form_name="Laboratory Results",
-                    page_number=1
-                ),
-                clinical_findings=[
-                    ClinicalFinding(
-                        parameter="hemoglobin",
-                        value=f"{8.5 + i * 0.1}",
-                        interpretation="Below normal range",
-                        normal_range="12-16 g/dL",
-                        severity=SeverityLevel.MAJOR,
-                        clinical_significance="Anemia detected"
-                    )
-                ],
-                ai_analysis=AIAnalysis(
-                    interpretation="Low hemoglobin indicates anemia",
-                    clinical_significance="high",
-                    confidence_score=0.95,
-                    suggested_query="Please confirm hemoglobin value and check for bleeding",
-                    recommendations=["Verify lab results", "Check for GI bleeding", "Consider iron studies"]
-                ),
-                execution_time=1.2,
-                confidence_score=0.95,
-                raw_response=f"Analysis for query {i}"
-            )
-            mock_queries.append(mock_query)
-        
-        return mock_queries[skip:skip + limit]
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve queries: {str(e)}")
+# LIST QUERIES ENDPOINT REMOVED - Use /api/v1/test-data/queries instead
+# The test-data endpoint provides the same query listing functionality with better integration
 
 
-@router.get("/{query_id}", response_model=QueryAnalyzerResponse)
-async def get_query_details(query_id: str):
-    """Get detailed information about a specific query"""
-    try:
-        # Mock data for testing
-        mock_query = QueryAnalyzerResponse(
-            success=True,
-            query_id=query_id,
-            created_date=datetime.now(),
-            status=QueryStatus.PENDING,
-            severity=SeverityLevel.CRITICAL,
-            category="laboratory_value",
-            subject=SubjectInfo(
-                id="SUBJ001",
-                initials="JD",
-                site="Boston General",
-                site_id="SITE01"
-            ),
-            clinical_context=QueryContext(
-                visit="Week 12",
-                field="hemoglobin",
-                value="8.5",
-                normal_range="12-16 g/dL",
-                form_name="Laboratory Results",
-                page_number=1
-            ),
-            clinical_findings=[
-                ClinicalFinding(
-                    parameter="hemoglobin",
-                    value="8.5",
-                    interpretation="Severe anemia",
-                    normal_range="12-16 g/dL",
-                    severity=SeverityLevel.CRITICAL,
-                    clinical_significance="Risk of tissue hypoxia"
-                )
-            ],
-            ai_analysis=AIAnalysis(
-                interpretation="Critical finding: Hemoglobin 8.5 g/dL indicates severe anemia",
-                clinical_significance="high",
-                confidence_score=0.95,
-                suggested_query="URGENT: Please confirm hemoglobin value of 8.5 g/dL and evaluate for potential bleeding source",
-                recommendations=["Immediate medical review", "Check for GI bleeding", "Consider transfusion", "Verify lab results"]
-            ),
-            execution_time=1.2,
-            confidence_score=0.95,
-            raw_response=f"Detailed analysis for {query_id}"
-        )
-        
-        return mock_query
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve query {query_id}: {str(e)}")
+# GET QUERY DETAILS ENDPOINT REMOVED - Use test-data endpoints for query details
+# Individual query details are available through the test-data API
 
 
-@router.post("/{query_id}/resolve")
-async def resolve_query(query_id: str, resolution: QueryResolutionInput):
-    """Resolve a query with provided resolution"""
-    try:
-        return {
-            "success": True,
-            "query_id": query_id,
-            "status": "resolved",
-            "resolved_by": resolution.resolved_by,
-            "resolution_date": resolution.resolution_date or datetime.now(),
-            "resolution": resolution.resolution,
-            "comments": resolution.comments
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to resolve query {query_id}: {str(e)}")
+# RESOLVE QUERY ENDPOINT REMOVED - Use /api/v1/test-data/queries/{id}/resolve instead
+# The test-data endpoint provides proper query resolution with data persistence
 
 
 @router.get("/stats/dashboard", response_model=QueryStatistics)

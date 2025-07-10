@@ -12,12 +12,17 @@ from app.api.endpoints.dashboard import router as dashboard_router
 
 api_router = APIRouter()
 
-# Include agent endpoints
-api_router.include_router(
-    agents_router,
-    prefix="/agents",
-    tags=["agents"]
-)
+# Agent endpoints removed - internal orchestration only
+# The Portfolio Manager runs internally, exposed through AI workflow endpoints:
+# - POST /api/v1/queries/analyze
+# - POST /api/v1/sdv/verify  
+# - POST /api/v1/deviations/detect
+# Uncomment below only if agent management endpoints are needed for debugging
+# api_router.include_router(
+#     agents_router,
+#     prefix="/agents",
+#     tags=["agents"]
+# )
 
 # Include test data endpoints
 api_router.include_router(

@@ -521,17 +521,25 @@ Analyze clinical data for discrepancies and generate queries with medical intell
 }
 ```
 
-### GET /api/v1/queries/
+### POST /api/v1/queries/batch/analyze
 
-List queries with filtering and pagination.
+Analyze multiple queries in batch for bulk processing.
 
-**Query Parameters**:
-- `skip` (integer, default: 0)
-- `limit` (integer, default: 100, max: 1000)
-- `severity` (array): `critical` | `major` | `minor` | `info`
-- `status` (array): `open` | `resolved` | `escalated`
-- `site_id` (string)
-- `subject_id` (string)
+**Request Body**:
+```json
+{
+  "queries": [
+    {
+      "subject_id": "SUBJ001",
+      "site_id": "SITE01",
+      "visit": "Week 12",
+      "field_name": "hemoglobin",
+      "field_value": "8.5",
+      "form_name": "Laboratory Results"
+    }
+  ]
+}
+```
 
 ### GET /api/v1/queries/stats/dashboard
 
@@ -646,6 +654,27 @@ Get deviation statistics for dashboard display.
 
 ---
 
+# 🎯 Simplified API Structure
+
+## Primary AI Endpoints (For Workflows)
+- `POST /api/v1/queries/analyze` - AI-powered query analysis
+- `POST /api/v1/sdv/verify` - AI-powered data verification  
+- `POST /api/v1/deviations/detect` - AI-powered deviation detection
+- `GET /api/v1/dashboard/analytics` - Analytics with AI insights
+
+## Test Data Endpoints (For UI)
+- `GET /api/v1/test-data/status` - Study overview
+- `GET /api/v1/test-data/queries` - Query management
+- `GET /api/v1/test-data/sdv/sessions` - SDV sessions
+- `GET /api/v1/test-data/protocol/deviations` - Protocol deviations
+
+## Statistics Endpoints (For Dashboards)
+- `GET /api/v1/queries/stats/dashboard` - Query metrics
+- `GET /api/v1/sdv/stats/dashboard` - SDV metrics
+- `GET /api/v1/deviations/stats/dashboard` - Deviation metrics
+
+---
+
 # 🔒 Authentication
 
 Currently, the API uses API key authentication:
@@ -705,7 +734,8 @@ All endpoints return consistent error responses:
 # 📈 Rate Limits
 
 - **Test Data Endpoints**: 120 requests per minute
-- **AI Workflow Endpoints**: 60 requests per minute
+- **AI Workflow Endpoints**: 60 requests per minute  
+- **Statistics Endpoints**: 120 requests per minute
 - **Health Check**: Unlimited
 
 ---
@@ -763,7 +793,40 @@ All responses are optimized for common frontend components:
 
 Interactive API documentation is available at:
 - **Development**: `http://localhost:8000/docs`
-- **Production**: `https://your-railway-app.railway.app/docs`
+- **Production**: `https://pm-clinical-trials-agent-production.up.railway.app/docs`
+
+## ⚠️ Important Notes
+
+1. **No Chat Interface**: This is an enterprise automation platform, not a chatbot
+2. **Internal Orchestration**: Agent management happens internally via Portfolio Manager
+3. **Structured Data Only**: All endpoints return JSON for dashboard integration
+4. **AI Integration**: Agents provide medical intelligence through structured endpoints
+
+## 🚫 Removed Endpoints (January 2025)
+
+The following endpoints were removed to streamline the API:
+
+**Agent Management** (Internal orchestration, not needed by frontend):
+- `POST /api/v1/agents/workflow` - Use AI workflow endpoints instead
+- `GET /api/v1/agents/status` - Internal monitoring only
+- `GET /api/v1/agents/workflow/{id}/status` - Internal tracking
+- `DELETE /api/v1/agents/workflow/{id}` - Not used
+- `GET /api/v1/agents/health/{id}` - Internal health
+- `POST /api/v1/agents/reset` - Dev/test only
+
+**Redundant Endpoints** (Functionality available in test-data API):
+- `GET /api/v1/queries/` - Use `/api/v1/test-data/queries`
+- `GET /api/v1/queries/{id}` - Query details in test-data
+- `POST /api/v1/queries/{id}/resolve` - Use `/api/v1/test-data/queries/{id}/resolve`
+- `GET /api/v1/sdv/progress` - Use `/api/v1/test-data/sdv/sessions`
+- `GET /api/v1/sdv/discrepancies` - Use `/api/v1/test-data/subjects/{id}/discrepancies`
+- `GET /api/v1/deviations/` - Use `/api/v1/test-data/protocol/deviations`
+- `GET /api/v1/deviations/{id}` - Deviation details in test-data
+- `POST /api/v1/deviations/{id}/resolve` - Resolution in test-data
+
+**Report Endpoints** (Not needed for MVP):
+- `GET /api/v1/sdv/report/summary` - Use dashboard statistics instead
+- `GET /api/v1/sdv/report/site/{id}` - Site data in test-data API
 
 ---
 
