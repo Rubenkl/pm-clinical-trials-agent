@@ -20,6 +20,20 @@ class QueryGenerationContext(BaseModel):
     response_patterns: List[Dict[str, Any]] = Field(default_factory=list)
 
 
+class QueryGeneratorOutput(BaseModel):
+    """Structured JSON output for Query Generator responses."""
+    
+    model_config = {"strict": True}
+    
+    success: bool
+    query_type: str
+    generated_query: str
+    query_priority: str
+    regulatory_compliance: str
+    recommended_timeline: str
+    follow_up_actions: List[str]
+
+
 class QueryGenerator:
     """Query Generator agent for professional clinical trial query creation.
 
@@ -45,7 +59,8 @@ class QueryGenerator:
             name="QueryGenerator",
             instructions=self._get_instructions(),
             tools=[],  # No tools needed for text generation
-            model="gpt-4",
+            model="gpt-4o-mini",
+            output_type=QueryGeneratorOutput,
         )
 
     def _get_instructions(self) -> str:

@@ -22,6 +22,21 @@ class QueryTrackingContext(BaseModel):
     performance_metrics: Dict[str, Any] = Field(default_factory=dict)
 
 
+class QueryTrackerOutput(BaseModel):
+    """Structured JSON output for Query Tracker responses."""
+    
+    model_config = {"strict": True}
+    
+    success: bool
+    tracking_type: str
+    query_status: str
+    escalation_level: str
+    timeline_status: str
+    sla_compliance: str
+    next_actions: List[str]
+    performance_metrics: str
+
+
 class QueryTracker:
     """Query Tracker agent for query lifecycle management and performance monitoring.
 
@@ -46,7 +61,8 @@ class QueryTracker:
             name="QueryTracker",
             instructions=self._get_instructions(),
             tools=tools,
-            model="gpt-4",
+            model="gpt-4o-mini",
+            output_type=QueryTrackerOutput,
         )
 
     def _get_instructions(self) -> str:

@@ -6,7 +6,7 @@ using real medical intelligence instead of hardcoded verification rules.
 
 import json
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from agents import Agent, Runner
 from pydantic import BaseModel, Field
@@ -24,6 +24,21 @@ class DataVerificationContext(BaseModel):
     verification_history: List[Dict[str, Any]] = Field(default_factory=list)
     critical_findings: List[Dict[str, Any]] = Field(default_factory=list)
     audit_trail: List[Dict[str, Any]] = Field(default_factory=list)
+
+
+class DataVerifierOutput(BaseModel):
+    """Structured JSON output for Data Verifier responses."""
+    
+    model_config = {"strict": True}
+    
+    success: bool
+    verification_type: str
+    discrepancies: List[str]
+    critical_findings: List[str]
+    audit_trail: List[str]
+    verification_status: str
+    confidence_score: Optional[str] = None
+    recommendations: List[str]
 
 
 class DataVerifier:
@@ -54,7 +69,8 @@ class DataVerifier:
             name="DataVerifier",
             instructions=self._get_instructions(),
             tools=tools,
-            model="gpt-4",
+            model="gpt-4o-mini",
+            output_type=DataVerifierOutput,
         )
 
     def _get_instructions(self) -> str:

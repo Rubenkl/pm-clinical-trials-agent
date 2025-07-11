@@ -22,6 +22,21 @@ class AnalyticsContext(BaseModel):
     trend_data: List[Dict[str, Any]] = Field(default_factory=list)
 
 
+class AnalyticsAgentOutput(BaseModel):
+    """Structured JSON output for Analytics Agent responses."""
+    
+    model_config = {"strict": True}
+    
+    success: bool
+    analysis_type: str
+    key_insights: List[str]
+    performance_trends: List[str]
+    risk_indicators: List[str]
+    recommendations: List[str]
+    metrics_summary: str
+    predictive_insights: str
+
+
 class AnalyticsAgent:
     """Analytics Agent for clinical trial performance analytics and insights.
 
@@ -46,7 +61,8 @@ class AnalyticsAgent:
             name="AnalyticsAgent",
             instructions=self._get_instructions(),
             tools=tools,
-            model="gpt-4",
+            model="gpt-4o-mini",
+            output_type=AnalyticsAgentOutput,
         )
 
     def _get_instructions(self) -> str:

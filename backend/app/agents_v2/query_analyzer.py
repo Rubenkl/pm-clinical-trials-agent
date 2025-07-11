@@ -10,6 +10,7 @@ from typing import Any, Dict, List
 
 from agents import Agent, Runner
 from pydantic import BaseModel, Field
+from typing import Any, Dict, List, Optional
 
 from .calculation_tools import (
     calculate_age_at_visit,
@@ -25,6 +26,21 @@ class QueryAnalysisContext(BaseModel):
     analysis_history: List[Dict[str, Any]] = Field(default_factory=list)
     medical_terminology: Dict[str, str] = Field(default_factory=dict)
     query_patterns: List[Dict[str, Any]] = Field(default_factory=list)
+
+
+class QueryAnalyzerOutput(BaseModel):
+    """Structured JSON output for Query Analyzer responses."""
+    
+    model_config = {"strict": True}
+    
+    success: bool
+    analysis_type: str
+    findings: List[str]
+    severity: Optional[str] = None
+    clinical_significance: Optional[str] = None
+    recommended_queries: List[str]
+    priority: Optional[str] = None
+    medical_assessment: Optional[str] = None
 
 
 class QueryAnalyzer:
@@ -55,7 +71,8 @@ class QueryAnalyzer:
             name="QueryAnalyzer",
             instructions=self._get_instructions(),
             tools=tools,
-            model="gpt-4",
+            model="gpt-4o-mini",
+            output_type=QueryAnalyzerOutput,
         )
 
     def _get_instructions(self) -> str:

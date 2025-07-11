@@ -11,6 +11,7 @@ from typing import Any, Dict, List
 
 from agents import Agent, Runner
 from pydantic import BaseModel, Field
+from typing import Any, Dict, List, Optional
 
 from .calculation_tools import (
     calculate_age_at_visit,
@@ -31,6 +32,23 @@ class WorkflowContext(BaseModel):
     completed_workflows: List[Dict[str, Any]] = Field(default_factory=list)
     performance_metrics: Dict[str, Any] = Field(default_factory=dict)
     agent_handoffs: List[Dict[str, Any]] = Field(default_factory=list)
+
+
+class PortfolioManagerOutput(BaseModel):
+    """Structured JSON output for Portfolio Manager responses."""
+    
+    model_config = {"strict": True}
+    
+    success: bool
+    workflow_type: str
+    clinical_assessment: Optional[str] = None
+    findings: List[str]
+    severity: Optional[str] = None
+    safety_implications: Optional[str] = None
+    recommended_actions: List[str]
+    workflow_next_steps: List[str]
+    priority: Optional[str] = None
+    execution_time: Optional[str] = None
 
 
 class PortfolioManager:
@@ -73,7 +91,8 @@ class PortfolioManager:
             name="PortfolioManager",
             instructions=self._get_instructions(),
             tools=tools,
-            model="gpt-4",
+            model="gpt-4o-mini",
+            output_type=PortfolioManagerOutput,
         )
 
     def _get_instructions(self) -> str:
@@ -124,26 +143,21 @@ When analyzing clinical data:
 5. Ensure regulatory compliance
 
 RESPONSE FORMAT:
-Always return structured JSON responses with:
-- Clinical findings and assessments
-- Recommended actions
-- Priority levels (critical/major/minor)
-- Next steps in workflow
-- Agent handoff recommendations if needed
+You MUST return structured JSON in the PortfolioManagerOutput format with these fields:
+- success: boolean indicating operation success
+- workflow_type: string describing the workflow type
+- clinical_assessment: object with detailed clinical findings (optional)
+- findings: array of clinical findings as strings
+- severity: string (critical/major/minor/normal)
+- safety_implications: string describing safety concerns
+- recommended_actions: array of recommended actions
+- workflow_next_steps: array of next steps
+- priority: string (urgent/high/medium/low)
+- execution_time: string timestamp
 
-Example Clinical Assessment:
-{
-    "clinical_assessment": {
-        "findings": ["BP 180/95 = Stage 2 Hypertension", "BNP 850 = Heart Failure"],
-        "severity": "critical",
-        "safety_implications": "Requires immediate medical evaluation",
-        "recommended_actions": ["Contact investigator", "Safety assessment", "Consider dose modification"]
-    },
-    "workflow_next_steps": ["hand_off_to_query_generator", "schedule_safety_review"],
-    "priority": "urgent"
-}
+Always populate relevant fields. If no clinical data is provided, focus on workflow coordination.
 
-Remember: You are providing real clinical intelligence, not mock responses."""
+Remember: You are providing real clinical intelligence in structured JSON format."""
 
     async def orchestrate_workflow(
         self, workflow_type: str, input_data: Dict[str, Any], context: WorkflowContext

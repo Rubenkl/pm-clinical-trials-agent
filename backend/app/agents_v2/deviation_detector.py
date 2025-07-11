@@ -26,6 +26,21 @@ class DeviationDetectionContext(BaseModel):
     deviation_trends: List[Dict[str, Any]] = Field(default_factory=list)
 
 
+class DeviationDetectorOutput(BaseModel):
+    """Structured JSON output for Deviation Detector responses."""
+    
+    model_config = {"strict": True}
+    
+    success: bool
+    detection_type: str
+    deviations: List[str]
+    severity_assessment: str
+    compliance_status: str
+    regulatory_risk: str
+    corrective_actions: List[str]
+    preventive_measures: List[str]
+
+
 class DeviationDetector:
     """Deviation Detector agent for protocol compliance monitoring.
 
@@ -54,7 +69,8 @@ class DeviationDetector:
             name="DeviationDetector",
             instructions=self._get_instructions(),
             tools=tools,
-            model="gpt-4",
+            model="gpt-4o-mini",
+            output_type=DeviationDetectorOutput,
         )
 
     def _get_instructions(self) -> str:

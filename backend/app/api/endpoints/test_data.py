@@ -853,151 +853,91 @@ async def get_sdv_sessions(
 async def get_protocol_deviations(
     test_service: TestDataService = Depends(get_test_data_service),
 ) -> ProtocolDeviationsResponse:
-    """Get protocol deviations and compliance metrics using Deviation Detector agent."""
+    """Get protocol deviations and compliance metrics with static test data."""
 
     if not test_service.is_test_mode():
         raise HTTPException(status_code=404, detail="Test data mode not enabled")
 
-    # Import Deviation Detector agent
-    from app.agents_v2.deviation_detector import DeviationDetector
+    # Generate realistic static protocol deviations (no AI agent calls)
+    deviations = [
+        {
+            "deviation_id": "DEV-2025-0001",
+            "subject_id": "CARD001",
+            "site_id": "SITE_001",
+            "deviation_type": "inclusion_criteria",
+            "severity": "major",
+            "status": "under_review",
+            "detected_date": "2025-01-09T10:00:00",
+            "reported_date": "2025-01-09T12:00:00",
+            "description": "Subject age 17 years does not meet minimum inclusion criteria (18 years)",
+            "protocol_section": "Section 4.1 - Inclusion Criteria",
+            "impact_assessment": "high_regulatory_risk",
+            "capa_required": True,
+            "capa_due_date": "2025-01-23T10:00:00",
+            "root_cause": "data_entry_error",
+            "corrective_action": "Re-verify subject eligibility documentation",
+            "preventive_action": "Enhanced training on inclusion criteria verification",
+        },
+        {
+            "deviation_id": "DEV-2025-0002",
+            "subject_id": "CARD002", 
+            "site_id": "SITE_001",
+            "deviation_type": "visit_window",
+            "severity": "minor",
+            "status": "resolved",
+            "detected_date": "2025-01-08T14:30:00",
+            "reported_date": "2025-01-08T16:00:00",
+            "description": "Week 4 visit conducted on Day 29 (outside 21-35 day window)",
+            "protocol_section": "Section 5.2 - Visit Schedule",
+            "impact_assessment": "low_regulatory_risk",
+            "capa_required": False,
+            "capa_due_date": None,
+            "investigator": "Dr. Site 001 Investigator",
+            "root_cause": "scheduling_conflict",
+            "corrective_action": "Visit rescheduled within window",
+            "preventive_action": "Improved scheduling coordination",
+        },
+        {
+            "deviation_id": "DEV-2025-0003",
+            "subject_id": "CARD003",
+            "site_id": "SITE_002", 
+            "deviation_type": "procedure_violation",
+            "severity": "major",
+            "status": "under_review",
+            "detected_date": "2025-01-07T11:15:00",
+            "reported_date": "2025-01-07T13:45:00",
+            "description": "Required ECG not performed at baseline visit",
+            "protocol_section": "Section 6.3 - Required Assessments",
+            "impact_assessment": "medium_regulatory_risk",
+            "capa_required": True,
+            "capa_due_date": "2025-01-21T10:00:00",
+            "investigator": "Dr. Site 002 Investigator",
+            "root_cause": "procedure_oversight",
+            "corrective_action": "ECG completed within 24 hours",
+            "preventive_action": "Enhanced visit checklist implementation",
+        },
+    ]
 
-    # Initialize agent
-    deviation_detector = DeviationDetector()
-
-    # Get subject data for deviation detection
-    subjects = test_service.get_available_subjects()
-
-    # Create protocol contexts for deviation detection
-    protocol_contexts = []
-    for subject_id in subjects[:10]:  # Check first 10 subjects
-        # Create mock protocol data for deviation detection
-        protocol_context = {
-            "subject_id": subject_id,
-            "site_id": f"SITE_{(hash(subject_id) % 3) + 1:03d}",
-            "enrollment_date": "2024-12-01",
-            "subject_age": (
-                45 if hash(subject_id) % 20 != 0 else 17
-            ),  # Some subjects under 18
-            "visit_dates": {
-                "baseline": "2024-12-01",
-                "week_4": (
-                    "2024-12-29" if hash(subject_id) % 10 == 0 else "2024-12-22"
-                ),  # Some outside window
-                "week_8": "2025-01-26",
-            },
-            "protocol_requirements": {
-                "inclusion_criteria": {"min_age": 18, "max_age": 75},
-                "visit_windows": {
-                    "week_4": {"min_days": 21, "max_days": 35},
-                    "week_8": {"min_days": 49, "max_days": 63},
-                },
-            },
-        }
-        protocol_contexts.append(protocol_context)
-
-    # Use Deviation Detector agent to identify deviations
-    all_deviations = []
-    deviation_counter = 1
-
-    for context in protocol_contexts:
-        # Prepare protocol and subject data for AI detection
-        protocol_data = context.get("protocol_requirements", {})
-        subject_data = {
-            "subject_id": context["subject_id"],
-            "site_id": context["site_id"],
-            "age": context.get("subject_age", 45),
-            "enrollment_date": context.get("enrollment_date"),
-            "visit_dates": context.get("visit_dates", {}),
-        }
-
-        # Call AI-powered agent to detect deviations
-        detection_result = await deviation_detector.detect_protocol_deviations_ai(
-            protocol_data, subject_data
-        )
-
-        # Extract deviations from agent result
-        detected_deviations = detection_result.get("deviations", [])
-
-        # Format deviations for frontend
-        for deviation in detected_deviations:
-            formatted_deviation = {
-                "deviation_id": f"DEV-2025-{deviation_counter:04d}",
-                "subject_id": context["subject_id"],
-                "site_id": context["site_id"],
-                "deviation_type": deviation.get("deviation_type", "protocol_violation"),
-                "severity": deviation.get("severity", "minor"),
-                "status": (
-                    "under_review"
-                    if deviation.get("severity") == "major"
-                    else "resolved"
-                ),
-                "detected_date": "2025-01-09T10:00:00",
-                "reported_date": "2025-01-09T12:00:00",
-                "description": deviation.get(
-                    "description", "Protocol deviation detected"
-                ),
-                "protocol_section": deviation.get("protocol_section", "Unknown"),
-                "impact_assessment": deviation.get(
-                    "impact_assessment", "low_regulatory_risk"
-                ),
-                "capa_required": deviation.get("severity") == "major",
-                "capa_due_date": (
-                    "2025-01-23T10:00:00"
-                    if deviation.get("severity") == "major"
-                    else None
-                ),
-                "investigator": f"Dr. {context['site_id'].replace('SITE_', 'Site ')} Investigator",
-                "root_cause": deviation.get("root_cause", "system_error"),
-                "corrective_action": deviation.get(
-                    "corrective_action", "Standard correction applied"
-                ),
-                "preventive_action": deviation.get(
-                    "preventive_action", "Process improvement implemented"
-                ),
-            }
-            all_deviations.append(formatted_deviation)
-            deviation_counter += 1
-
-    # Generate compliance metrics from agent results
-    total_deviations = len(all_deviations)
-    active_deviations = len([d for d in all_deviations if d["status"] != "resolved"])
-    resolved_deviations = len([d for d in all_deviations if d["status"] == "resolved"])
-
-    # Calculate compliance rate
-    total_subjects_checked = len(protocol_contexts)
-    compliance_rate = (
-        ((total_subjects_checked - len(all_deviations)) / total_subjects_checked) * 100
-        if total_subjects_checked > 0
-        else 100
-    )
-
-    # Categorize deviations
-    deviations_by_type = {}
-    deviations_by_severity = {}
-
-    for deviation in all_deviations:
-        dev_type = deviation["deviation_type"]
-        severity = deviation["severity"]
-
-        deviations_by_type[dev_type] = deviations_by_type.get(dev_type, 0) + 1
-        deviations_by_severity[severity] = deviations_by_severity.get(severity, 0) + 1
-
+    # Static compliance metrics
     compliance_metrics = {
-        "overall_compliance_rate": round(compliance_rate, 1),
-        "active_deviations": active_deviations,
-        "resolved_deviations": resolved_deviations,
-        "deviations_by_type": deviations_by_type,
-        "deviations_by_severity": deviations_by_severity,
-        "risk_score": (
-            "high"
-            if active_deviations > 3
-            else "medium" if active_deviations > 1 else "low"
-        ),
-        "trend": "improving" if resolved_deviations > active_deviations else "stable",
+        "overall_compliance_rate": 87.3,
+        "active_deviations": 2,
+        "resolved_deviations": 1,
+        "deviations_by_type": {
+            "inclusion_criteria": 1,
+            "visit_window": 1, 
+            "procedure_violation": 1
+        },
+        "deviations_by_severity": {
+            "major": 2,
+            "minor": 1
+        },
+        "risk_score": "medium",
+        "trend": "stable",
     }
 
     return ProtocolDeviationsResponse(
-        deviations=all_deviations, compliance_metrics=compliance_metrics
+        deviations=deviations, compliance_metrics=compliance_metrics
     )
 
 
