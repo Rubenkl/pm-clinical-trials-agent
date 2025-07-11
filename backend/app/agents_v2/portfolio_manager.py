@@ -173,7 +173,7 @@ Please analyze this clinical data and coordinate the appropriate workflow:
 Use your medical knowledge to make real clinical assessments."""
 
             # Use Runner.run() for real AI execution
-            result = await Runner.run(self.agent, message)
+            result = await Runner.run(self.agent, message, context=context)
 
             # Extract the response
             response_text = (
@@ -234,7 +234,7 @@ Please provide:
 
 Focus on actionable clinical insights based on medical knowledge."""
 
-            result = await Runner.run(self.agent, message)
+            result = await Runner.run(self.agent, message, context=context)
             response_text = (
                 result.final_output if hasattr(result, "final_output") else str(result)
             )
@@ -288,7 +288,7 @@ Please:
 
 Ensure smooth workflow continuation."""
 
-            result = await Runner.run(self.agent, message)
+            result = await Runner.run(self.agent, message, context=context)
             response_text = (
                 result.final_output if hasattr(result, "final_output") else str(result)
             )

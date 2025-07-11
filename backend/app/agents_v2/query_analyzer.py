@@ -160,7 +160,7 @@ Please provide comprehensive analysis including:
 
 Focus on actionable medical insights and patient safety."""
 
-            result = await Runner.run(self.agent, message)
+            result = await Runner.run(self.agent, message, context=context)
             response_text = (
                 result.final_output if hasattr(result, "final_output") else str(result)
             )
@@ -236,7 +236,7 @@ Please evaluate:
 
 Consider medical plausibility, patient safety, and study endpoints."""
 
-            result = await Runner.run(self.agent, message)
+            result = await Runner.run(self.agent, message, context=context)
             response_text = (
                 result.final_output if hasattr(result, "final_output") else str(result)
             )
@@ -293,7 +293,7 @@ Please provide:
 
 Focus on clinical relevance and practical application."""
 
-            result = await Runner.run(self.agent, message)
+            result = await Runner.run(self.agent, message, context=context)
             response_text = (
                 result.final_output if hasattr(result, "final_output") else str(result)
             )

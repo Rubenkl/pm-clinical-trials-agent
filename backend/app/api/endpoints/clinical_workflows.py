@@ -76,7 +76,7 @@ async def analyze_clinical_query(request: QueryAnalysisRequest):
 
         # Run analysis
         context = QueryAnalysisContext()
-        result = await Runner.run(query_analyzer_agent, message, context)
+        result = await Runner.run(query_analyzer_agent, message, context=context)
 
         # Parse response
         try:
@@ -113,7 +113,7 @@ async def verify_source_data(request: DataVerificationRequest):
 
         # Run verification
         context = DataVerificationContext()
-        result = await Runner.run(data_verifier_agent, message, context)
+        result = await Runner.run(data_verifier_agent, message, context=context)
 
         # Parse response
         try:
@@ -148,7 +148,7 @@ async def detect_protocol_deviations(request: DeviationDetectionRequest):
 
         # Run detection
         context = DeviationDetectionContext()
-        result = await Runner.run(deviation_detector_agent, message, context)
+        result = await Runner.run(deviation_detector_agent, message, context=context)
 
         # Parse response
         try:
@@ -189,7 +189,7 @@ async def execute_clinical_workflow(request: WorkflowRequest):
 
         # Run workflow
         context = WorkflowContext()
-        result = await Runner.run(portfolio_manager_agent, message, context)
+        result = await Runner.run(portfolio_manager_agent, message, context=context)
 
         # Parse response
         try:

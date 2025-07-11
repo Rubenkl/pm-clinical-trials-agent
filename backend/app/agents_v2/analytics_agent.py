@@ -172,7 +172,7 @@ Please provide comprehensive trend analysis including:
 
 Focus on actionable insights that can improve study operations."""
 
-            result = await Runner.run(self.agent, message)
+            result = await Runner.run(self.agent, message, context=context)
             response_text = (
                 result.final_output if hasattr(result, "final_output") else str(result)
             )
@@ -237,7 +237,7 @@ Please provide dashboard-ready metrics including:
 
 Format for dashboard display with clear, actionable information."""
 
-            result = await Runner.run(self.agent, message)
+            result = await Runner.run(self.agent, message, context=context)
             response_text = (
                 result.final_output if hasattr(result, "final_output") else str(result)
             )

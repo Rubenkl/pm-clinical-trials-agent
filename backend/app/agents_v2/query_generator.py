@@ -168,7 +168,7 @@ Ensure the query is:
 
 Consider the clinical significance and patient safety implications."""
 
-            result = await Runner.run(self.agent, message)
+            result = await Runner.run(self.agent, message, context=context)
             response_text = (
                 result.final_output if hasattr(result, "final_output") else str(result)
             )
@@ -246,7 +246,7 @@ Provide a summary of:
 
 Maintain quality and consistency across all queries."""
 
-            result = await Runner.run(self.agent, message)
+            result = await Runner.run(self.agent, message, context=context)
             response_text = (
                 result.final_output if hasattr(result, "final_output") else str(result)
             )

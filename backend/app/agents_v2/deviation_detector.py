@@ -187,7 +187,7 @@ For each deviation found, provide:
 
 Focus on patient safety and regulatory compliance."""
 
-            result = await Runner.run(self.agent, message)
+            result = await Runner.run(self.agent, message, context=context)
             response_text = (
                 result.final_output if hasattr(result, "final_output") else str(result)
             )
@@ -268,7 +268,7 @@ Provide specific recommendations for:
 
 Consider ICH-GCP and regulatory guidance."""
 
-            result = await Runner.run(self.agent, message)
+            result = await Runner.run(self.agent, message, context=context)
             response_text = (
                 result.final_output if hasattr(result, "final_output") else str(result)
             )

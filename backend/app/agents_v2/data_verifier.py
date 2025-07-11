@@ -171,7 +171,7 @@ Please conduct thorough verification including:
 
 Focus on patient safety and data integrity."""
 
-            result = await Runner.run(self.agent, message)
+            result = await Runner.run(self.agent, message, context=context)
             response_text = (
                 result.final_output if hasattr(result, "final_output") else str(result)
             )
@@ -264,7 +264,7 @@ Please evaluate:
 
 Consider patient age, medical history, and clinical context."""
 
-            result = await Runner.run(self.agent, message)
+            result = await Runner.run(self.agent, message, context=context)
             response_text = (
                 result.final_output if hasattr(result, "final_output") else str(result)
             )
@@ -330,7 +330,7 @@ For each critical data point, explain:
 
 Focus on patient safety and regulatory compliance."""
 
-            result = await Runner.run(self.agent, message)
+            result = await Runner.run(self.agent, message, context=context)
             response_text = (
                 result.final_output if hasattr(result, "final_output") else str(result)
             )

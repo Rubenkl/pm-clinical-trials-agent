@@ -165,7 +165,7 @@ Consider:
 
 Focus on intelligent assessment rather than rigid rule application."""
 
-            result = await Runner.run(self.agent, message)
+            result = await Runner.run(self.agent, message, context=context)
             response_text = (
                 result.final_output if hasattr(result, "final_output") else str(result)
             )
@@ -243,7 +243,7 @@ Identify:
 
 Focus on actionable insights for study improvement."""
 
-            result = await Runner.run(self.agent, message)
+            result = await Runner.run(self.agent, message, context=context)
             response_text = (
                 result.final_output if hasattr(result, "final_output") else str(result)
             )
@@ -319,7 +319,7 @@ Consider:
 
 Provide practical, relationship-preserving escalation approach."""
 
-            result = await Runner.run(self.agent, message)
+            result = await Runner.run(self.agent, message, context=context)
             response_text = (
                 result.final_output if hasattr(result, "final_output") else str(result)
             )

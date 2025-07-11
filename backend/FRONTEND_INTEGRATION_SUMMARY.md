@@ -118,13 +118,13 @@ const result = await response.json();
 
 ### **Backend Health Check**
 ```bash
-curl http://localhost:8000/health
+curl /health
 # Should return: {"status": "healthy", ...}
 ```
 
 ### **Test Subject Data**
 ```bash
-curl http://localhost:8000/api/v1/test-data/subjects/CARD001
+curl /api/v1/test-data/subjects/CARD001
 # Should return complete subject profile
 ```
 
