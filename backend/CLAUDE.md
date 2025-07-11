@@ -498,6 +498,17 @@ The agents were hitting the 10-turn limit due to:
 - ✅ Tools only called when actually needed
 - ✅ Execution time reduced from 30-60s to 2-8s
 
+### **Pydantic Serialization Fix**:
+**Additional Issue Found**: `result.final_output` returns Pydantic model objects, not JSON strings
+**Solution**: Updated all endpoints to handle both cases:
+```python
+if hasattr(result.final_output, 'model_dump'):
+    response_data = result.final_output.model_dump()  # Pydantic model
+elif isinstance(result.final_output, str):
+    response_data = json.loads(result.final_output)  # JSON string
+```
+**Result**: Fixed "the JSON object must be str, bytes or bytearray, not QueryAnalyzerOutput" error
+
 ## ✅ **WORKING Multi-Agent Orchestration (DEPLOYED)**
 
 ### **Breakthrough Achievement - December 2024**

@@ -84,11 +84,19 @@ async def analyze_clinical_query(request: QueryAnalysisRequest):
             max_turns=3,  # Limit to 3 turns max
         )
 
-        # Parse response
-        try:
-            response_data = json.loads(result.final_output)
-        except json.JSONDecodeError:
-            response_data = {"analysis": result.final_output}
+        # Handle Pydantic model response
+        if hasattr(result.final_output, 'model_dump'):
+            # result.final_output is a Pydantic model object
+            response_data = result.final_output.model_dump()
+        elif isinstance(result.final_output, str):
+            # result.final_output is a JSON string, try to parse it
+            try:
+                response_data = json.loads(result.final_output)
+            except json.JSONDecodeError:
+                response_data = {"analysis": result.final_output}
+        else:
+            # Fallback for other types
+            response_data = {"analysis": str(result.final_output)}
 
         return {
             "success": True,
@@ -123,11 +131,19 @@ async def verify_source_data(request: DataVerificationRequest):
             data_verifier_agent, message, context=context, max_turns=3
         )
 
-        # Parse response
-        try:
-            response_data = json.loads(result.final_output)
-        except json.JSONDecodeError:
-            response_data = {"verification": result.final_output}
+        # Handle Pydantic model response
+        if hasattr(result.final_output, 'model_dump'):
+            # result.final_output is a Pydantic model object
+            response_data = result.final_output.model_dump()
+        elif isinstance(result.final_output, str):
+            # result.final_output is a JSON string, try to parse it
+            try:
+                response_data = json.loads(result.final_output)
+            except json.JSONDecodeError:
+                response_data = {"verification": result.final_output}
+        else:
+            # Fallback for other types
+            response_data = {"verification": str(result.final_output)}
 
         return {
             "success": True,
@@ -160,11 +176,19 @@ async def detect_protocol_deviations(request: DeviationDetectionRequest):
             deviation_detector_agent, message, context=context, max_turns=3
         )
 
-        # Parse response
-        try:
-            response_data = json.loads(result.final_output)
-        except json.JSONDecodeError:
-            response_data = {"deviations": result.final_output}
+        # Handle Pydantic model response
+        if hasattr(result.final_output, 'model_dump'):
+            # result.final_output is a Pydantic model object
+            response_data = result.final_output.model_dump()
+        elif isinstance(result.final_output, str):
+            # result.final_output is a JSON string, try to parse it
+            try:
+                response_data = json.loads(result.final_output)
+            except json.JSONDecodeError:
+                response_data = {"deviations": result.final_output}
+        else:
+            # Fallback for other types
+            response_data = {"deviations": str(result.final_output)}
 
         return {
             "success": True,
@@ -206,11 +230,19 @@ async def execute_clinical_workflow(request: WorkflowRequest):
             max_turns=5,  # Allow more turns for complex workflows
         )
 
-        # Parse response
-        try:
-            response_data = json.loads(result.final_output)
-        except json.JSONDecodeError:
-            response_data = {"workflow_results": result.final_output}
+        # Handle Pydantic model response
+        if hasattr(result.final_output, 'model_dump'):
+            # result.final_output is a Pydantic model object
+            response_data = result.final_output.model_dump()
+        elif isinstance(result.final_output, str):
+            # result.final_output is a JSON string, try to parse it
+            try:
+                response_data = json.loads(result.final_output)
+            except json.JSONDecodeError:
+                response_data = {"workflow_results": result.final_output}
+        else:
+            # Fallback for other types
+            response_data = {"workflow_results": str(result.final_output)}
 
         return {
             "success": True,
