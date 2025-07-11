@@ -3,6 +3,17 @@
 ## Overview
 The Clinical Trials Agent API provides AI-powered clinical data analysis through a clean set of workflow-focused endpoints. All agent interactions use the OpenAI Agents SDK with direct `Runner.run()` invocation.
 
+## ⭐ **Agent Output Schemas**
+For complete standardized output documentation for all agents, see:
+**[Agent Output Schemas Reference](./AGENT_OUTPUT_SCHEMAS.md)**
+
+This comprehensive document contains:
+- Exact JSON schemas for all 7 agents
+- TypeScript interface definitions  
+- Realistic example responses
+- Field types and constraints
+- Error handling patterns
+
 ## Base URL
 ```
 http://localhost:8000/api/v1
@@ -44,13 +55,21 @@ POST /clinical/analyze-query
   "success": true,
   "query_id": "QUERY-001",
   "analysis": {
-    "severity": "critical",
-    "category": "laboratory_value",
-    "findings": ["Severe anemia requiring immediate attention"],
-    "recommendations": ["Verify value", "Consider transfusion"],
-    "confidence_score": 0.95
+    "success": true,
+    "analysis_type": "clinical_data_analysis",
+    "findings": [
+      "Hemoglobin 8.5 g/dL - moderate anemia requiring clinical evaluation"
+    ],
+    "severity": "major",
+    "clinical_significance": "Hemoglobin below normal range requires assessment for causes",
+    "recommended_queries": [
+      "Verify hemoglobin reading and recent transfusions",
+      "Assess for bleeding or other causes of anemia"
+    ],
+    "priority": "high",
+    "medical_assessment": "Moderate anemia requiring prompt clinical evaluation"
   },
-  "execution_time": 3.2
+  "execution_time": 7.8
 }
 ```
 
@@ -83,19 +102,26 @@ POST /clinical/verify-data
   "success": true,
   "subject_id": "CARD001",
   "verification": {
-    "match_score": 0.75,
+    "success": true,
+    "verification_type": "edc_vs_source_verification",
     "discrepancies": [
-      {
-        "field": "hemoglobin",
-        "edc_value": "12.5",
-        "source_value": "11.2",
-        "type": "value_mismatch",
-        "severity": "major"
-      }
+      "Hemoglobin: EDC shows 12.5 g/dL, source document shows 11.2 g/dL"
     ],
-    "recommendations": ["Verify hemoglobin with site"]
+    "critical_findings": [
+      "1.3 g/dL hemoglobin difference requires source verification"
+    ],
+    "audit_trail": [
+      "Verification initiated: 2024-07-11T10:30:00Z",
+      "Source documents reviewed: CRF page 2"
+    ],
+    "verification_status": "discrepancies_found",
+    "confidence_score": "0.92",
+    "recommendations": [
+      "Contact site to verify hemoglobin value",
+      "Request source document clarification"
+    ]
   },
-  "execution_time": 2.8
+  "execution_time": 5.2
 }
 ```
 

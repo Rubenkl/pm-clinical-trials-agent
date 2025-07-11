@@ -28,14 +28,12 @@ class TestImports:
     def test_portfolio_manager_imports(self):
         """Test Portfolio Manager and related imports"""
         try:
-            from app.agents.portfolio_manager import (
+            from app.agents_v2.portfolio_manager import (
                 PortfolioManager,
                 WorkflowContext,
-                WorkflowRequest,
             )
 
             assert PortfolioManager is not None
-            assert WorkflowRequest is not None
             assert WorkflowContext is not None
         except ImportError as e:
             pytest.fail(f"Failed to import Portfolio Manager components: {e}")
@@ -43,21 +41,24 @@ class TestImports:
     def test_base_agent_imports(self):
         """Test base agent imports"""
         try:
-            from app.agents.base_agent import AgentResponse, BaseAgent
+            from app.agents_v2.query_analyzer import QueryAnalyzer
+            from app.agents_v2.data_verifier import DataVerifier
 
-            assert BaseAgent is not None
-            assert AgentResponse is not None
+            assert QueryAnalyzer is not None
+            assert DataVerifier is not None
         except ImportError as e:
-            pytest.fail(f"Failed to import base agent components: {e}")
+            pytest.fail(f"Failed to import agent components: {e}")
 
     def test_api_endpoints_import(self):
         """Test API endpoint imports - This catches the specific deployment failure"""
         try:
-            from app.api.endpoints.agents import agents_router
+            from app.api.endpoints.clinical_workflows import router as clinical_router
+            from app.api.endpoints.test_data import router as test_data_router
 
-            assert agents_router is not None
+            assert clinical_router is not None
+            assert test_data_router is not None
         except ImportError as e:
-            pytest.fail(f"Failed to import agents endpoint: {e}")
+            pytest.fail(f"Failed to import API endpoints: {e}")
 
     def test_health_endpoint_import(self):
         """Test health endpoint imports"""
@@ -80,10 +81,12 @@ class TestImports:
     def test_all_agent_imports(self):
         """Test all agent imports to catch missing dependencies"""
         agents = [
-            ("app.agents.query_analyzer", "QueryAnalyzer"),
-            ("app.agents.data_verifier", "DataVerifier"),
-            ("app.agents.query_generator", "QueryGenerator"),
-            ("app.agents.query_tracker", "QueryTracker"),
+            ("app.agents_v2.query_analyzer", "QueryAnalyzer"),
+            ("app.agents_v2.data_verifier", "DataVerifier"),
+            ("app.agents_v2.query_generator", "QueryGenerator"),
+            ("app.agents_v2.query_tracker", "QueryTracker"),
+            ("app.agents_v2.deviation_detector", "DeviationDetector"),
+            ("app.agents_v2.analytics_agent", "AnalyticsAgent"),
         ]
 
         for module_name, class_name in agents:
@@ -97,10 +100,10 @@ class TestImports:
     def test_pydantic_models_import(self):
         """Test Pydantic model imports"""
         try:
-            from app.api.models.agent_models import ChatRequest, ChatResponse
+            from app.api.models.agent_models import WorkflowExecutionRequest, WorkflowStatusRequest
 
-            assert ChatRequest is not None
-            assert ChatResponse is not None
+            assert WorkflowExecutionRequest is not None
+            assert WorkflowStatusRequest is not None
         except ImportError as e:
             pytest.fail(f"Failed to import API models: {e}")
 
@@ -111,33 +114,26 @@ class TestInstantiation:
     def test_portfolio_manager_instantiation(self):
         """Test Portfolio Manager can be created"""
         try:
-            from app.agents.portfolio_manager import PortfolioManager
+            from app.agents_v2.portfolio_manager import PortfolioManager
 
             pm = PortfolioManager()
             assert pm is not None
         except Exception as e:
             pytest.fail(f"Failed to instantiate Portfolio Manager: {e}")
 
-    def test_workflow_request_validation(self):
-        """Test WorkflowRequest validation"""
+    def test_workflow_context_validation(self):
+        """Test WorkflowContext validation"""
         try:
-            from app.agents.portfolio_manager import WorkflowRequest
+            from app.agents_v2.portfolio_manager import WorkflowContext
 
-            # Valid request
-            request = WorkflowRequest(
-                workflow_id="test_001",
-                workflow_type="query_resolution",
-                description="Test workflow",
-                input_data={"test": "data"},
-            )
-            assert request.workflow_id == "test_001"
-
-            # Invalid request should raise validation error
-            with pytest.raises(Exception):
-                WorkflowRequest()  # Missing required fields
+            # Valid context
+            context = WorkflowContext()
+            assert context is not None
+            assert hasattr(context, 'active_workflows')
+            assert hasattr(context, 'completed_workflows')
 
         except Exception as e:
-            pytest.fail(f"WorkflowRequest validation failed: {e}")
+            pytest.fail(f"WorkflowContext validation failed: {e}")
 
 
 # Test all imports when file is run directly
