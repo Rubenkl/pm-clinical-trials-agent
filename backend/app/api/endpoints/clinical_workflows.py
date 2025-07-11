@@ -81,7 +81,7 @@ async def analyze_clinical_query(request: QueryAnalysisRequest):
             query_analyzer_agent,
             message,
             context=context,
-            max_turns=3,  # Limit to 3 turns max
+            max_turns=50,  # Allow complex analysis with orchestration
         )
 
         # Handle Pydantic model response
@@ -131,7 +131,7 @@ async def verify_source_data(request: DataVerificationRequest):
             data_verifier_agent, 
             message, 
             context=context, 
-            max_turns=6  # Higher limit for complex medical verification
+            max_turns=50  # Allow complex multi-agent coordination
         )
 
         # Handle Pydantic model response
@@ -179,7 +179,7 @@ async def detect_protocol_deviations(request: DeviationDetectionRequest):
             deviation_detector_agent, 
             message, 
             context=context, 
-            max_turns=8  # Higher limit for complex regulatory analysis
+            max_turns=50  # Allow complex regulatory analysis with handoffs
         )
 
         # Handle Pydantic model response
@@ -233,7 +233,7 @@ async def execute_clinical_workflow(request: WorkflowRequest):
             portfolio_manager_agent,
             message,
             context=context,
-            max_turns=8  # Higher limit for complex multi-agent workflows
+            max_turns=50  # Allow comprehensive multi-agent orchestration
         )
 
         # Handle Pydantic model response
