@@ -79,37 +79,47 @@ class DeviationDetector:
 
 TASK: Analyze the provided data and identify any protocol deviations.
 
-TOOLS AVAILABLE:
-- check_visit_window_compliance: Use ONLY when you need to verify borderline visit timing cases
-- Other calculation tools: Use only for complex math you cannot do mentally
+CRITICAL RULES - READ CAREFULLY:
+1. If data is insufficient, incomplete, or nonsensical → Return "insufficient data" immediately
+2. Only use tools for borderline cases where calculation is needed
+3. NEVER use tools to explore or gather data - only to verify specific borderline calculations
+4. Maximum 1 tool call per analysis (tools are for verification, not exploration)
+
+WHEN TO USE TOOLS:
+✅ Visit dates are 2-3 days from window limit (borderline case needing verification)
+✅ You have exact dates and window requirements to verify
+
+WHEN NOT TO USE TOOLS:
+❌ Data is missing, invalid, or nonsensical
+❌ No clear visit dates provided
+❌ No protocol requirements provided  
+❌ Values are clearly compliant or clearly non-compliant
+❌ Exploring "what if" scenarios
 
 TOOL USAGE EXAMPLES:
-For visit window "±3 days":
-✅ CORRECT: check_visit_window_compliance("2025-01-10", "2025-01-15", "3", "3")
-❌ WRONG: check_visit_window_compliance("2025-01-10", "2025-01-15", "±3 days", "±3 days")
-
-For visit window "±5 days":
-✅ CORRECT: check_visit_window_compliance("2025-02-21", "2025-02-28", "5", "5")
+✅ CORRECT: check_visit_window_compliance("2025-01-10", "2025-01-13", "3", "3")
+❌ WRONG: check_visit_window_compliance("invalid", "date", "±3 days", "±5 days")
 
 ANALYSIS METHOD:
-1. Review the provided data
-2. Identify clear violations (age, lab values, timing issues)
-3. Use tools sparingly - maximum 3 tool calls total
-4. Provide your assessment
+1. Check if data is sufficient and valid
+2. If insufficient → Return "insufficient data for analysis"
+3. If sufficient → Identify clear violations using medical knowledge
+4. Only use tools for borderline verification (max 1 call)
+5. Provide assessment
 
 OUTPUT FORMAT:
 {
     "success": true,
-    "detection_type": "protocol_deviation_analysis",
+    "detection_type": "protocol_deviation_analysis", 
     "deviations": ["List of specific violations found"],
     "severity_assessment": "critical/major/minor/none",
-    "compliance_status": "compliant/violations_detected",
+    "compliance_status": "compliant/violations_detected/insufficient_data",
     "regulatory_risk": "low/medium/high",
     "corrective_actions": ["Specific actions needed"],
     "preventive_measures": ["Prevention recommendations"]
 }
 
-IMPORTANT: Be efficient. Don't overthink. Use your medical knowledge directly."""
+CRITICAL: If data is unclear or invalid, return compliance_status: "insufficient_data" without using tools."""
 
     async def detect_protocol_deviations(
         self,
