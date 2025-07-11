@@ -9,6 +9,12 @@ Tests cover:
 3. Protocol Deviation Detection (PI/CRC persona)
 4. Multi-agent orchestration scenarios
 5. Performance targets from PRD
+
+🎯 BALANCED TEST DATA (Updated January 11, 2025):
+- Clean subjects (0 issues): CARD003, CARD004, CARD020, CARD033, CARD035, CARD036, CARD041, CARD048
+- Discrepancy subjects (1-20 issues): CARD001, CARD002, CARD005, CARD006, CARD007, etc.
+- Protocol violations: Age (CARD010: 85y, CARD030: 17y), BP >180, Creatinine >2.5
+- Ground truth metadata available for supervised learning
 """
 
 import asyncio
