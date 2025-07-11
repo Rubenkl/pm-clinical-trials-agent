@@ -6,11 +6,10 @@ using real medical knowledge instead of hardcoded rules.
 
 import json
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from agents import Agent, Runner
 from pydantic import BaseModel, Field
-from typing import Any, Dict, List, Optional
 
 from .calculation_tools import (
     calculate_age_at_visit,
@@ -30,9 +29,9 @@ class QueryAnalysisContext(BaseModel):
 
 class QueryAnalyzerOutput(BaseModel):
     """Structured JSON output for Query Analyzer responses."""
-    
+
     model_config = {"strict": True}
-    
+
     success: bool
     analysis_type: str
     findings: List[str]
@@ -97,7 +96,7 @@ You have comprehensive medical knowledge including:
 - Drug interactions and contraindications
 - Clinical trial safety monitoring
 
-AVAILABLE CALCULATION TOOLS:
+CALCULATION TOOLS (use only when needed for specific calculations):
 - Medical unit conversions (mg/dL ↔ mmol/L, etc.)
 - Age calculations for age-specific ranges
 - Change from baseline calculations
@@ -126,27 +125,29 @@ For each finding, provide:
 - Follow-up actions (investigator contact, safety review, etc.)
 
 RESPONSE FORMAT:
-Always return structured JSON with clinical assessments:
+You MUST return a response that exactly matches this structure:
 {
-    "analysis": {
-        "findings": [
-            {
-                "parameter": "systolic_bp",
-                "value": "185 mmHg",
-                "clinical_interpretation": "Stage 2 Hypertension - requires immediate evaluation",
-                "severity": "critical",
-                "medical_reasoning": "BP >180 mmHg increases risk of cardiovascular events",
-                "query_recommendation": "Please verify BP reading and confirm if patient received antihypertensive treatment",
-                "timeline": "immediate",
-                "safety_implications": "Potential for stroke, MI, or hypertensive crisis"
-            }
-        ],
-        "overall_assessment": "Critical safety findings require immediate attention",
-        "recommended_actions": ["Contact investigator", "Safety assessment", "Consider study drug hold"]
-    }
+    "success": true,
+    "analysis_type": "clinical_query_analysis",
+    "findings": [
+        "BP 185/95 mmHg indicates Stage 2 Hypertension requiring immediate evaluation",
+        "Critical value exceeds safety threshold and requires investigator notification"
+    ],
+    "severity": "critical",
+    "clinical_significance": "Stage 2 Hypertension with increased cardiovascular risk",
+    "recommended_queries": [
+        "Please verify BP reading 185/95 and confirm if patient received antihypertensive treatment",
+        "Confirm if study drug was held following this critical BP value"
+    ],
+    "priority": "urgent",
+    "medical_assessment": "BP >180/110 increases risk of stroke, MI, or hypertensive crisis. Immediate medical evaluation required."
 }
 
-Remember: You provide real medical intelligence, not rule-based assessments."""
+IMPORTANT:
+- Only use calculation tools when you need to perform actual calculations
+- Focus on medical analysis using your clinical knowledge
+- Return the exact JSON structure above - no nested objects
+- All fields except optional ones (severity, clinical_significance, priority, medical_assessment) must be included"""
 
     async def analyze_clinical_data(
         self,

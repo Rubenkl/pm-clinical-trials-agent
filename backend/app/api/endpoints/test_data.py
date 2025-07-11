@@ -880,7 +880,7 @@ async def get_protocol_deviations(
         },
         {
             "deviation_id": "DEV-2025-0002",
-            "subject_id": "CARD002", 
+            "subject_id": "CARD002",
             "site_id": "SITE_001",
             "deviation_type": "visit_window",
             "severity": "minor",
@@ -900,7 +900,7 @@ async def get_protocol_deviations(
         {
             "deviation_id": "DEV-2025-0003",
             "subject_id": "CARD003",
-            "site_id": "SITE_002", 
+            "site_id": "SITE_002",
             "deviation_type": "procedure_violation",
             "severity": "major",
             "status": "under_review",
@@ -925,13 +925,10 @@ async def get_protocol_deviations(
         "resolved_deviations": 1,
         "deviations_by_type": {
             "inclusion_criteria": 1,
-            "visit_window": 1, 
-            "procedure_violation": 1
+            "visit_window": 1,
+            "procedure_violation": 1,
         },
-        "deviations_by_severity": {
-            "major": 2,
-            "minor": 1
-        },
+        "deviations_by_severity": {"major": 2, "minor": 1},
         "risk_score": "medium",
         "trend": "stable",
     }

@@ -24,9 +24,9 @@ class AnalyticsContext(BaseModel):
 
 class AnalyticsAgentOutput(BaseModel):
     """Structured JSON output for Analytics Agent responses."""
-    
+
     model_config = {"strict": True}
-    
+
     success: bool
     analysis_type: str
     key_insights: List[str]
@@ -85,7 +85,7 @@ ANALYTICS EXPERTISE:
 - Safety signal detection
 - Enrollment and retention analytics
 
-AVAILABLE CALCULATION TOOLS:
+CALCULATION TOOLS (use only when needed for specific calculations):
 - Date difference calculations for timeline analysis
 
 ANALYTICS DOMAINS:
@@ -114,44 +114,38 @@ ANALYTICS DOMAINS:
    - Quality trend predictions
 
 RESPONSE FORMAT:
-Always return structured JSON with analytics results:
+You MUST return a response that exactly matches this structure:
 {
-    "analytics_results": {
-        "metric_type": "site_performance_analysis",
-        "analysis_period": "2024-Q1",
-        "key_insights": [
-            {
-                "insight": "Site 001 showing 15% higher enrollment rate than average",
-                "impact": "positive",
-                "recommendation": "Share best practices with underperforming sites",
-                "confidence": 0.92
-            }
-        ],
-        "performance_metrics": {
-            "overall_enrollment_rate": 85.3,
-            "data_quality_score": 94.2,
-            "protocol_compliance": 88.7,
-            "query_resolution_time": 4.2
-        },
-        "trends": {
-            "enrollment": "increasing",
-            "data_quality": "stable",
-            "compliance": "improving"
-        },
-        "risk_factors": [
-            {
-                "factor": "site_003_delayed_enrollment",
-                "severity": "moderate",
-                "mitigation": "Additional CRA support assigned"
-            }
-        ],
-        "predictions": {
-            "study_completion_date": "2024-12-15",
-            "confidence_interval": "±2 weeks",
-            "risk_level": "low"
-        }
-    }
+    "success": true,
+    "analysis_type": "site_performance_analysis",
+    "key_insights": [
+        "Site 001 showing 15% higher enrollment rate than average",
+        "Data quality scores improved 8% over last quarter",
+        "Protocol compliance trending upward across all sites"
+    ],
+    "performance_trends": [
+        "Enrollment rate increasing 12% month-over-month",
+        "Query resolution time decreased to 4.2 days average",
+        "Site 003 showing improvement after additional CRA support"
+    ],
+    "risk_indicators": [
+        "Site 005 enrollment below target by 30%",
+        "Data entry delays increasing at Site 002",
+        "Protocol deviation rate elevated at Site 007"
+    ],
+    "recommendations": [
+        "Share Site 001 best practices with underperforming sites",
+        "Implement additional training at Site 007",
+        "Consider additional resources for Site 005"
+    ],
+    "metrics_summary": "Overall study performance: 85.3% enrollment rate, 94.2% data quality score, 88.7% protocol compliance",
+    "predictive_insights": "Study completion projected for 2024-12-15 with 95% confidence, low risk level overall"
 }
+
+IMPORTANT:
+- Only use calculation tools when you need to perform actual calculations
+- Focus on analytical assessment using clinical trial operations knowledge
+- Return the exact JSON structure above - no nested objects
 
 Remember: Provide intelligent analytics insights, not static report generation."""
 

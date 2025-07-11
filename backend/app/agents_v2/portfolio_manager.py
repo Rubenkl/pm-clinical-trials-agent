@@ -7,11 +7,10 @@ with specialized agents through handoffs.
 
 import json
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from agents import Agent, Runner
 from pydantic import BaseModel, Field
-from typing import Any, Dict, List, Optional
 
 from .calculation_tools import (
     calculate_age_at_visit,
@@ -36,9 +35,9 @@ class WorkflowContext(BaseModel):
 
 class PortfolioManagerOutput(BaseModel):
     """Structured JSON output for Portfolio Manager responses."""
-    
+
     model_config = {"strict": True}
-    
+
     success: bool
     workflow_type: str
     clinical_assessment: Optional[str] = None
@@ -106,7 +105,7 @@ CORE RESPONSIBILITIES:
 4. Make clinical assessments using your medical knowledge
 5. Delegate specific tasks to appropriate specialized agents
 
-AVAILABLE FUNCTION TOOLS:
+CALCULATION TOOLS (use only when needed for specific calculations):
 - Medical unit conversion tools (mg/dL to mmol/L, etc.)
 - Age and date calculation tools
 - Visit window compliance checking
@@ -143,21 +142,37 @@ When analyzing clinical data:
 5. Ensure regulatory compliance
 
 RESPONSE FORMAT:
-You MUST return structured JSON in the PortfolioManagerOutput format with these fields:
-- success: boolean indicating operation success
-- workflow_type: string describing the workflow type
-- clinical_assessment: object with detailed clinical findings (optional)
-- findings: array of clinical findings as strings
-- severity: string (critical/major/minor/normal)
-- safety_implications: string describing safety concerns
-- recommended_actions: array of recommended actions
-- workflow_next_steps: array of next steps
-- priority: string (urgent/high/medium/low)
-- execution_time: string timestamp
+You MUST return a response that exactly matches this structure:
+{
+    "success": true,
+    "workflow_type": "comprehensive_analysis",
+    "clinical_assessment": "Patient CARD001 shows Stage 1 HTN (BP 147.5/79.6) with elevated BNP 319.57 indicating cardiac stress",
+    "findings": [
+        "BP 147.5/79.6 mmHg indicates Stage 1 Hypertension requiring monitoring",
+        "BNP 319.57 pg/mL elevated suggesting cardiac dysfunction",
+        "Creatinine 1.84 mg/dL shows mild kidney dysfunction"
+    ],
+    "severity": "major",
+    "safety_implications": "Cardiovascular risk factors require clinical attention and potential treatment adjustment",
+    "recommended_actions": [
+        "Schedule cardiology consultation",
+        "Monitor BP trends weekly",
+        "Consider nephrology referral for kidney function"
+    ],
+    "workflow_next_steps": [
+        "Complete comprehensive clinical assessment",
+        "Generate queries for missing data",
+        "Schedule safety review"
+    ],
+    "priority": "high",
+    "execution_time": "2025-01-11T10:30:00Z"
+}
 
-Always populate relevant fields. If no clinical data is provided, focus on workflow coordination.
-
-Remember: You are providing real clinical intelligence in structured JSON format."""
+IMPORTANT:
+- Only use calculation tools when you need to perform actual calculations
+- Focus on clinical assessment using your medical knowledge
+- Return the exact JSON structure above - no nested objects beyond what's shown
+- All fields except optional ones (clinical_assessment, severity, safety_implications, priority, execution_time) must be included"""
 
     async def orchestrate_workflow(
         self, workflow_type: str, input_data: Dict[str, Any], context: WorkflowContext

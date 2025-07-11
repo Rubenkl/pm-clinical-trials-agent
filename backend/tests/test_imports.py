@@ -41,8 +41,8 @@ class TestImports:
     def test_base_agent_imports(self):
         """Test base agent imports"""
         try:
-            from app.agents_v2.query_analyzer import QueryAnalyzer
             from app.agents_v2.data_verifier import DataVerifier
+            from app.agents_v2.query_analyzer import QueryAnalyzer
 
             assert QueryAnalyzer is not None
             assert DataVerifier is not None
@@ -100,7 +100,10 @@ class TestImports:
     def test_pydantic_models_import(self):
         """Test Pydantic model imports"""
         try:
-            from app.api.models.agent_models import WorkflowExecutionRequest, WorkflowStatusRequest
+            from app.api.models.agent_models import (
+                WorkflowExecutionRequest,
+                WorkflowStatusRequest,
+            )
 
             assert WorkflowExecutionRequest is not None
             assert WorkflowStatusRequest is not None
@@ -129,8 +132,8 @@ class TestInstantiation:
             # Valid context
             context = WorkflowContext()
             assert context is not None
-            assert hasattr(context, 'active_workflows')
-            assert hasattr(context, 'completed_workflows')
+            assert hasattr(context, "active_workflows")
+            assert hasattr(context, "completed_workflows")
 
         except Exception as e:
             pytest.fail(f"WorkflowContext validation failed: {e}")

@@ -24,9 +24,9 @@ class QueryTrackingContext(BaseModel):
 
 class QueryTrackerOutput(BaseModel):
     """Structured JSON output for Query Tracker responses."""
-    
+
     model_config = {"strict": True}
-    
+
     success: bool
     tracking_type: str
     query_status: str
@@ -84,7 +84,7 @@ QUERY LIFECYCLE MANAGEMENT:
 - **Resolved**: Query closed with satisfactory resolution
 - **Escalated**: Moved to higher-level attention
 
-AVAILABLE CALCULATION TOOLS:
+CALCULATION TOOLS (use only when needed for specific calculations):
 - Date difference calculations for timeline tracking
 
 SLA AND TIMING STANDARDS:
@@ -118,26 +118,26 @@ ESCALATION LEVELS:
 5. **Regulatory Consideration**: Consider regulatory implications
 
 RESPONSE FORMAT:
-Always return structured JSON with tracking analysis:
+You MUST return a response that exactly matches this structure:
 {
-    "tracking_analysis": {
-        "query_status": "overdue",
-        "days_since_sent": 8,
-        "sla_compliance": "non_compliant",
-        "escalation_recommendation": {
-            "level": "cra_follow_up",
-            "rationale": "Routine query now 3 days overdue, site typically responsive",
-            "recommended_action": "Personal CRA contact to check for issues",
-            "timeline": "within 24 hours"
-        },
-        "performance_context": {
-            "site_avg_response_time": 4.2,
-            "query_type_complexity": "moderate",
-            "site_current_query_load": 12
-        },
-        "next_steps": ["CRA to contact site", "Schedule follow-up in 48 hours"]
-    }
+    "success": true,
+    "tracking_type": "query_lifecycle_tracking",
+    "query_status": "overdue",
+    "escalation_level": "cra_follow_up",
+    "timeline_status": "3_days_overdue",
+    "sla_compliance": "non_compliant",
+    "next_actions": [
+        "CRA to contact site within 24 hours",
+        "Schedule follow-up in 48 hours",
+        "Check for site capacity issues"
+    ],
+    "performance_metrics": "Site avg response time: 4.2 days, Current query load: 12 active queries"
 }
+
+IMPORTANT:
+- Only use calculation tools when you need to perform actual calculations
+- Focus on intelligent tracking assessment using query management knowledge
+- Return the exact JSON structure above - no nested objects
 
 Remember: Use intelligent assessment considering clinical context, not rigid rules."""
 

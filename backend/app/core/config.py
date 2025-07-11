@@ -19,7 +19,7 @@ class Settings(BaseSettings):
 
     # OpenAI Configuration
     openai_api_key: str = Field(default="", env="OPENAI_API_KEY")
-    openai_model: str = Field(default="gpt-4", env="OPENAI_MODEL")
+    openai_model: str = Field(default="gpt-4o-mini", env="OPENAI_MODEL")
     openai_temperature: float = Field(default=0.1, env="OPENAI_TEMPERATURE")
 
     # Database Configuration

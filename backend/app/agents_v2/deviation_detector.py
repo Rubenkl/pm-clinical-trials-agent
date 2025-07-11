@@ -28,9 +28,9 @@ class DeviationDetectionContext(BaseModel):
 
 class DeviationDetectorOutput(BaseModel):
     """Structured JSON output for Deviation Detector responses."""
-    
+
     model_config = {"strict": True}
-    
+
     success: bool
     detection_type: str
     deviations: List[str]
@@ -91,7 +91,7 @@ REGULATORY EXPERTISE:
 - Protocol compliance requirements
 - Regulatory reporting obligations
 
-AVAILABLE CALCULATION TOOLS:
+CALCULATION TOOLS (use only when needed for specific calculations):
 - Age calculations for eligibility verification
 - Date calculations for timeline compliance
 - Visit window compliance checking
@@ -139,27 +139,35 @@ For each deviation, evaluate:
 - Need for immediate action
 
 RESPONSE FORMAT:
-Always return structured JSON with deviation analysis:
+You MUST return a response that exactly matches this structure:
 {
-    "deviation_analysis": {
-        "deviations_detected": [
-            {
-                "deviation_type": "inclusion_criteria_violation",
-                "description": "Patient age 17.8 years at enrollment (protocol requires ≥18)",
-                "severity": "critical",
-                "regulatory_impact": "Major protocol violation requiring immediate action",
-                "patient_safety_impact": "Minimal - age difference minimal",
-                "study_integrity_impact": "High - undermines inclusion criteria validity",
-                "immediate_actions": ["Remove patient from study", "Notify IRB/EC", "Report to sponsor"],
-                "capa_recommendations": ["Enhance site training on eligibility verification"],
-                "regulatory_reporting": "Report to regulatory authorities within 24 hours"
-            }
-        ],
-        "overall_compliance_score": 0.92,
-        "risk_assessment": "Moderate risk due to eligibility violation",
-        "recommendations": ["Immediate corrective action required", "Enhanced monitoring"]
-    }
+    "success": true,
+    "detection_type": "protocol_deviation_analysis",
+    "deviations": [
+        "Patient age 17.8 years at enrollment (protocol requires ≥18 years)",
+        "Visit conducted 5 days outside protocol window",
+        "Missed safety lab collection at baseline"
+    ],
+    "severity_assessment": "critical",
+    "compliance_status": "major_violations_detected",
+    "regulatory_risk": "high_risk_immediate_action_required",
+    "corrective_actions": [
+        "Remove ineligible patient from study immediately",
+        "Notify IRB/EC within 24 hours",
+        "Report to regulatory authorities",
+        "Implement enhanced eligibility verification"
+    ],
+    "preventive_measures": [
+        "Additional site training on inclusion criteria",
+        "Enhanced pre-enrollment verification checklist",
+        "Real-time eligibility review process"
+    ]
 }
+
+IMPORTANT:
+- Only use calculation tools when you need to perform actual calculations
+- Focus on regulatory and medical assessment using clinical knowledge
+- Return the exact JSON structure above - no nested objects
 
 Remember: Use real regulatory and medical knowledge for deviation assessment."""
 

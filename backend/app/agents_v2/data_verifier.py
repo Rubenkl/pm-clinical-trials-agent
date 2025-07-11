@@ -28,9 +28,9 @@ class DataVerificationContext(BaseModel):
 
 class DataVerifierOutput(BaseModel):
     """Structured JSON output for Data Verifier responses."""
-    
+
     model_config = {"strict": True}
-    
+
     success: bool
     verification_type: str
     discrepancies: List[str]
@@ -91,7 +91,7 @@ MEDICAL EXPERTISE FOR VERIFICATION:
 - Temporal relationships: Disease progression, treatment responses
 - Safety data: AE severity, causality, expected vs. unexpected events
 
-AVAILABLE CALCULATION TOOLS:
+CALCULATION TOOLS (use only when needed for specific calculations):
 - Medical unit conversions for standardization
 - Change from baseline calculations
 - Date difference calculations for temporal validation
@@ -127,31 +127,36 @@ VERIFICATION PROCESS:
 6. Document findings in audit trail
 
 RESPONSE FORMAT:
-Always return structured JSON with verification results:
+You MUST return a response that exactly matches this structure:
 {
-    "verification_results": {
-        "overall_match_percentage": 94.2,
-        "discrepancies": [
-            {
-                "field": "systolic_bp",
-                "edc_value": "120",
-                "source_value": "180",
-                "discrepancy_type": "critical_safety_value",
-                "medical_assessment": "60 mmHg difference in systolic BP suggests serious data error",
-                "clinical_impact": "Could miss hypertensive crisis requiring intervention",
-                "severity": "critical",
-                "resolution_priority": "immediate",
-                "recommended_action": "Verify source document, contact site immediately"
-            }
-        ],
-        "critical_findings_count": 1,
-        "data_quality_score": 0.85,
-        "regulatory_compliance": "requires_attention",
-        "recommendations": ["Immediate site contact for critical BP discrepancy"]
-    }
+    "success": true,
+    "verification_type": "edc_vs_source",
+    "discrepancies": [
+        "BP 120 vs 180 mmHg - 60 mmHg difference suggests critical data error",
+        "Glucose 150 vs 145 mg/dL - minor 5 mg/dL difference within acceptable range"
+    ],
+    "critical_findings": [
+        "Critical BP discrepancy could miss hypertensive crisis requiring intervention"
+    ],
+    "audit_trail": [
+        "Verified 12 data points between EDC and source documents",
+        "Identified 2 discrepancies requiring attention",
+        "1 critical finding flagged for immediate review"
+    ],
+    "verification_status": "completed_with_findings",
+    "confidence_score": "0.85",
+    "recommendations": [
+        "Immediate site contact for critical BP discrepancy",
+        "Verify source document accuracy",
+        "Schedule data quality review"
+    ]
 }
 
-Remember: Provide real medical intelligence for data verification, not rule-based checking."""
+IMPORTANT:
+- Only use calculation tools when you need to perform actual calculations
+- Focus on medical verification using your clinical knowledge
+- Return the exact JSON structure above - no nested objects beyond what's shown
+- All fields except optional ones (confidence_score) must be included"""
 
     async def verify_edc_vs_source(
         self,

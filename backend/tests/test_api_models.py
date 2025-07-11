@@ -8,115 +8,11 @@ from pydantic import ValidationError
 
 from app.api.models.agent_models import (
     AgentStatusResponse,
-    ChatRequest,
-    ChatResponse,
     ErrorResponse,
     HealthCheckResponse,
     WorkflowExecutionRequest,
     WorkflowExecutionResponse,
 )
-
-
-class TestChatModels:
-    """Test cases for chat-related API models."""
-
-    def test_chat_request_valid(self):
-        """Test valid ChatRequest creation."""
-        request = ChatRequest(
-            message="Analyze clinical trial data for Site 101",
-            agent_type="portfolio-manager",
-            metadata={
-                "user_id": "user123",
-                "session_id": "session456",
-                "priority": "high",
-            },
-        )
-
-        assert request.message == "Analyze clinical trial data for Site 101"
-        assert request.agent_type == "portfolio-manager"
-        assert request.metadata["user_id"] == "user123"
-
-    def test_chat_request_defaults(self):
-        """Test ChatRequest with default values."""
-        request = ChatRequest(message="Test message")
-
-        assert request.message == "Test message"
-        assert request.agent_type == "portfolio-manager"  # Default
-        assert request.metadata == {}
-
-    def test_chat_request_validation_empty_message(self):
-        """Test ChatRequest validation with empty message."""
-        with pytest.raises(ValidationError) as exc_info:
-            ChatRequest(message="")
-
-        assert "at least 1 character" in str(exc_info.value)
-
-    def test_chat_request_validation_long_message(self):
-        """Test ChatRequest validation with overly long message."""
-        long_message = "a" * 10001  # Assuming 10000 char limit
-
-        with pytest.raises(ValidationError) as exc_info:
-            ChatRequest(message=long_message)
-
-        assert "at most" in str(exc_info.value)
-
-    def test_chat_request_invalid_agent_type(self):
-        """Test ChatRequest validation with invalid agent type."""
-        with pytest.raises(ValidationError) as exc_info:
-            ChatRequest(message="Test message", agent_type="invalid-agent")
-
-        assert "Input should be" in str(
-            exc_info.value
-        ) or "not a valid enumeration" in str(exc_info.value)
-
-    def test_chat_response_success(self):
-        """Test successful ChatResponse creation."""
-        response = ChatResponse(
-            success=True,
-            response="Analysis completed successfully. Found 5 discrepancies.",
-            agent_id="portfolio-manager",
-            execution_time=3.25,
-            metadata={
-                "tokens_used": 250,
-                "model": "gpt-4",
-                "timestamp": "2024-01-15T10:30:00Z",
-            },
-        )
-
-        assert response.success is True
-        assert (
-            response.response
-            == "Analysis completed successfully. Found 5 discrepancies."
-        )
-        assert response.agent_id == "portfolio-manager"
-        assert response.execution_time == 3.25
-        assert response.error is None
-
-    def test_chat_response_failure(self):
-        """Test failed ChatResponse creation."""
-        response = ChatResponse(
-            success=False,
-            response="",
-            agent_id="portfolio-manager",
-            execution_time=0.5,
-            error="OpenAI API rate limit exceeded",
-        )
-
-        assert response.success is False
-        assert response.response == ""
-        assert response.error == "OpenAI API rate limit exceeded"
-
-    def test_chat_response_validation_negative_execution_time(self):
-        """Test ChatResponse validation with negative execution time."""
-        with pytest.raises(ValidationError) as exc_info:
-            ChatResponse(
-                success=True,
-                response="Test response",
-                agent_id="test-agent",
-                execution_time=-1.0,
-            )
-
-        assert "greater than or equal to 0" in str(exc_info.value)
 
 
 class TestWorkflowModels:
@@ -376,33 +272,6 @@ class TestErrorModels:
 class TestModelSerialization:
     """Test cases for model serialization and deserialization."""
 
-    def test_chat_request_serialization(self):
-        """Test ChatRequest serialization to dict."""
-        request = ChatRequest(
-            message="Test message",
-            agent_type="portfolio-manager",
-            metadata={"user_id": "123"},
-        )
-
-        data = request.model_dump()
-        assert data["message"] == "Test message"
-        assert data["agent_type"] == "portfolio-manager"
-        assert data["metadata"]["user_id"] == "123"
-
-    def test_chat_response_serialization(self):
-        """Test ChatResponse serialization to dict."""
-        response = ChatResponse(
-            success=True,
-            response="Test response",
-            agent_id="test-agent",
-            execution_time=1.5,
-        )
-
-        data = response.model_dump()
-        assert data["success"] is True
-        assert data["response"] == "Test response"
-        assert data["execution_time"] == 1.5
-
     def test_workflow_request_json_serialization(self):
         """Test WorkflowExecutionRequest JSON serialization."""
         request = WorkflowExecutionRequest(
@@ -421,9 +290,11 @@ class TestModelSerialization:
         """Test model validation with extra fields."""
         # Test that extra fields are ignored (if model configured for it)
         with pytest.raises(ValidationError):
-            ChatRequest(
-                message="Test",
-                agent_type="portfolio-manager",
+            WorkflowExecutionRequest(
+                workflow_id="WF_001",
+                workflow_type="clinical_data_analysis",
+                description="Test",
+                input_data={},
                 extra_field="should_be_ignored",  # This should cause validation error
             )
 
@@ -445,24 +316,28 @@ class TestModelEdgeCases:
         assert len(request.input_data) == 100
         assert "key_99" in request.input_data
 
-    def test_unicode_characters_in_message(self):
-        """Test handling of unicode characters in messages."""
-        request = ChatRequest(
-            message="Analyze data for site München with 中文 characters and émojis 🧬",
-            agent_type="portfolio-manager",
+    def test_unicode_characters_in_workflow_description(self):
+        """Test handling of unicode characters in workflow descriptions."""
+        request = WorkflowExecutionRequest(
+            workflow_id="WF_UNICODE",
+            workflow_type="clinical_data_analysis",
+            description="Analyze data for site München with 中文 characters and émojis 🧬",
+            input_data={"test": "data"},
         )
 
-        assert "München" in request.message
-        assert "中文" in request.message
-        assert "🧬" in request.message
+        assert "München" in request.description
+        assert "中文" in request.description
+        assert "🧬" in request.description
 
     def test_null_values_in_optional_fields(self):
         """Test handling of null values in optional fields."""
-        response = ChatResponse(
+        response = WorkflowExecutionResponse(
             success=False,
-            response="",
-            agent_id="test-agent",
+            workflow_id="WF_001",
+            tasks_completed=0,
+            tasks_failed=1,
             execution_time=0.0,
+            results={},
             error=None,  # Explicitly set to None
             metadata={},
         )
@@ -473,19 +348,21 @@ class TestModelEdgeCases:
     def test_extreme_execution_times(self):
         """Test handling of extreme execution time values."""
         # Very small execution time
-        response1 = ChatResponse(
+        response1 = WorkflowExecutionResponse(
             success=True,
-            response="Quick response",
-            agent_id="test-agent",
+            workflow_id="WF_FAST",
+            tasks_completed=1,
             execution_time=0.001,
+            results={"status": "completed"},
         )
         assert response1.execution_time == 0.001
 
         # Very large execution time
-        response2 = ChatResponse(
+        response2 = WorkflowExecutionResponse(
             success=True,
-            response="Slow response",
-            agent_id="test-agent",
+            workflow_id="WF_SLOW",
+            tasks_completed=5,
             execution_time=3600.0,  # 1 hour
+            results={"status": "completed"},
         )
         assert response2.execution_time == 3600.0

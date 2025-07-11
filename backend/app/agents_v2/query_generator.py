@@ -22,9 +22,9 @@ class QueryGenerationContext(BaseModel):
 
 class QueryGeneratorOutput(BaseModel):
     """Structured JSON output for Query Generator responses."""
-    
+
     model_config = {"strict": True}
-    
+
     success: bool
     query_type: str
     generated_query: str
@@ -128,21 +128,26 @@ URGENCY CLASSIFICATION:
 - **Routine**: Administrative, standard response timeline
 
 RESPONSE FORMAT:
-Always return structured JSON with query content:
+You MUST return a response that exactly matches this structure:
 {
-    "query_details": {
-        "query_text": "Please clarify the systolic blood pressure reading of 180 mmHg recorded on Day 15. The source document shows 120 mmHg. Please verify which value is correct and provide the source document page reference.",
-        "query_type": "source_verification",
-        "urgency": "urgent",
-        "medical_context": "Significant BP discrepancy may indicate safety concern",
-        "response_timeline": "72 hours",
-        "follow_up_required": true,
-        "regulatory_implications": "Data integrity requirement for safety parameter",
-        "suggested_response_format": "Verified value: [X] mmHg, Source document page: [X]"
-    }
+    "success": true,
+    "query_type": "source_verification",
+    "generated_query": "Please clarify the systolic blood pressure reading of 180 mmHg recorded on Day 15. The source document shows 120 mmHg. Please verify which value is correct and provide the source document page reference.",
+    "query_priority": "urgent",
+    "regulatory_compliance": "Data integrity requirement for safety parameter",
+    "recommended_timeline": "72 hours",
+    "follow_up_actions": [
+        "Verify correct BP value with source document",
+        "Provide source document page reference",
+        "Schedule safety review if confirmed critical value"
+    ]
 }
 
-Remember: Generate professional, medically appropriate queries that facilitate clear communication."""
+IMPORTANT:
+- Focus on professional query generation using your medical language expertise
+- Return the exact JSON structure above - no nested objects beyond what's shown
+- All fields must be included
+- No calculation tools needed for query generation"""
 
     async def generate_clinical_query(
         self,

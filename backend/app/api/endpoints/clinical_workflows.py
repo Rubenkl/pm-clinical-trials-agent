@@ -71,17 +71,23 @@ async def analyze_clinical_query(request: QueryAnalysisRequest):
         Subject: {request.subject_id}
         Query Text: {request.query_text}
         Data Points: {json.dumps(request.data_points)}
-        
-        Return JSON with severity, findings, and recommendations."""
 
-        # Run analysis
+        Provide your medical analysis as structured JSON matching the QueryAnalyzerOutput format.
+        Focus on clinical interpretation without unnecessary tool usage."""
+
+        # Run analysis with max_turns limit to prevent excessive iterations
         context = QueryAnalysisContext()
-        result = await Runner.run(query_analyzer_agent, message, context=context)
+        result = await Runner.run(
+            query_analyzer_agent,
+            message,
+            context=context,
+            max_turns=3,  # Limit to 3 turns max
+        )
 
         # Parse response
         try:
             response_data = json.loads(result.final_output)
-        except:
+        except json.JSONDecodeError:
             response_data = {"analysis": result.final_output}
 
         return {
@@ -105,20 +111,22 @@ async def verify_source_data(request: DataVerificationRequest):
         message = f"""Verify source data for:
         Subject: {request.subject_id}
         Visit: {request.visit}
-        
+
         EDC Data: {json.dumps(request.edc_data)}
         Source Data: {json.dumps(request.source_data)}
-        
+
         Return JSON with discrepancies and match percentage."""
 
-        # Run verification
+        # Run verification with max_turns limit
         context = DataVerificationContext()
-        result = await Runner.run(data_verifier_agent, message, context=context)
+        result = await Runner.run(
+            data_verifier_agent, message, context=context, max_turns=3
+        )
 
         # Parse response
         try:
             response_data = json.loads(result.final_output)
-        except:
+        except json.JSONDecodeError:
             response_data = {"verification": result.final_output}
 
         return {
@@ -143,17 +151,19 @@ async def detect_protocol_deviations(request: DeviationDetectionRequest):
         Subject: {request.subject_id}
         Visit Data: {json.dumps(request.visit_data)}
         Protocol Requirements: {json.dumps(request.protocol_requirements)}
-        
+
         Return JSON with deviations and compliance score."""
 
-        # Run detection
+        # Run detection with max_turns limit
         context = DeviationDetectionContext()
-        result = await Runner.run(deviation_detector_agent, message, context=context)
+        result = await Runner.run(
+            deviation_detector_agent, message, context=context, max_turns=3
+        )
 
         # Parse response
         try:
             response_data = json.loads(result.final_output)
-        except:
+        except json.JSONDecodeError:
             response_data = {"deviations": result.final_output}
 
         return {
@@ -184,17 +194,22 @@ async def execute_clinical_workflow(request: WorkflowRequest):
         Description: {workflow_descriptions.get(request.workflow_type, 'Custom workflow')}
         Subject ID: {request.subject_id}
         Input Data: {json.dumps(request.input_data)}
-        
+
         Coordinate with relevant agents and return comprehensive results."""
 
-        # Run workflow
+        # Run workflow with max_turns limit
         context = WorkflowContext()
-        result = await Runner.run(portfolio_manager_agent, message, context=context)
+        result = await Runner.run(
+            portfolio_manager_agent,
+            message,
+            context=context,
+            max_turns=5,  # Allow more turns for complex workflows
+        )
 
         # Parse response
         try:
             response_data = json.loads(result.final_output)
-        except:
+        except json.JSONDecodeError:
             response_data = {"workflow_results": result.final_output}
 
         return {
