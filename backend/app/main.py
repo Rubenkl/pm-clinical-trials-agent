@@ -1,22 +1,23 @@
 """FastAPI application main entry point."""
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi.responses import JSONResponse
-from fastapi.exceptions import RequestValidationError
 import time
 import uuid
 
-from app.core.config import get_settings
+from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.responses import JSONResponse
+
 from app.api.api_v1.api import api_router
 from app.api.endpoints.health import health_router
+from app.core.config import get_settings
 
 
 def create_application() -> FastAPI:
     """Create and configure the FastAPI application."""
     settings = get_settings()
-    
+
     app = FastAPI(
         title="Clinical Trials Agent API",
         description="AI-powered clinical trials management system with multi-agent orchestration",
@@ -39,7 +40,7 @@ def create_application() -> FastAPI:
     if not settings.debug:
         app.add_middleware(
             TrustedHostMiddleware,
-            allowed_hosts=["*"]  # Configure appropriately for production
+            allowed_hosts=["*"],  # Configure appropriately for production
         )
 
     # Add request ID middleware
@@ -47,11 +48,11 @@ def create_application() -> FastAPI:
     async def add_request_id(request, call_next):
         request_id = str(uuid.uuid4())
         request.state.request_id = request_id
-        
+
         response = await call_next(request)
         response.headers["X-Request-ID"] = request_id
         response.headers["X-API-Version"] = "v1"
-        
+
         return response
 
     # Add request timing middleware
@@ -72,8 +73,8 @@ def create_application() -> FastAPI:
                 "error": "Validation Error",
                 "message": "The request data is invalid",
                 "details": exc.errors(),
-                "request_id": getattr(request.state, "request_id", None)
-            }
+                "request_id": getattr(request.state, "request_id", None),
+            },
         )
 
     @app.exception_handler(Exception)
@@ -83,9 +84,11 @@ def create_application() -> FastAPI:
             content={
                 "error": "Internal Server Error",
                 "message": "An unexpected error occurred",
-                "details": str(exc) if settings.debug else "Contact system administrator",
-                "request_id": getattr(request.state, "request_id", None)
-            }
+                "details": (
+                    str(exc) if settings.debug else "Contact system administrator"
+                ),
+                "request_id": getattr(request.state, "request_id", None),
+            },
         )
 
     # Include routers
@@ -103,19 +106,21 @@ app = create_application()
 async def startup_event():
     """Initialize application on startup."""
     settings = get_settings()
-    
+
     # Initialize agent system
     from app.api.dependencies import initialize_agent_system
+
     await initialize_agent_system()
-    
+
     # Start background monitoring service
     from app.services.monitoring_service import start_background_monitoring
+
     try:
         await start_background_monitoring()
         print("🔍 Background monitoring service started")
     except Exception as e:
         print(f"⚠️ Failed to start monitoring service: {e}")
-    
+
     print(f"🚀 {settings.app_name} started successfully")
     print(f"📊 Debug mode: {settings.debug}")
     print(f"🔑 OpenAI API configured: {'Yes' if settings.openai_api_key else 'No'}")
@@ -125,19 +130,21 @@ async def startup_event():
 async def shutdown_event():
     """Clean up on application shutdown."""
     print("🔄 Shutting down Clinical Trials Agent API...")
-    
+
     # Stop background monitoring service
     from app.services.monitoring_service import stop_background_monitoring
+
     try:
         await stop_background_monitoring()
         print("🔍 Background monitoring service stopped")
     except Exception as e:
         print(f"⚠️ Error stopping monitoring service: {e}")
-    
+
     # Clean up agent resources
     from app.api.dependencies import cleanup_agent_system
+
     await cleanup_agent_system()
-    
+
     print("✅ Shutdown complete")
 
 
@@ -151,5 +158,5 @@ async def root():
         "version": "0.1.0",
         "status": "operational",
         "docs_url": "/docs" if settings.debug else None,
-        "health_check": "/health"
+        "health_check": "/health",
     }

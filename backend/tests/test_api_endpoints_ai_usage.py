@@ -3,10 +3,11 @@ Integration tests to verify that API endpoints are using AI-powered methods.
 Tests that endpoints call the correct AI methods and handle responses properly.
 """
 
-import pytest
 import json
-from unittest.mock import Mock, patch, AsyncMock
 from datetime import datetime
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -20,10 +21,10 @@ def client():
 
 class TestDeviationsEndpointAI:
     """Test that deviations endpoint uses AI-powered detection."""
-    
+
     def test_detect_deviations_uses_ai_method(self, client):
         """Test that /api/v1/deviations/detect uses detect_protocol_deviations_ai."""
-        
+
         # Mock AI response
         mock_ai_response = {
             "ai_powered": True,
@@ -36,17 +37,19 @@ class TestDeviationsEndpointAI:
                     "description": "Subject taking amiodarone (prohibited)",
                     "clinical_impact": "Risk of QT prolongation with study drug",
                     "regulatory_impact": "Major protocol deviation requiring sponsor notification",
-                    "recommended_action": "Discontinue amiodarone with washout period"
+                    "recommended_action": "Discontinue amiodarone with washout period",
                 }
             ],
             "compliance_score": 0.75,
-            "overall_assessment": "Subject has major deviation requiring intervention"
+            "overall_assessment": "Subject has major deviation requiring intervention",
         }
-        
-        with patch('app.agents.deviation_detector.DeviationDetector.detect_protocol_deviations_ai', 
-                  new_callable=AsyncMock) as mock_ai_method:
+
+        with patch(
+            "app.agents.deviation_detector.DeviationDetector.detect_protocol_deviations_ai",
+            new_callable=AsyncMock,
+        ) as mock_ai_method:
             mock_ai_method.return_value = mock_ai_response
-            
+
             # Make request to endpoint
             response = client.post(
                 "/api/v1/deviations/detect",
@@ -59,23 +62,23 @@ class TestDeviationsEndpointAI:
                     },
                     "actual_data": {
                         "current_medications": ["metoprolol", "amiodarone"]
-                    }
-                }
+                    },
+                },
             )
-            
+
             # Verify response
             assert response.status_code == 200
             result = response.json()
-            
+
             # Verify AI method was called
             assert mock_ai_method.called
-            
+
             # Verify response contains AI-powered data
             assert result["success"] == True
             assert len(result["deviations"]) == 1
             assert result["deviations"][0]["severity"] == "major"
             assert "amiodarone" in result["deviations"][0]["description"]
-            
+
             # Check raw response indicates AI usage
             raw = json.loads(result["raw_response"])
             assert raw.get("ai_powered") == True
@@ -84,61 +87,67 @@ class TestDeviationsEndpointAI:
 
 class TestAnalyticsEndpointAI:
     """Test that analytics endpoint uses AI-powered insights."""
-    
+
     def test_dashboard_analytics_uses_ai_method(self, client):
         """Test that /api/v1/test-data/analytics/dashboard uses generate_analytics_insights_ai."""
-        
+
         # Mock AI response
         mock_ai_response = {
             "ai_powered": True,
-            "study_id": "CARD-2025-001", 
+            "study_id": "CARD-2025-001",
             "analytics_insights": {
                 "enrollment_analysis": {
                     "status": "at_risk",
                     "completion_probability": 0.68,
                     "key_findings": [
                         "Current rate insufficient to meet target",
-                        "Site SITE_003 underperforming"
-                    ]
+                        "Site SITE_003 underperforming",
+                    ],
                 },
                 "quality_analysis": {
                     "overall_score": 0.82,
-                    "concerns": ["Query rate above benchmark"]
+                    "concerns": ["Query rate above benchmark"],
                 },
                 "predictive_insights": {
                     "study_completion_date": "2026-01-15",
-                    "final_enrollment": 245
-                }
+                    "final_enrollment": 245,
+                },
             },
-            "executive_summary": "Study at risk of missing enrollment target by 18%."
+            "executive_summary": "Study at risk of missing enrollment target by 18%.",
         }
-        
+
         # Mock the test data service
-        with patch('app.api.endpoints.test_data.TestDataService') as mock_service_class:
+        with patch("app.api.endpoints.test_data.TestDataService") as mock_service_class:
             mock_service = Mock()
             mock_service.is_test_mode.return_value = True
-            mock_service.get_available_subjects.return_value = ["CARD001", "CARD002", "CARD003"]
+            mock_service.get_available_subjects.return_value = [
+                "CARD001",
+                "CARD002",
+                "CARD003",
+            ]
             mock_service_class.return_value = mock_service
-            
-            with patch('app.agents.analytics_agent.AnalyticsAgent.generate_analytics_insights_ai',
-                      new_callable=AsyncMock) as mock_ai_method:
+
+            with patch(
+                "app.agents.analytics_agent.AnalyticsAgent.generate_analytics_insights_ai",
+                new_callable=AsyncMock,
+            ) as mock_ai_method:
                 mock_ai_method.return_value = mock_ai_response
-                
+
                 # Make request to endpoint
                 response = client.get("/api/v1/test-data/analytics/dashboard")
-                
+
                 # Verify response
                 assert response.status_code == 200
                 result = response.json()
-                
+
                 # Verify AI method was called
                 assert mock_ai_method.called
-                
+
                 # Verify response contains data influenced by AI insights
                 assert "enrollment_trend" in result
                 assert "data_quality_trend" in result
                 assert "recent_activities" in result
-                
+
                 # Check that AI insights influenced the response
                 # First activity should be AI insight
                 assert len(result["recent_activities"]) > 0
@@ -150,10 +159,10 @@ class TestAnalyticsEndpointAI:
 
 class TestProtocolDeviationsEndpointAI:
     """Test that protocol deviations endpoint uses AI detection."""
-    
+
     def test_get_protocol_deviations_uses_ai_method(self, client):
         """Test that /api/v1/test-data/protocol/deviations uses detect_protocol_deviations_ai."""
-        
+
         # Mock AI response
         mock_ai_response = {
             "ai_powered": True,
@@ -164,34 +173,36 @@ class TestProtocolDeviationsEndpointAI:
                     "description": "Subject age 17 below inclusion criteria (18-75)",
                     "clinical_impact": "Minor cannot provide informed consent",
                     "regulatory_impact": "Critical GCP violation",
-                    "recommended_action": "Immediate subject withdrawal required"
+                    "recommended_action": "Immediate subject withdrawal required",
                 }
             ],
-            "compliance_score": 0.45
+            "compliance_score": 0.45,
         }
-        
+
         # Mock the test data service
-        with patch('app.api.endpoints.test_data.TestDataService') as mock_service_class:
+        with patch("app.api.endpoints.test_data.TestDataService") as mock_service_class:
             mock_service = Mock()
             mock_service.is_test_mode.return_value = True
             mock_service.get_available_subjects.return_value = ["CARD001", "CARD002"]
             mock_service_class.return_value = mock_service
-            
-            with patch('app.agents.deviation_detector.DeviationDetector.detect_protocol_deviations_ai',
-                      new_callable=AsyncMock) as mock_ai_method:
+
+            with patch(
+                "app.agents.deviation_detector.DeviationDetector.detect_protocol_deviations_ai",
+                new_callable=AsyncMock,
+            ) as mock_ai_method:
                 mock_ai_method.return_value = mock_ai_response
-                
+
                 # Make request to endpoint
                 response = client.get("/api/v1/test-data/protocol/deviations")
-                
+
                 # Verify response
                 assert response.status_code == 200
                 result = response.json()
-                
+
                 # Verify AI method was called (multiple times for different subjects)
                 assert mock_ai_method.called
                 assert mock_ai_method.call_count >= 1  # Called for each subject checked
-                
+
                 # Verify response structure
                 assert "deviations" in result
                 assert "compliance_metrics" in result
@@ -199,10 +210,10 @@ class TestProtocolDeviationsEndpointAI:
 
 class TestSDVEndpointAI:
     """Test that SDV endpoint continues to use AI verification."""
-    
+
     def test_sdv_verify_uses_ai_method(self, client):
         """Test that /api/v1/sdv/verify continues to use verify_clinical_data_ai."""
-        
+
         # Mock AI response
         mock_ai_response = {
             "success": True,
@@ -213,9 +224,9 @@ class TestSDVEndpointAI:
             "verification_date": datetime.now().isoformat(),
             "subject": {
                 "id": "CARD001",
-                "initials": "JD", 
+                "initials": "JD",
                 "site": "Test Site",
-                "site_id": "SITE01"
+                "site_id": "SITE01",
             },
             "visit": "Baseline",
             "match_score": 0.85,
@@ -230,7 +241,7 @@ class TestSDVEndpointAI:
                     "discrepancy_type": "value_mismatch",
                     "confidence": 0.92,
                     "medical_significance": "0.7 g/dL difference within normal variation",
-                    "recommended_action": "Verify with source document"
+                    "recommended_action": "Verify with source document",
                 }
             ],
             "total_fields_compared": 10,
@@ -240,19 +251,21 @@ class TestSDVEndpointAI:
                 "discrepancies": 1,
                 "skipped": 0,
                 "completion_rate": 0.9,
-                "estimated_time_remaining": 5
+                "estimated_time_remaining": 5,
             },
             "fields_to_verify": [],
             "recommendations": ["Complete verification"],
             "critical_findings": [],
             "execution_time": 1.2,
-            "raw_response": "{}"
+            "raw_response": "{}",
         }
-        
-        with patch('app.agents.data_verifier.DataVerifier.verify_clinical_data_ai',
-                  new_callable=AsyncMock) as mock_ai_method:
+
+        with patch(
+            "app.agents.data_verifier.DataVerifier.verify_clinical_data_ai",
+            new_callable=AsyncMock,
+        ) as mock_ai_method:
             mock_ai_method.return_value = mock_ai_response
-            
+
             # Make request to endpoint
             response = client.post(
                 "/api/v1/sdv/verify",
@@ -261,17 +274,17 @@ class TestSDVEndpointAI:
                     "site_id": "SITE01",
                     "visit": "Baseline",
                     "edc_data": {"hemoglobin": "12.5"},
-                    "source_data": {"hemoglobin": "11.8"}
-                }
+                    "source_data": {"hemoglobin": "11.8"},
+                },
             )
-            
+
             # Verify response
             assert response.status_code == 200
             result = response.json()
-            
+
             # Verify AI method was called
             assert mock_ai_method.called
-            
+
             # Verify response contains AI-powered verification
             assert result["success"] == True
             assert result["match_score"] == 0.85

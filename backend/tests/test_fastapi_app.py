@@ -1,14 +1,15 @@
 """Tests for FastAPI application structure and main app configuration."""
 
+import json
+from typing import Any, Dict
+from unittest.mock import MagicMock, patch
+
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
-import json
-from typing import Dict, Any
 
-from app.main import app, get_settings
 from app.core.config import Settings
+from app.main import app, get_settings
 
 
 class TestFastAPIApp:
@@ -26,21 +27,27 @@ class TestFastAPIApp:
         # Test that the settings function returns the actual settings, not a mock
         # This is a more realistic test that validates the actual configuration
         settings = get_settings()
-        assert settings.app_name == "Clinical Trials Agent"  # This is the actual default value
-        assert hasattr(settings, 'openai_api_key')
-        assert hasattr(settings, 'debug')
+        assert (
+            settings.app_name == "Clinical Trials Agent"
+        )  # This is the actual default value
+        assert hasattr(settings, "openai_api_key")
+        assert hasattr(settings, "debug")
 
     def test_cors_middleware_configuration(self):
         """Test CORS middleware is properly configured."""
         # Check that CORS middleware is added
-        middleware_classes = [middleware.cls.__name__ for middleware in app.user_middleware]
+        middleware_classes = [
+            middleware.cls.__name__ for middleware in app.user_middleware
+        ]
         assert "CORSMiddleware" in middleware_classes
 
     def test_api_router_inclusion(self):
         """Test that API router is properly included."""
         # Check that API routes are included
         route_paths = [route.path for route in app.routes]
-        assert "/api/v1/agents/chat" in route_paths or any("/api/v1" in path for path in route_paths)
+        assert "/api/v1/agents/chat" in route_paths or any(
+            "/api/v1" in path for path in route_paths
+        )
 
 
 class TestHealthEndpoints:
@@ -71,11 +78,14 @@ class TestHealthEndpoints:
         assert "redis" in data["services"]
         assert "agents" in data["services"]
 
-    @patch('app.api.endpoints.health.check_database_health')
+    @patch("app.api.endpoints.health.check_database_health")
     def test_health_database_failure(self, mock_db_check, client):
         """Test health endpoint when database is unhealthy."""
-        mock_db_check.return_value = {"status": "unhealthy", "error": "Connection failed"}
-        
+        mock_db_check.return_value = {
+            "status": "unhealthy",
+            "error": "Connection failed",
+        }
+
         response = client.get("/health/detailed")
         assert response.status_code == 503
         data = response.json()
@@ -88,22 +98,28 @@ class TestAgentEndpoints:
 
     def setup_method(self):
         """Set up test method with mocked dependencies."""
-        from app.api.dependencies import validate_openai_key, get_portfolio_manager, validate_workflow_permissions
-        
+        from app.api.dependencies import (
+            get_portfolio_manager,
+            validate_openai_key,
+            validate_workflow_permissions,
+        )
+
         self.mock_manager = MagicMock()
-        
+
         def mock_validate_openai_key():
             return True
-            
+
         def mock_get_portfolio_manager():
             return self.mock_manager
-            
+
         def mock_validate_workflow_permissions(workflow_type: str):
             return True
-            
+
         app.dependency_overrides[validate_openai_key] = mock_validate_openai_key
         app.dependency_overrides[get_portfolio_manager] = mock_get_portfolio_manager
-        app.dependency_overrides[validate_workflow_permissions] = mock_validate_workflow_permissions
+        app.dependency_overrides[validate_workflow_permissions] = (
+            mock_validate_workflow_permissions
+        )
 
     def teardown_method(self):
         """Clean up after test method."""
@@ -114,7 +130,6 @@ class TestAgentEndpoints:
         """Create test client."""
         return TestClient(app)
 
-
     def test_chat_endpoint_success(self, client):
         """Test successful chat interaction with agent."""
         # Mock portfolio manager response
@@ -124,28 +139,27 @@ class TestAgentEndpoints:
         mock_response.agent_id = "portfolio-manager"
         mock_response.execution_time = 2.5
         mock_response.metadata = {"tokens_used": 250, "model": "gpt-4"}
-        
+
         # Mock as async function
         async def mock_process_message(message):
             return mock_response
-        
+
         self.mock_manager.process_message = mock_process_message
 
         payload = {
             "message": "Analyze clinical trial data for Site 101",
             "agent_type": "portfolio-manager",
-            "metadata": {
-                "user_id": "user123",
-                "session_id": "session456"
-            }
+            "metadata": {"user_id": "user123", "session_id": "session456"},
         }
 
         response = client.post("/api/v1/agents/chat", json=payload)
         assert response.status_code == 200
-        
+
         data = response.json()
         assert data["success"] is True
-        assert data["response"] == "Analysis complete. Found 3 discrepancies in the data."
+        assert (
+            data["response"] == "Analysis complete. Found 3 discrepancies in the data."
+        )
         assert data["agent_id"] == "portfolio-manager"
         assert isinstance(data["execution_time"], float)
         assert data["execution_time"] > 0
@@ -171,21 +185,23 @@ class TestAgentEndpoints:
         mock_response.agent_id = "portfolio-manager"
         mock_response.execution_time = 0.1
         mock_response.metadata = {}
-        
+
         # Mock as async function
         async def mock_process_message(message):
             return mock_response
-        
+
         self.mock_manager.process_message = mock_process_message
 
         payload = {
             "message": "Analyze clinical trial data",
-            "agent_type": "portfolio-manager"
+            "agent_type": "portfolio-manager",
         }
 
         response = client.post("/api/v1/agents/chat", json=payload)
-        assert response.status_code == 200  # Endpoint returns 200 with error in response
-        
+        assert (
+            response.status_code == 200
+        )  # Endpoint returns 200 with error in response
+
         data = response.json()
         assert data["success"] is False
         assert "OpenAI API rate limit exceeded" in data["error"]
@@ -197,26 +213,25 @@ class TestAgentEndpoints:
             "success_rate": 95.5,
             "workflows_executed": 25,
             "active_workflows": 1,
-            "registered_agents": 3
+            "registered_agents": 3,
         }
         self.mock_manager.get_performance_metrics.return_value = mock_metrics
-        
+
         # Mock agent health check (async method)
         async def mock_check_agent_health():
-            return {
-                "query-analyzer": {
-                    "status": "active",
-                    "success_rate": 98.1
-                }
-            }
+            return {"query-analyzer": {"status": "active", "success_rate": 98.1}}
+
         self.mock_manager.check_agent_health = mock_check_agent_health
-        
+
         # Mock available agents (sync method)
-        self.mock_manager.get_available_agents.return_value = ["query-analyzer", "data-verifier"]
-        
+        self.mock_manager.get_available_agents.return_value = [
+            "query-analyzer",
+            "data-verifier",
+        ]
+
         response = client.get("/api/v1/agents/status")
         assert response.status_code == 200
-        
+
         data = response.json()
         assert "agents" in data
         assert data["agents"]["portfolio-manager"]["status"] == "active"
@@ -236,39 +251,35 @@ class TestAgentEndpoints:
         mock_workflow_response.execution_time = 45.2
         mock_workflow_response.results = {
             "queries_generated": 12,
-            "discrepancies_found": 5
+            "discrepancies_found": 5,
         }
         mock_workflow_response.error = None
         mock_workflow_response.metadata = {"execution_mode": "test"}
-        
+
         # Mock as async function
         async def mock_execute_workflow(workflow_request):
             return mock_workflow_response
-        
+
         self.mock_manager.execute_workflow = mock_execute_workflow
 
         payload = {
             "workflow_id": "WF_001",
             "workflow_type": "clinical_data_analysis",
             "description": "Analyze Site 101 data",
-            "input_data": {
-                "site_id": "101",
-                "subjects": ["S001", "S002", "S003"]
-            }
+            "input_data": {"site_id": "101", "subjects": ["S001", "S002", "S003"]},
         }
 
         response = client.post(
-            "/api/v1/agents/workflow?workflow_type=clinical_data_analysis", 
-            json=payload
+            "/api/v1/agents/workflow?workflow_type=clinical_data_analysis", json=payload
         )
-        
+
         # Debug the error if status is not 200
         if response.status_code != 200:
             print(f"Response status: {response.status_code}")
             print(f"Response body: {response.text}")
-        
+
         assert response.status_code == 200
-        
+
         data = response.json()
         assert data["success"] is True
         assert data["workflow_id"] == "WF_001"
@@ -281,12 +292,12 @@ class TestAPIModels:
     def test_chat_request_model_validation(self):
         """Test ChatRequest model validation."""
         from app.api.models.agent_models import ChatRequest
-        
+
         # Valid request
         valid_request = ChatRequest(
             message="Analyze clinical data",
             agent_type="portfolio-manager",
-            metadata={"user_id": "123"}
+            metadata={"user_id": "123"},
         )
         assert valid_request.message == "Analyze clinical data"
         assert valid_request.agent_type == "portfolio-manager"
@@ -299,15 +310,15 @@ class TestAPIModels:
     def test_chat_response_model(self):
         """Test ChatResponse model."""
         from app.api.models.agent_models import ChatResponse
-        
+
         response = ChatResponse(
             success=True,
             response="Analysis complete",
             agent_id="portfolio-manager",
             execution_time=2.5,
-            metadata={"tokens_used": 150}
+            metadata={"tokens_used": 150},
         )
-        
+
         assert response.success is True
         assert response.response == "Analysis complete"
         assert response.execution_time == 2.5
@@ -315,14 +326,14 @@ class TestAPIModels:
     def test_workflow_request_model_validation(self):
         """Test WorkflowRequest model validation."""
         from app.api.models.agent_models import WorkflowExecutionRequest
-        
+
         request = WorkflowExecutionRequest(
             workflow_id="WF_001",
             workflow_type="clinical_data_analysis",
             description="Test workflow",
-            input_data={"test": "data"}
+            input_data={"test": "data"},
         )
-        
+
         assert request.workflow_id == "WF_001"
         assert request.workflow_type == "clinical_data_analysis"
         assert request.priority == 1  # Default value
@@ -330,19 +341,19 @@ class TestAPIModels:
     def test_agent_status_response_model(self):
         """Test AgentStatusResponse model."""
         from app.api.models.agent_models import AgentStatusResponse
-        
+
         status = AgentStatusResponse(
             agents={
                 "portfolio-manager": {
                     "status": "active",
                     "success_rate": 95.5,
-                    "active_workflows": 2
+                    "active_workflows": 2,
                 }
             },
             total_agents=1,
-            active_agents=1
+            active_agents=1,
         )
-        
+
         assert status.total_agents == 1
         assert status.active_agents == 1
         assert status.agents["portfolio-manager"]["status"] == "active"
@@ -354,36 +365,39 @@ class TestAPIDependencies:
     def test_get_portfolio_manager_dependency(self):
         """Test portfolio manager dependency injection."""
         from app.api.dependencies import get_portfolio_manager
-        
+
         # Test that dependency returns portfolio manager instance
         manager = get_portfolio_manager()
         from app.agents.portfolio_manager import PortfolioManager
+
         assert isinstance(manager, PortfolioManager)
 
-    @patch('app.api.dependencies.get_settings')
+    @patch("app.api.dependencies.get_settings")
     def test_get_settings_dependency(self, mock_get_settings):
         """Test settings dependency injection."""
         import asyncio
+
         from app.api.dependencies import get_current_settings
-        
+
         mock_settings = MagicMock()
         mock_settings.openai_api_key = "test-key"
         mock_get_settings.return_value = mock_settings
-        
+
         # Since get_current_settings is async, we need to run it properly
         async def run_test():
             settings = await get_current_settings()
             return settings
-            
+
         settings = asyncio.run(run_test())
         assert settings.openai_api_key == "test-key"
 
     def test_validate_openai_key_dependency(self):
         """Test OpenAI API key validation dependency."""
+        from fastapi import HTTPException
+
         from app.api.dependencies import validate_openai_key
         from app.core.config import Settings
-        from fastapi import HTTPException
-        
+
         # Test with valid key
         settings_with_key = Settings(openai_api_key="sk-test123")
         result = validate_openai_key(settings_with_key)
@@ -413,28 +427,32 @@ class TestErrorHandling:
     def test_500_error_handler(self, client):
         """Test 500 error handling."""
         # Override dependencies to avoid OpenAI key validation
-        from app.api.dependencies import validate_openai_key, get_portfolio_manager
+        from app.api.dependencies import get_portfolio_manager, validate_openai_key
         from app.main import app
-        
+
         def mock_validate_openai_key():
             return True
-            
+
         def mock_get_portfolio_manager():
             # Return a mock that will raise an exception when process_message is called
             mock_manager = MagicMock()
+
             async def failing_process_message(message):
                 raise Exception("Internal server error")
+
             mock_manager.process_message = failing_process_message
             return mock_manager
-            
+
         app.dependency_overrides[validate_openai_key] = mock_validate_openai_key
         app.dependency_overrides[get_portfolio_manager] = mock_get_portfolio_manager
-        
+
         try:
-            response = client.post("/api/v1/agents/chat", json={
-                "message": "Test message"
-            })
-            assert response.status_code == 200  # The endpoint catches exceptions and returns them in the response
+            response = client.post(
+                "/api/v1/agents/chat", json={"message": "Test message"}
+            )
+            assert (
+                response.status_code == 200
+            )  # The endpoint catches exceptions and returns them in the response
             data = response.json()
             assert data["success"] is False
             assert "Internal server error" in data["error"]
@@ -446,18 +464,21 @@ class TestErrorHandling:
         # Override dependencies to avoid OpenAI key validation
         from app.api.dependencies import validate_openai_key
         from app.main import app
-        
+
         def mock_validate_openai_key():
             return True
-            
+
         app.dependency_overrides[validate_openai_key] = mock_validate_openai_key
-        
+
         try:
             # Send invalid JSON
-            response = client.post("/api/v1/agents/chat", json={
-                "message": "",  # Empty message should fail validation
-                "agent_type": "invalid-agent-type"
-            })
+            response = client.post(
+                "/api/v1/agents/chat",
+                json={
+                    "message": "",  # Empty message should fail validation
+                    "agent_type": "invalid-agent-type",
+                },
+            )
             assert response.status_code == 422
             data = response.json()
             # Our custom validation error handler returns "details" not "detail"
@@ -498,12 +519,14 @@ class TestMiddleware:
         """Test CORS headers are present."""
         # Make a simple GET request to check if CORS headers are added
         response = client.get("/health")
-        
+
         # In debug mode with CORS enabled, check if CORS headers might be present
         # The test passes if we either have CORS headers or the response is successful
-        has_cors_headers = any("access-control" in h.lower() for h in response.headers.keys())
+        has_cors_headers = any(
+            "access-control" in h.lower() for h in response.headers.keys()
+        )
         is_successful = response.status_code == 200
-        
+
         # The endpoint should work - CORS headers may or may not be present depending on configuration
         assert is_successful
 
@@ -518,11 +541,11 @@ class TestMiddleware:
         # Make multiple requests to test rate limiting
         responses = []
         for _ in range(5):
-            response = client.post("/api/v1/agents/chat", json={
-                "message": "Test message"
-            })
+            response = client.post(
+                "/api/v1/agents/chat", json={"message": "Test message"}
+            )
             responses.append(response.status_code)
-        
+
         # Should not all be rate limited (429) in normal testing
         assert not all(status == 429 for status in responses)
 
@@ -530,7 +553,7 @@ class TestMiddleware:
 @pytest.fixture
 def mock_openai_client():
     """Mock OpenAI client for testing."""
-    with patch('app.agents.base_agent.AsyncOpenAI') as mock_client:
+    with patch("app.agents.base_agent.AsyncOpenAI") as mock_client:
         mock_instance = MagicMock()
         mock_client.return_value = mock_instance
         yield mock_instance
@@ -540,7 +563,5 @@ def mock_openai_client():
 def mock_settings():
     """Mock settings for testing."""
     return Settings(
-        app_name="Test Clinical Trials Agent",
-        openai_api_key="test-key-123",
-        debug=True
+        app_name="Test Clinical Trials Agent", openai_api_key="test-key-123", debug=True
     )

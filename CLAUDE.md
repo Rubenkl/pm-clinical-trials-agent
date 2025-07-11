@@ -9,7 +9,8 @@
 1. 🔴 **RED**: Write failing tests AND run them to confirm failures
 2. 🟢 **GREEN**: Write minimum code to make tests pass AND verify with test runs  
 3. 🔵 **REFACTOR**: Improve code while keeping tests passing AND verify after each change
-4. 🔄 **REPEAT**: Continue cycles until all requirements met
+4. ✨ **LINT**: Run `make lint` (or `make format` to auto-fix) before committing
+5. 🔄 **REPEAT**: Continue cycles until all requirements met
 
 ### Presentation TDD Commands
 ```bash
@@ -106,6 +107,12 @@ pm-clinical-trials-agent/
 cd backend
 pip install -r requirements.txt
 uvicorn app.main:app --reload
+
+# Code quality checks (ALWAYS run before committing!)
+make lint      # Check code style
+make format    # Auto-format code
+make test-cov  # Run tests with coverage
+make check-all # Run everything
 ```
 
 ### Frontend Development

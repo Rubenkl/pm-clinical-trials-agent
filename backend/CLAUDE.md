@@ -300,6 +300,44 @@ mypy==1.7.1
 python-dotenv==1.0.0
 ```
 
+## Code Quality & Linting
+
+### Quick Commands
+```bash
+# Format code automatically
+make format
+
+# Run all linters
+make lint
+
+# Run tests with coverage
+make test-cov
+
+# Run everything (lint + test)
+make check-all
+```
+
+### Available Linters
+- **Black**: Code formatting (88 char line length)
+- **isort**: Import sorting (black-compatible profile)
+- **Flake8**: Style guide enforcement
+- **MyPy**: Static type checking
+
+### Pre-commit Hooks
+```bash
+# Install pre-commit hooks
+pre-commit install
+
+# Run on all files
+pre-commit run --all-files
+```
+
+### CI/CD Integration
+All code is automatically checked on push/PR via GitHub Actions:
+- Linting (black, isort, flake8, mypy)
+- Testing with coverage
+- Security scanning with Bandit
+
 ## Testing
 ```bash
 # Run all tests

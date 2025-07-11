@@ -1,0 +1,23 @@
+[flake8]
+# E203: whitespace before ':' (conflicts with black)
+# E501: line too long (black handles this)
+# W503: line break before binary operator (conflicts with black)
+# E402: module level import not at top of file (needed for conditional imports)
+ignore = E203, E501, W503, E402
+max-line-length = 88
+exclude = 
+    .git,
+    __pycache__,
+    venv,
+    .venv,
+    .eggs,
+    *.egg,
+    build,
+    dist,
+    .pytest_cache,
+    .mypy_cache
+per-file-ignores =
+    # F401: imported but unused (needed for __init__.py exports)
+    __init__.py:F401
+    # Test files can have longer lines and unused imports
+    test_*.py:E501,F401
