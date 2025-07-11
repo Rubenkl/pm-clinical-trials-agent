@@ -128,7 +128,10 @@ async def verify_source_data(request: DataVerificationRequest):
         # Run verification with max_turns limit
         context = DataVerificationContext()
         result = await Runner.run(
-            data_verifier_agent, message, context=context, max_turns=3
+            data_verifier_agent, 
+            message, 
+            context=context, 
+            max_turns=6  # Higher limit for complex medical verification
         )
 
         # Handle Pydantic model response
@@ -173,7 +176,10 @@ async def detect_protocol_deviations(request: DeviationDetectionRequest):
         # Run detection with max_turns limit
         context = DeviationDetectionContext()
         result = await Runner.run(
-            deviation_detector_agent, message, context=context, max_turns=3
+            deviation_detector_agent, 
+            message, 
+            context=context, 
+            max_turns=8  # Higher limit for complex regulatory analysis
         )
 
         # Handle Pydantic model response
@@ -227,7 +233,7 @@ async def execute_clinical_workflow(request: WorkflowRequest):
             portfolio_manager_agent,
             message,
             context=context,
-            max_turns=5,  # Allow more turns for complex workflows
+            max_turns=8  # Higher limit for complex multi-agent workflows
         )
 
         # Handle Pydantic model response

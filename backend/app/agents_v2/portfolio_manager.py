@@ -9,7 +9,7 @@ import json
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from agents import Agent, Runner
+from agents import Agent, Runner, handoff
 from pydantic import BaseModel, Field
 
 from .calculation_tools import (
@@ -22,6 +22,14 @@ from .calculation_tools import (
     convert_medical_units,
 )
 from .test_data_tools import get_subject_discrepancies, get_test_subject_data
+
+# Import specialist agents for handoffs
+from .query_analyzer import query_analyzer_agent
+from .data_verifier import data_verifier_agent
+from .deviation_detector import deviation_detector_agent
+from .query_generator import query_generator_agent
+from .query_tracker import query_tracker_agent
+from .analytics_agent import analytics_agent
 
 
 class WorkflowContext(BaseModel):
@@ -90,6 +98,14 @@ class PortfolioManager:
             name="PortfolioManager",
             instructions=self._get_instructions(),
             tools=tools,
+            handoffs=[
+                handoff(query_analyzer_agent, tool_name_override="transfer_to_query_analyzer"),
+                handoff(data_verifier_agent, tool_name_override="transfer_to_data_verifier"),
+                handoff(deviation_detector_agent, tool_name_override="transfer_to_deviation_detector"),
+                handoff(query_generator_agent, tool_name_override="transfer_to_query_generator"),
+                handoff(query_tracker_agent, tool_name_override="transfer_to_query_tracker"),
+                handoff(analytics_agent, tool_name_override="transfer_to_analytics_agent"),
+            ],
             model="gpt-4o-mini",
             output_type=PortfolioManagerOutput,
         )
@@ -99,11 +115,29 @@ class PortfolioManager:
         return """You are the Portfolio Manager for a clinical trials automation platform.
 
 CORE RESPONSIBILITIES:
-1. Orchestrate multi-agent workflows for clinical operations
-2. Coordinate with specialized agents (Query Analyzer, Data Verifier, etc.)
-3. Manage workflow context and state across complex operations
-4. Make clinical assessments using your medical knowledge
-5. Delegate specific tasks to appropriate specialized agents
+1. **Intelligent Triage**: Analyze any input and determine what expertise is needed
+2. **Smart Delegation**: Use handoffs to transfer control to specialist agents when their expertise is required
+3. **Direct Analysis**: Perform analysis yourself when specialist expertise isn't needed
+4. **Result Integration**: When multiple specialists are needed, coordinate their work
+5. **Quality Assessment**: Evaluate results and determine if additional expertise is needed
+
+AVAILABLE SPECIALIST AGENTS (via handoffs):
+- **transfer_to_query_analyzer**: For clinical data analysis and discrepancy assessment
+- **transfer_to_data_verifier**: For EDC vs source document verification
+- **transfer_to_deviation_detector**: For protocol compliance and regulatory analysis
+- **transfer_to_query_generator**: For professional clinical query creation
+- **transfer_to_query_tracker**: For query lifecycle and SLA management
+- **transfer_to_analytics_agent**: For performance analytics and operational insights
+
+DELEGATION DECISION LOGIC:
+- **Simple clinical assessment**: Do it yourself using medical knowledge
+- **Complex data analysis with multiple discrepancies**: → transfer_to_query_analyzer
+- **Data verification between systems**: → transfer_to_data_verifier
+- **Protocol compliance evaluation**: → transfer_to_deviation_detector
+- **Query creation needed**: → transfer_to_query_generator
+- **Query management/tracking**: → transfer_to_query_tracker  
+- **Performance analysis**: → transfer_to_analytics_agent
+- **Multiple specialties needed**: Handle coordination yourself, use handoffs as needed
 
 CALCULATION TOOLS (use only when needed for specific calculations):
 - Medical unit conversion tools (mg/dL to mmol/L, etc.)

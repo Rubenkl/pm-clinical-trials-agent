@@ -487,9 +487,11 @@ The agents were hitting the 10-turn limit due to:
 ### **Solution Implemented**:
 1. **Aligned instructions with output schema**: Updated agent instructions to match QueryAnalyzerOutput exactly
 2. **Clarified tool usage**: Tools marked as "use only when needed for specific calculations"
-3. **Added max_turns limits**: 
-   - Most endpoints: `max_turns=3`
-   - Complex workflows: `max_turns=5`
+3. **Added appropriate max_turns limits based on complexity**: 
+   - Simple analysis: `max_turns=3` (analyze-query)
+   - Complex medical verification: `max_turns=6` (verify-data)
+   - Complex regulatory analysis: `max_turns=8` (detect-deviations)
+   - Multi-agent workflows: `max_turns=8` (execute-workflow)
 4. **Fixed bare except clauses**: Changed to `except json.JSONDecodeError`
 
 ### **Results**:
