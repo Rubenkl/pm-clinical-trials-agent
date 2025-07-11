@@ -82,7 +82,6 @@ async def initialize_agent_system() -> None:
     print(f"📊 Portfolio Manager: {portfolio_manager.__class__.__name__}")
     print(f"🔍 Query Analyzer: {query_analyzer.__class__.__name__}")
     print(f"✅ Data Verifier: {data_verifier.__class__.__name__}")
-    print(f"🤝 Available agents: {portfolio_manager.get_available_agents()}")
 
 
 async def cleanup_agent_system() -> None:

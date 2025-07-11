@@ -320,13 +320,15 @@ Available workflow types for `/clinical/execute-workflow`:
 
 ## Agent Capabilities
 
-The system uses 5 specialized AI agents:
+The system uses 7 specialized AI agents (agents_v2 clean implementation):
 
 1. **Portfolio Manager** - Orchestrates multi-agent workflows
-2. **Query Analyzer** - Clinical data analysis and severity assessment
+2. **Query Analyzer** - Clinical data analysis and severity assessment  
 3. **Data Verifier** - EDC vs source document verification
-4. **Deviation Detector** - Protocol compliance monitoring
-5. **Query Generator** - Professional query creation (via workflows)
+4. **Query Generator** - Professional query creation with medical language expertise
+5. **Query Tracker** - Query lifecycle management and intelligent escalation
+6. **Deviation Detector** - Protocol compliance monitoring with regulatory knowledge
+7. **Analytics Agent** - Performance analytics and operational insights
 
 ## Example Usage
 
