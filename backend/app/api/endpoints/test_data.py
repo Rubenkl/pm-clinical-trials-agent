@@ -1,5 +1,6 @@
 """Test Data API endpoints for development and testing."""
 
+from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -431,7 +432,7 @@ def _format_queries_for_frontend(queries: list, analyses: list):
         analysis = analyses[i] if i < len(analyses) else analyses[0]
 
         formatted_query = {
-            "query_id": query.get("query_id", f"QRY-2025-{i+1:04d}"),
+            "query_id": query.get("query_id", f"QRY-2025-{i + 1:04d}"),
             "subject_id": analysis["subject_id"],
             "site_id": analysis["site_name"].replace("Site ", "SITE_"),
             "query_type": (
@@ -715,7 +716,7 @@ async def _process_sdv_sessions(verification_contexts: list, data_verifier):
             )
 
             return {
-                "session_id": f"SDV-2025-{i+1:04d}",
+                "session_id": f"SDV-2025-{i + 1:04d}",
                 "subject_id": context["subject_id"],
                 "site_id": context["site_id"],
                 "monitor_name": context["monitor_name"],
@@ -741,7 +742,7 @@ async def _process_sdv_sessions(verification_contexts: list, data_verifier):
             )
             # Return minimal session data
             return {
-                "session_id": f"SDV-2025-{i+1:04d}",
+                "session_id": f"SDV-2025-{i + 1:04d}",
                 "subject_id": context["subject_id"],
                 "site_id": context["site_id"],
                 "monitor_name": context["monitor_name"],
@@ -1154,9 +1155,9 @@ async def get_dashboard_analytics(
         and "analytics_insights" in ai_analytics_result
     ):
         # Extract insights from AI analysis
-        insights = ai_analytics_result.get("analytics_insights", {})
-        enrollment_analysis = insights.get("enrollment_analysis", {})
-        quality_analysis = insights.get("quality_analysis", {})
+        # insights = ai_analytics_result.get("analytics_insights", {})
+        # enrollment_analysis = insights.get("enrollment_analysis", {})
+        # quality_analysis = insights.get("quality_analysis", {})
 
         # Generate trend data based on AI insights
         enrollment_trend = []
@@ -1239,7 +1240,6 @@ async def get_dashboard_analytics(
         )
     else:
         # Fallback to basic analytics
-        from datetime import datetime, timedelta
 
         # Basic fallback data
         enrollment_trend = [

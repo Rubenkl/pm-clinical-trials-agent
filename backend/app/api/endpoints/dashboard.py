@@ -4,18 +4,15 @@ Provides comprehensive overview and real-time metrics for the platform.
 """
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException
 
 from app.api.models.structured_responses import (
     AgentActivity,
     DashboardOverviewResponse,
     QueryStatistics,
-    QueryStatus,
     SDVStatistics,
-    SeverityLevel,
     SystemHealthMetrics,
     TrialOverviewResponse,
 )

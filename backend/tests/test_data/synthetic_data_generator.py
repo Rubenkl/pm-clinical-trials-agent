@@ -20,7 +20,9 @@ class StudyConfiguration:
     discrepancy_rate: float = 0.15  # 15% of data points have discrepancies
     critical_event_rate: float = 0.05  # 5% critical safety events
     protocol_deviation_rate: float = 0.25  # 25% of subjects have protocol deviations
-    clean_subjects_rate: float = 0.30  # 30% of subjects are completely clean (no discrepancies or deviations)
+    clean_subjects_rate: float = (
+        0.30  # 30% of subjects are completely clean (no discrepancies or deviations)
+    )
 
 
 class SyntheticDataGenerator:
@@ -150,7 +152,11 @@ class SyntheticDataGenerator:
                 subject_has_discrepancies = False
                 subject_has_protocol_deviations = False
                 subject_quality_profile = "clean"
-            elif quality_roll < self.config.clean_subjects_rate + (1 - self.config.clean_subjects_rate) * 0.5:
+            elif (
+                quality_roll
+                < self.config.clean_subjects_rate
+                + (1 - self.config.clean_subjects_rate) * 0.5
+            ):
                 # Discrepancy-only subjects: have discrepancies but compliant with protocol
                 subject_has_discrepancies = True
                 subject_has_protocol_deviations = False
@@ -158,15 +164,24 @@ class SyntheticDataGenerator:
             else:
                 # Complex subjects: may have both discrepancies and protocol deviations
                 subject_has_discrepancies = random.random() < 0.8  # 80% chance
-                subject_has_protocol_deviations = random.random() < self.config.protocol_deviation_rate
+                subject_has_protocol_deviations = (
+                    random.random() < self.config.protocol_deviation_rate
+                )
                 subject_quality_profile = "complex"
 
             # Generate baseline subject with quality profile metadata
             subject = {
                 "subject_id": subject_id,
                 "site_id": site_id,
-                "demographics": self._generate_demographics(template, subject_has_protocol_deviations),
-                "visits": self._generate_visits(subject_id, template, subject_has_discrepancies, subject_has_protocol_deviations),
+                "demographics": self._generate_demographics(
+                    template, subject_has_protocol_deviations
+                ),
+                "visits": self._generate_visits(
+                    subject_id,
+                    template,
+                    subject_has_discrepancies,
+                    subject_has_protocol_deviations,
+                ),
                 "overall_status": random.choice(["active", "completed", "withdrawn"]),
                 "data_quality": {
                     "total_data_points": 0,
@@ -190,20 +205,28 @@ class SyntheticDataGenerator:
 
         return subjects
 
-    def _generate_demographics(self, template: Dict, has_protocol_deviations: bool = False) -> Dict[str, Any]:
+    def _generate_demographics(
+        self, template: Dict, has_protocol_deviations: bool = False
+    ) -> Dict[str, Any]:
         """Generate realistic demographic data with optional protocol deviations."""
-        protocol_reqs = template.get("protocol_requirements", {}).get("inclusion_criteria", {})
-        
+        protocol_reqs = template.get("protocol_requirements", {}).get(
+            "inclusion_criteria", {}
+        )
+
         if has_protocol_deviations and random.random() < 0.5:
             # Introduce age-related protocol deviation
             if random.random() < 0.5:
                 age = random.choice([17, 81, 82, 85])  # Outside 18-80 range
             else:
-                age = random.randint(protocol_reqs.get("age_min", 18), protocol_reqs.get("age_max", 80))
+                age = random.randint(
+                    protocol_reqs.get("age_min", 18), protocol_reqs.get("age_max", 80)
+                )
         else:
             # Compliant age
-            age = random.randint(protocol_reqs.get("age_min", 18), protocol_reqs.get("age_max", 80))
-        
+            age = random.randint(
+                protocol_reqs.get("age_min", 18), protocol_reqs.get("age_max", 80)
+            )
+
         return {
             "age": age,
             "gender": random.choice(["M", "F"]),
@@ -215,7 +238,13 @@ class SyntheticDataGenerator:
             ).strftime("%Y-%m-%d"),
         }
 
-    def _generate_visits(self, subject_id: str, template: Dict, has_discrepancies: bool = True, has_protocol_deviations: bool = False) -> List[Dict[str, Any]]:
+    def _generate_visits(
+        self,
+        subject_id: str,
+        template: Dict,
+        has_discrepancies: bool = True,
+        has_protocol_deviations: bool = False,
+    ) -> List[Dict[str, Any]]:
         """Generate visit data with potential discrepancies and protocol deviations."""
         visits = []
         visit_schedule = [
@@ -227,43 +256,61 @@ class SyntheticDataGenerator:
             "End_of_Study",
         ]
 
-        protocol_windows = template.get("protocol_requirements", {}).get("visit_windows", {})
+        protocol_windows = template.get("protocol_requirements", {}).get(
+            "visit_windows", {}
+        )
         baseline_date = datetime.now() - timedelta(days=random.randint(30, 180))
-        
+
         for i, visit_name in enumerate(visit_schedule):
             # Calculate intended visit date based on baseline
             weeks_from_baseline = {
                 "Screening": -1,
                 "Baseline": 0,
                 "Week_4": 4,
-                "Week_8": 8, 
+                "Week_8": 8,
                 "Week_12": 12,
-                "End_of_Study": 16
+                "End_of_Study": 16,
             }.get(visit_name, 0)
-            
+
             intended_visit_date = baseline_date + timedelta(weeks=weeks_from_baseline)
-            
+
             if visit_name == "Baseline":
                 actual_visit_date = intended_visit_date
             else:
-                
+
                 # Introduce visit window deviations if flagged
-                if has_protocol_deviations and visit_name in protocol_windows and random.random() < 0.3:
+                if (
+                    has_protocol_deviations
+                    and visit_name in protocol_windows
+                    and random.random() < 0.3
+                ):
                     # Create visit outside allowed window
                     window = protocol_windows[visit_name]
-                    max_deviation = max(window.get("days_before", 0), window.get("days_after", 0))
-                    deviation_days = random.randint(max_deviation + 1, max_deviation + 10)
-                    actual_visit_date = intended_visit_date + timedelta(days=random.choice([-deviation_days, deviation_days]))
+                    max_deviation = max(
+                        window.get("days_before", 0), window.get("days_after", 0)
+                    )
+                    deviation_days = random.randint(
+                        max_deviation + 1, max_deviation + 10
+                    )
+                    actual_visit_date = intended_visit_date + timedelta(
+                        days=random.choice([-deviation_days, deviation_days])
+                    )
                 else:
                     # Visit within allowed window or slightly early/late
-                    window_days = random.randint(-2, 2) if visit_name != "Baseline" else 0
-                    actual_visit_date = intended_visit_date + timedelta(days=window_days)
-            
+                    window_days = (
+                        random.randint(-2, 2) if visit_name != "Baseline" else 0
+                    )
+                    actual_visit_date = intended_visit_date + timedelta(
+                        days=window_days
+                    )
+
             visit = {
                 "visit_name": visit_name,
                 "visit_date": actual_visit_date.strftime("%Y-%m-%d"),
                 "intended_visit_date": intended_visit_date.strftime("%Y-%m-%d"),
-                "edc_data": self._generate_visit_data(template, has_protocol_deviations),
+                "edc_data": self._generate_visit_data(
+                    template, has_protocol_deviations
+                ),
                 "source_data": None,  # Will be generated with discrepancies
                 "discrepancies": [],
                 "queries": [],
@@ -289,21 +336,31 @@ class SyntheticDataGenerator:
 
         return visits
 
-    def _generate_visit_data(self, template: Dict, has_protocol_deviations: bool = False) -> Dict[str, Any]:
+    def _generate_visit_data(
+        self, template: Dict, has_protocol_deviations: bool = False
+    ) -> Dict[str, Any]:
         """Generate realistic visit data based on therapeutic area template with optional protocol deviations."""
         data = {}
 
         # Generate vital signs with potential protocol deviations
         if "vital_signs" in template:
             vital_signs = {}
-            protocol_reqs = template.get("protocol_requirements", {}).get("inclusion_criteria", {})
-            
+            protocol_reqs = template.get("protocol_requirements", {}).get(
+                "inclusion_criteria", {}
+            )
+
             for param, (min_val, max_val) in template["vital_signs"].items():
-                if has_protocol_deviations and param == "systolic_bp" and random.random() < 0.3:
+                if (
+                    has_protocol_deviations
+                    and param == "systolic_bp"
+                    and random.random() < 0.3
+                ):
                     # Introduce BP protocol deviation
                     max_allowed = protocol_reqs.get("systolic_bp_max", 180)
                     if random.random() < 0.5:
-                        vital_signs[param] = round(random.uniform(max_allowed + 5, max_allowed + 30), 1)
+                        vital_signs[param] = round(
+                            random.uniform(max_allowed + 5, max_allowed + 30), 1
+                        )
                     else:
                         vital_signs[param] = round(random.uniform(min_val, max_val), 1)
                 else:
@@ -313,14 +370,22 @@ class SyntheticDataGenerator:
         # Generate laboratory data with potential protocol deviations
         if "laboratory" in template:
             laboratory = {}
-            protocol_reqs = template.get("protocol_requirements", {}).get("inclusion_criteria", {})
-            
+            protocol_reqs = template.get("protocol_requirements", {}).get(
+                "inclusion_criteria", {}
+            )
+
             for param, (min_val, max_val) in template["laboratory"].items():
-                if has_protocol_deviations and param == "creatinine" and random.random() < 0.3:
+                if (
+                    has_protocol_deviations
+                    and param == "creatinine"
+                    and random.random() < 0.3
+                ):
                     # Introduce creatinine protocol deviation
                     max_allowed = protocol_reqs.get("creatinine_max", 2.5)
                     if random.random() < 0.5:
-                        laboratory[param] = round(random.uniform(max_allowed + 0.2, max_allowed + 1.0), 2)
+                        laboratory[param] = round(
+                            random.uniform(max_allowed + 0.2, max_allowed + 1.0), 2
+                        )
                     else:
                         laboratory[param] = round(random.uniform(min_val, max_val), 2)
                 else:
@@ -329,22 +394,37 @@ class SyntheticDataGenerator:
 
         # Generate therapeutic-specific data with potential protocol deviations
         for key, value in template.items():
-            if key not in ["vital_signs", "laboratory", "adverse_events", "protocol_requirements"]:
+            if key not in [
+                "vital_signs",
+                "laboratory",
+                "adverse_events",
+                "protocol_requirements",
+            ]:
                 if isinstance(value, dict) and all(
                     isinstance(v, tuple) for v in value.values()
                 ):
                     # Numeric parameters
                     section = {}
-                    protocol_reqs = template.get("protocol_requirements", {}).get("inclusion_criteria", {})
-                    
+                    protocol_reqs = template.get("protocol_requirements", {}).get(
+                        "inclusion_criteria", {}
+                    )
+
                     for param, (min_val, max_val) in value.items():
-                        if has_protocol_deviations and param == "lvef" and random.random() < 0.3:
+                        if (
+                            has_protocol_deviations
+                            and param == "lvef"
+                            and random.random() < 0.3
+                        ):
                             # Introduce LVEF protocol deviation (below minimum)
                             min_allowed = protocol_reqs.get("lvef_min", 40)
                             if random.random() < 0.5:
-                                section[param] = round(random.uniform(min_allowed - 15, min_allowed - 1), 1)
+                                section[param] = round(
+                                    random.uniform(min_allowed - 15, min_allowed - 1), 1
+                                )
                             else:
-                                section[param] = round(random.uniform(min_val, max_val), 1)
+                                section[param] = round(
+                                    random.uniform(min_val, max_val), 1
+                                )
                         else:
                             section[param] = round(random.uniform(min_val, max_val), 1)
                     data[key] = section
@@ -401,21 +481,23 @@ class SyntheticDataGenerator:
         """Introduce balanced discrepancies - a few per visit for realistic demos."""
         # Instead of applying rate to every data point, select a few random points per visit
         # This creates realistic discrepancy counts (2-5 per visit)
-        
+
         # Count total data points in this visit
         all_data_points = []
         for section_name, section_data in data.items():
             if isinstance(section_data, dict):
                 for param_name, param_value in section_data.items():
                     all_data_points.append((section_name, param_name, param_value))
-        
+
         # Select a small number of data points to modify (1-4 per visit)
         num_discrepancies = random.randint(1, 4) if all_data_points else 0
-        points_to_modify = random.sample(all_data_points, min(num_discrepancies, len(all_data_points)))
-        
+        points_to_modify = random.sample(
+            all_data_points, min(num_discrepancies, len(all_data_points))
+        )
+
         for section_name, param_name, param_value in points_to_modify:
             section_data = data[section_name]
-            
+
             if isinstance(param_value, (int, float)):
                 # Small transcription errors (5-15% variance)
                 variance_factor = random.uniform(0.05, 0.15)
@@ -426,7 +508,7 @@ class SyntheticDataGenerator:
             elif isinstance(param_value, str) and random.random() < 0.3:
                 # Occasional missing data (remove parameter)
                 del section_data[param_name]
-        
+
         # Handle adverse events separately
         if "adverse_events" in data and isinstance(data["adverse_events"], list):
             # 20% chance to add an extra AE or modify existing one
@@ -434,14 +516,20 @@ class SyntheticDataGenerator:
                 if data["adverse_events"] and random.random() < 0.5:
                     # Modify existing AE severity
                     ae_to_modify = random.choice(data["adverse_events"])
-                    ae_to_modify["severity"] = random.choice(["Mild", "Moderate", "Severe"])
+                    ae_to_modify["severity"] = random.choice(
+                        ["Mild", "Moderate", "Severe"]
+                    )
                 else:
                     # Add additional AE not in EDC
                     additional_ae = {
-                        "term": random.choice(["dizziness", "headache", "fatigue", "nausea"]),
+                        "term": random.choice(
+                            ["dizziness", "headache", "fatigue", "nausea"]
+                        ),
                         "severity": random.choice(["Mild", "Moderate"]),
-                        "start_date": (datetime.now() - timedelta(days=random.randint(1, 14))).strftime("%Y-%m-%d"),
-                        "outcome": "Ongoing"
+                        "start_date": (
+                            datetime.now() - timedelta(days=random.randint(1, 14))
+                        ).strftime("%Y-%m-%d"),
+                        "outcome": "Ongoing",
                     }
                     data["adverse_events"].append(additional_ae)
 

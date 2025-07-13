@@ -1,5 +1,11 @@
 # Project Plan Analysis and Critique
 
+> **⚠️ HISTORICAL DOCUMENT NOTICE**  
+> **Date:** June 29, 2025 (ARCHIVED)  
+> **Status:** Outdated - Framework decisions superseded  
+> **Note:** This document recommended CrewAI, but the project ultimately used OpenAI Agents SDK  
+> **Current Status:** See MASTER_DOCUMENTATION.md for actual implementation
+
 ## Current State Analysis
 
 ### Strengths of Current Plans

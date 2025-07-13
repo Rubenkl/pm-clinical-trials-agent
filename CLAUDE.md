@@ -89,7 +89,7 @@ pm-clinical-trials-agent/
 4. Status updates and scratchpads in `/product-management/status-updates/`
 
 ### Development Process
-1. **Frontend**: Prototype in Lovable.dev, then export to `/frontend/`
+1. **Frontend**: Integrated via Git subtree from Lovable.dev export in `/frontend/`
 2. **Backend**: Lightweight FastAPI wrapper around OpenAI Agents SDK
 3. **AI Agents**: Portfolio Manager + specialist agents using SDK's built-in orchestration
 4. **Deployment**: Deploy both services separately on Railway
@@ -99,6 +99,12 @@ pm-clinical-trials-agent/
 - **Backend**: Deployed as FastAPI with Hypercorn server on Railway
 - **State Management**: SDK Context objects (in-memory + optional PostgreSQL for persistence)
 - **Environment**: Separate services with proper domain configuration
+
+## Git Subtree Frontend Integration
+
+The `/frontend` directory is managed as a **Git subtree** for simplified development workflow.
+
+**For complete Git subtree documentation and commands, see:** [`frontend/CLAUDE.md`](frontend/CLAUDE.md#git-subtree-integration)
 
 ## Key Commands
 

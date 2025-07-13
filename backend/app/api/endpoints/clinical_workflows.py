@@ -85,7 +85,7 @@ async def analyze_clinical_query(request: QueryAnalysisRequest):
         )
 
         # Handle Pydantic model response
-        if hasattr(result.final_output, 'model_dump'):
+        if hasattr(result.final_output, "model_dump"):
             # result.final_output is a Pydantic model object
             response_data = result.final_output.model_dump()
         elif isinstance(result.final_output, str):
@@ -128,14 +128,14 @@ async def verify_source_data(request: DataVerificationRequest):
         # Run verification with max_turns limit
         context = DataVerificationContext()
         result = await Runner.run(
-            data_verifier_agent, 
-            message, 
-            context=context, 
-            max_turns=50  # Allow complex multi-agent coordination
+            data_verifier_agent,
+            message,
+            context=context,
+            max_turns=50,  # Allow complex multi-agent coordination
         )
 
         # Handle Pydantic model response
-        if hasattr(result.final_output, 'model_dump'):
+        if hasattr(result.final_output, "model_dump"):
             # result.final_output is a Pydantic model object
             response_data = result.final_output.model_dump()
         elif isinstance(result.final_output, str):
@@ -176,14 +176,14 @@ async def detect_protocol_deviations(request: DeviationDetectionRequest):
         # Run detection with max_turns limit
         context = DeviationDetectionContext()
         result = await Runner.run(
-            deviation_detector_agent, 
-            message, 
-            context=context, 
-            max_turns=50  # Allow complex regulatory analysis with handoffs
+            deviation_detector_agent,
+            message,
+            context=context,
+            max_turns=50,  # Allow complex regulatory analysis with handoffs
         )
 
         # Handle Pydantic model response
-        if hasattr(result.final_output, 'model_dump'):
+        if hasattr(result.final_output, "model_dump"):
             # result.final_output is a Pydantic model object
             response_data = result.final_output.model_dump()
         elif isinstance(result.final_output, str):
@@ -233,11 +233,11 @@ async def execute_clinical_workflow(request: WorkflowRequest):
             portfolio_manager_agent,
             message,
             context=context,
-            max_turns=50  # Allow comprehensive multi-agent orchestration
+            max_turns=50,  # Allow comprehensive multi-agent orchestration
         )
 
         # Handle Pydantic model response
-        if hasattr(result.final_output, 'model_dump'):
+        if hasattr(result.final_output, "model_dump"):
             # result.final_output is a Pydantic model object
             response_data = result.final_output.model_dump()
         elif isinstance(result.final_output, str):

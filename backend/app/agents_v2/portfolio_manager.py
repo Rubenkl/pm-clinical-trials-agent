@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional
 from agents import Agent, Runner, handoff
 from pydantic import BaseModel, Field
 
+from .analytics_agent import analytics_agent
 from .calculation_tools import (
     calculate_age_at_visit,
     calculate_body_surface_area,
@@ -21,15 +22,14 @@ from .calculation_tools import (
     check_visit_window_compliance,
     convert_medical_units,
 )
-from .test_data_tools import get_subject_discrepancies, get_test_subject_data
+from .data_verifier import data_verifier_agent
+from .deviation_detector import deviation_detector_agent
 
 # Import specialist agents for handoffs
 from .query_analyzer import query_analyzer_agent
-from .data_verifier import data_verifier_agent
-from .deviation_detector import deviation_detector_agent
 from .query_generator import query_generator_agent
 from .query_tracker import query_tracker_agent
-from .analytics_agent import analytics_agent
+from .test_data_tools import get_subject_discrepancies, get_test_subject_data
 
 
 class WorkflowContext(BaseModel):
@@ -99,12 +99,27 @@ class PortfolioManager:
             instructions=self._get_instructions(),
             tools=tools,
             handoffs=[
-                handoff(query_analyzer_agent, tool_name_override="transfer_to_query_analyzer"),
-                handoff(data_verifier_agent, tool_name_override="transfer_to_data_verifier"),
-                handoff(deviation_detector_agent, tool_name_override="transfer_to_deviation_detector"),
-                handoff(query_generator_agent, tool_name_override="transfer_to_query_generator"),
-                handoff(query_tracker_agent, tool_name_override="transfer_to_query_tracker"),
-                handoff(analytics_agent, tool_name_override="transfer_to_analytics_agent"),
+                handoff(
+                    query_analyzer_agent,
+                    tool_name_override="transfer_to_query_analyzer",
+                ),
+                handoff(
+                    data_verifier_agent, tool_name_override="transfer_to_data_verifier"
+                ),
+                handoff(
+                    deviation_detector_agent,
+                    tool_name_override="transfer_to_deviation_detector",
+                ),
+                handoff(
+                    query_generator_agent,
+                    tool_name_override="transfer_to_query_generator",
+                ),
+                handoff(
+                    query_tracker_agent, tool_name_override="transfer_to_query_tracker"
+                ),
+                handoff(
+                    analytics_agent, tool_name_override="transfer_to_analytics_agent"
+                ),
             ],
             model="gpt-4o-mini",
             output_type=PortfolioManagerOutput,

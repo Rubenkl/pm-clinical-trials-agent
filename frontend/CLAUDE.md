@@ -1,7 +1,5 @@
 # Clinical Trials AI Agent Frontend - CLAUDE.md
 
-> **Note**: This documentation was renamed from README.md to CLAUDE.md to provide enhanced project documentation specifically tailored for Claude AI integration and development workflows.
-
 A comprehensive React dashboard showcasing production-ready clinical intelligence through AI-powered analysis of real cardiology study data. **Fully functional and deployed with live backend integration.**
 
 ## 🎯 Project Overview
@@ -26,7 +24,7 @@ This frontend application demonstrates the capabilities of our **Clinical Trials
 - **Subject CARD001**: 43F with Stage 1 Hypertension (BP 147.5/79.6 mmHg)
 - **Clinical Findings**: Elevated BNP (319.57 pg/mL), kidney dysfunction (creatinine 1.84)
 - **AI Recommendations**: Cardiology consultation, nephrology evaluation
-- **Safety Monitoring**: 48 discrepancies per subject with severity classification
+- **Test Data**: Balanced distribution (0-20 discrepancies per subject based on complexity)
 
 ### Multi-Agent AI System
 - **Portfolio Manager**: Clinical analysis orchestration and medical recommendations
@@ -244,9 +242,63 @@ npm run build
 - **Build Optimization**: Vite-powered production builds
 
 ### Integration Options
-- **GitHub Sync**: Two-way sync with GitHub repositories
+- **Git Subtree Integration**: Seamlessly integrated into main project via Git subtree
 - **Lovable Platform**: Native deployment and hosting
 - **Custom Hosting**: Standard web app deployment anywhere
+
+## 🔄 Git Subtree Integration
+
+This frontend is integrated into the main project using **Git subtree** for simplified development workflow.
+
+### For Developers
+
+**Getting Started**
+```bash
+# Clone the main project (includes frontend automatically)
+git clone <main_project_url>
+
+# Install frontend dependencies
+cd frontend
+npm install
+
+# Start development
+npm run dev
+```
+
+**Daily Development**
+```bash
+# Pull latest changes (includes frontend updates)
+git pull
+
+# Make frontend changes and commit normally
+git add frontend/
+git commit -m "Update frontend: [describe your changes]"
+git push
+```
+
+### For Maintainers
+
+**Pulling Frontend Updates from Source Repository**
+```bash
+# From project root, pull latest frontend changes
+git subtree pull --prefix=frontend git@github.com:Rubenkl/clinical-trials-ai-compass.git main --squash
+```
+
+**Pushing Frontend Changes Back to Source Repository**
+```bash
+# Commit frontend changes first (if not already committed)
+git add frontend/
+git commit -m "Update frontend: [describe your changes]"
+
+# Push frontend changes back to source repo
+git subtree push --prefix=frontend git@github.com:Rubenkl/clinical-trials-ai-compass.git main
+```
+
+**Key Benefits of Subtree Integration:**
+- ✅ **Simplified Workflow**: Standard `git clone` and `git pull` work for everything
+- ✅ **No Extra Commands**: No need to learn submodule-specific commands
+- ✅ **Unified Development**: Frontend treated as integral part of main project
+- ✅ **Easy Onboarding**: New developers get complete project in one step
 
 ## 📈 Business Impact
 
