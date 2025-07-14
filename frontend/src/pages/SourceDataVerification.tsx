@@ -102,39 +102,106 @@ export default function SourceDataVerification() {
     }
   });
 
-  // Generate recent discrepancies from real subject data (demo scenarios) - AI determines severity
-  const recentDiscrepancies = subjects ? subjects.slice(0, 3).map((subject, index) => ({
-    id: `SDV-${String(index + 1).padStart(3, '0')}`,
-    subject: subject.subject_id,
-    site: subject.site_id,
-    field: ['Systolic BP', 'Weight', 'Heart Rate'][index] || 'Clinical Parameter',
-    edcValue: ['145 mmHg', '75.2 kg', '68 bpm'][index] || 'Value TBD',
-    sourceValue: ['155 mmHg', '72.5 kg', '86 bpm'][index] || 'Source TBD',
-    severity: 'pending_ai_analysis', // AI will determine
-    status: 'needs_verification' // AI will determine
-  })) : [];
+  // Generate SDV scenarios from real subject data - mix of normal and problem cases
+  const sdvScenarios = subjects ? [
+    // PROBLEM CASES - Discrepancies requiring investigation
+    {
+      id: `SDV-001`,
+      subject: 'CARD001',
+      site: 'SITE_001',
+      field: 'Systolic BP',
+      edcValue: '145 mmHg',
+      sourceValue: '155 mmHg',
+      severity: 'major',
+      status: 'needs_verification',
+      category: 'Discrepancy',
+      description: 'BP values differ by 10 mmHg - transcription error suspected'
+    },
+    {
+      id: `SDV-002`,
+      subject: 'CARD002',
+      site: 'SITE_002',
+      field: 'Weight',
+      edcValue: '75.2 kg',
+      sourceValue: '72.5 kg',
+      severity: 'minor',
+      status: 'needs_verification',
+      category: 'Discrepancy',
+      description: 'Weight values differ by 2.7 kg - measurement timing variance'
+    },
+    {
+      id: `SDV-003`,
+      subject: 'CARD005',
+      site: 'SITE_003',
+      field: 'Heart Rate',
+      edcValue: '68 bpm',
+      sourceValue: '86 bpm',
+      severity: 'major',
+      status: 'needs_verification',
+      category: 'Discrepancy',
+      description: 'Significant HR difference - timing or measurement error'
+    },
+    // NORMAL CASES - Perfect matches, no discrepancies
+    {
+      id: `SDV-004`,
+      subject: 'CARD003',
+      site: 'SITE_001',
+      field: 'Systolic BP',
+      edcValue: '128 mmHg',
+      sourceValue: '128 mmHg',
+      severity: 'none',
+      status: 'verified',
+      category: 'Perfect Match',
+      description: 'EDC and source values match exactly - no action needed'
+    },
+    {
+      id: `SDV-005`,
+      subject: 'CARD007',
+      site: 'SITE_002',
+      field: 'Weight',
+      edcValue: '68.5 kg',
+      sourceValue: '68.5 kg',
+      severity: 'none',
+      status: 'verified',
+      category: 'Perfect Match',
+      description: 'Perfect data consistency - quality verification complete'
+    },
+    {
+      id: `SDV-006`,
+      subject: 'CARD008',
+      site: 'SITE_001',
+      field: 'Heart Rate',
+      edcValue: '72 bpm',
+      sourceValue: '72 bpm',
+      severity: 'none',
+      status: 'verified',
+      category: 'Perfect Match',
+      description: 'Source document matches EDC exactly - exemplary data quality'
+    }
+  ] : [];
 
-  const handleVerifyDiscrepancy = (discrepancy: any) => {
-    setSelectedDiscrepancy(discrepancy);
+  const handleVerifyDiscrepancy = (scenario: any) => {
+    setSelectedDiscrepancy(scenario);
     setAiVerificationResult(null);
     
-    console.log('Starting AI SDV verification for discrepancy:', discrepancy);
+    console.log('Starting AI SDV verification for scenario:', scenario);
     
     sdvVerifyMutation.mutate({
-      subject_id: discrepancy.subject,
-      site_id: discrepancy.site,
+      subject_id: scenario.subject,
+      site_id: scenario.site,
       visit: "Week_4", // Demo visit
       edc_data: {
-        [discrepancy.field.toLowerCase().replace(' ', '_')]: discrepancy.edcValue
+        [scenario.field.toLowerCase().replace(' ', '_')]: scenario.edcValue
       },
       source_data: {
-        [discrepancy.field.toLowerCase().replace(' ', '_')]: discrepancy.sourceValue
+        [scenario.field.toLowerCase().replace(' ', '_')]: scenario.sourceValue
       },
       monitor_id: "MON001",
       context: {
         demo_mode: true,
         limit_analysis: true,
-        field_name: discrepancy.field
+        field_name: scenario.field,
+        scenario_type: scenario.category
       }
     });
   };
@@ -176,7 +243,7 @@ export default function SourceDataVerification() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Source Data Verification</h1>
-          <p className="text-muted-foreground">Monitor SDV progress and manage data discrepancies</p>
+          <p className="text-muted-foreground">Monitor SDV progress with examples of perfect matches and discrepancies requiring investigation</p>
         </div>
       </div>
 
@@ -270,44 +337,59 @@ export default function SourceDataVerification() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Demo Scenarios */}
+                {/* SDV Scenarios */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Demo Verification Scenarios</h3>
+                  <h3 className="text-lg font-semibold">SDV Verification Scenarios</h3>
                   <div className="space-y-3">
-                    {recentDiscrepancies.map((discrepancy) => (
+                    {sdvScenarios.map((scenario) => (
                       <div 
-                        key={discrepancy.id}
-                        className="border rounded-lg p-4 cursor-pointer hover:bg-muted/50"
-                        onClick={() => handleVerifyDiscrepancy(discrepancy)}
+                        key={scenario.id}
+                        className={`border rounded-lg p-4 cursor-pointer hover:bg-muted/50 ${
+                          scenario.category === 'Perfect Match' ? 'border-green-200 bg-green-50/50' : 'border-red-200 bg-red-50/50'
+                        }`}
+                        onClick={() => handleVerifyDiscrepancy(scenario)}
                       >
                         <div className="flex justify-between items-start mb-2">
                           <div>
-                            <h4 className="font-medium">{discrepancy.subject}</h4>
-                            <p className="text-sm text-muted-foreground">{discrepancy.field}</p>
+                            <h4 className="font-medium">{scenario.subject}</h4>
+                            <p className="text-sm text-muted-foreground">{scenario.field}</p>
                           </div>
-                          <Badge variant={getSeverityColor(discrepancy.severity) as any}>
-                            {discrepancy.severity}
-                          </Badge>
+                          <div className="flex gap-2">
+                            <Badge variant={
+                              scenario.category === 'Perfect Match' ? 'secondary' : 'destructive'
+                            } className="text-xs">
+                              {scenario.category}
+                            </Badge>
+                            {scenario.severity !== 'none' && (
+                              <Badge variant={getSeverityColor(scenario.severity) as any}>
+                                {scenario.severity}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="grid grid-cols-2 gap-4 text-sm mb-3">
                           <div>
                             <span className="text-muted-foreground">EDC:</span>
-                            <div className="font-mono">{discrepancy.edcValue}</div>
+                            <div className="font-mono">{scenario.edcValue}</div>
                           </div>
                           <div>
                             <span className="text-muted-foreground">Source:</span>
-                            <div className="font-mono font-semibold">{discrepancy.sourceValue}</div>
+                            <div className={`font-mono ${scenario.category === 'Perfect Match' ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}`}>
+                              {scenario.sourceValue}
+                            </div>
                           </div>
                         </div>
+                        <p className="text-xs text-muted-foreground mb-3">{scenario.description}</p>
                         <Button 
                           size="sm" 
-                          className="mt-3 w-full"
+                          className="w-full"
                           disabled={sdvVerifyMutation.isPending}
+                          variant={scenario.category === 'Perfect Match' ? 'secondary' : 'default'}
                         >
-                          {sdvVerifyMutation.isPending && selectedDiscrepancy?.id === discrepancy.id ? (
+                          {sdvVerifyMutation.isPending && selectedDiscrepancy?.id === scenario.id ? (
                             <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analyzing...</>
                           ) : (
-                            'Verify with AI'
+                            scenario.category === 'Perfect Match' ? 'Confirm Match' : 'Investigate Discrepancy'
                           )}
                         </Button>
                       </div>
