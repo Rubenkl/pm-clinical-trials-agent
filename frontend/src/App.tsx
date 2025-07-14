@@ -11,11 +11,9 @@ import Subjects from "./pages/Subjects";
 import SubjectProfile from "./pages/SubjectProfile";
 import AIChat from "./pages/AIChat";
 import Discrepancies from "./pages/Discrepancies";
-import StudyManagement from "./pages/StudyManagement";
 import QueryManagement from "./pages/QueryManagement";
 import SourceDataVerification from "./pages/SourceDataVerification";
 import ProtocolCompliance from "./pages/ProtocolCompliance";
-import AIAgentsHub from "./pages/AIAgentsHub";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -45,11 +43,7 @@ const App = () => (
                 <Route path="/subjects" element={<Subjects />} />
                 <Route path="/subjects/:subjectId" element={<SubjectProfile />} />
                 <Route path="/discrepancies" element={<Discrepancies />} />
-                <Route path="/sites" element={<StudyManagement />} />
-                <Route path="/study-management" element={<StudyManagement />} />
-                <Route path="/ai-agents" element={<AIAgentsHub />} />
                 <Route path="/ai-chat" element={<AIChat />} />
-                <Route path="/study" element={<StudyManagement />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </ClinicalLayout>

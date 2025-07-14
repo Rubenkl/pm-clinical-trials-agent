@@ -65,16 +65,8 @@ const navigationSections: NavigationSection[] = [
     ]
   },
   {
-    title: "Operations",
-    items: [
-      { title: "Sites & Performance", url: "/sites", icon: Building2 },
-      { title: "Study Management", url: "/study-management", icon: FileText }
-    ]
-  },
-  {
     title: "AI Intelligence",
     items: [
-      { title: "AI Agents Hub", url: "/ai-agents", icon: Bot },
       { title: "Clinical Analysis", url: "/ai-chat", icon: ClipboardList }
     ]
   }

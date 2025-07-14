@@ -16,100 +16,58 @@ export default function Discrepancies() {
   const [severityFilter, setSeverityFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  // Realistic discrepancies data based on actual test data patterns
-  const mockDiscrepancies = [
-    {
-      subject_id: "CARD001",
-      total_discrepancies: 12,
-      critical: 1,
-      major: 4,
-      minor: 7,
-      open: 12,
-      pending: 2,
-      resolved: 0,
-      last_updated: "2 hours ago"
-    },
-    {
-      subject_id: "CARD002",
-      total_discrepancies: 13,
-      critical: 0,
-      major: 5,
-      minor: 8,
-      open: 13,
-      pending: 1,
-      resolved: 0,
-      last_updated: "4 hours ago"
-    },
-    {
-      subject_id: "CARD005",
-      total_discrepancies: 13,
-      critical: 0,
-      major: 4,
-      minor: 9,
-      open: 12,
-      pending: 1,
-      resolved: 0,
-      last_updated: "1 hour ago"
-    },
-    {
-      subject_id: "CARD006",
-      total_discrepancies: 14,
-      critical: 1,
-      major: 6,
-      minor: 7,
-      open: 14,
-      pending: 2,
-      resolved: 0,
-      last_updated: "3 hours ago"
-    },
-    // Clean subjects with 0 discrepancies
-    {
-      subject_id: "CARD003",
-      total_discrepancies: 0,
-      critical: 0,
-      major: 0,
-      minor: 0,
-      open: 0,
-      pending: 0,
-      resolved: 0,
-      last_updated: "1 day ago"
-    },
-    {
-      subject_id: "CARD007", 
-      total_discrepancies: 0,
-      critical: 0,
-      major: 0,
-      minor: 0,
-      open: 0,
-      pending: 0,
-      resolved: 0,
-      last_updated: "1 day ago"
-    },
-    {
-      subject_id: "CARD008",
-      total_discrepancies: 0,
-      critical: 0,
-      major: 0,
-      minor: 0,
-      open: 0,
-      pending: 0,
-      resolved: 0,
-      last_updated: "2 days ago"
-    },
-    {
-      subject_id: "CARD014",
-      total_discrepancies: 0,
-      critical: 0,
-      major: 0,
-      minor: 0,
-      open: 0,
-      pending: 0,
-      resolved: 0,
-      last_updated: "1 day ago"
-    }
-  ];
+  // Fetch real subjects data
+  const { data: subjects, isLoading } = useQuery({
+    queryKey: ['subjects'],
+    queryFn: () => apiService.getSubjects()
+  });
 
-  const filteredDiscrepancies = mockDiscrepancies.filter(item => {
+  // Get discrepancies for all subjects
+  const { data: allDiscrepancies, isLoading: discrepanciesLoading } = useQuery({
+    queryKey: ['all-discrepancies'],
+    queryFn: async () => {
+      if (!subjects) return [];
+      const discrepancyData = await Promise.all(
+        subjects.map(async (subject: any) => {
+          try {
+            const result = await apiService.getSubjectDiscrepancies(subject.subject_id);
+            return {
+              subject_id: subject.subject_id,
+              discrepancies: result.discrepancies || [],
+              total_discrepancies: result.discrepancies?.length || 0,
+              critical: result.discrepancies?.filter((d: any) => d.severity === 'critical').length || 0,
+              major: result.discrepancies?.filter((d: any) => d.severity === 'major').length || 0,
+              minor: result.discrepancies?.filter((d: any) => d.severity === 'minor').length || 0,
+              open: result.discrepancies?.filter((d: any) => d.status === 'open').length || 0,
+              pending: result.discrepancies?.filter((d: any) => d.status === 'pending').length || 0,
+              resolved: result.discrepancies?.filter((d: any) => d.status === 'resolved').length || 0,
+              last_updated: result.discrepancies?.[0]?.last_updated || 'N/A'
+            };
+          } catch (error) {
+            console.warn(`Failed to fetch discrepancies for ${subject.subject_id}`);
+            return {
+              subject_id: subject.subject_id,
+              discrepancies: [],
+              total_discrepancies: 0,
+              critical: 0,
+              major: 0,
+              minor: 0,
+              open: 0,
+              pending: 0,
+              resolved: 0,
+              last_updated: 'N/A'
+            };
+          }
+        })
+      );
+      return discrepancyData;
+    },
+    enabled: !!subjects
+  });
+
+  const isLoadingData = isLoading || discrepanciesLoading;
+
+  const filteredDiscrepancies = allDiscrepancies?.filter((item: any) => {
     const matchesSearch = item.subject_id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSeverity = severityFilter === "all" || 
       (severityFilter === "critical" && item.critical > 0) ||
@@ -121,12 +79,36 @@ export default function Discrepancies() {
       (statusFilter === "resolved" && item.resolved > 0);
     
     return matchesSearch && matchesSeverity && matchesStatus;
-  });
+  }) || [];
 
-  const totalDiscrepancies = mockDiscrepancies.reduce((sum, item) => sum + item.total_discrepancies, 0);
-  const totalCritical = mockDiscrepancies.reduce((sum, item) => sum + item.critical, 0);
-  const totalOpen = mockDiscrepancies.reduce((sum, item) => sum + item.open, 0);
-  const totalResolved = mockDiscrepancies.reduce((sum, item) => sum + item.resolved, 0);
+  const totalDiscrepancies = allDiscrepancies?.reduce((sum: number, item: any) => sum + item.total_discrepancies, 0) || 0;
+  const totalCritical = allDiscrepancies?.reduce((sum: number, item: any) => sum + item.critical, 0) || 0;
+  const totalOpen = allDiscrepancies?.reduce((sum: number, item: any) => sum + item.open, 0) || 0;
+  const totalResolved = allDiscrepancies?.reduce((sum: number, item: any) => sum + item.resolved, 0) || 0;
+
+  if (isLoadingData) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+              <AlertTriangle className="h-8 w-8 text-amber-600" />
+              Discrepancy Management
+            </h1>
+            <p className="text-slate-600 mt-1">
+              EDC vs Source Document Analysis • CARD-2025-001
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="text-lg font-medium text-slate-600 mb-2">Loading discrepancy data...</div>
+            <div className="text-sm text-slate-500">Analyzing subject records</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -193,7 +175,7 @@ export default function Discrepancies() {
               <div>
                 <p className="text-sm text-slate-600">Resolution Rate</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {Math.round((totalResolved / totalDiscrepancies) * 100)}%
+                  {totalDiscrepancies > 0 ? Math.round((totalResolved / totalDiscrepancies) * 100) : 0}%
                 </p>
                 <p className="text-xs text-green-500">{totalResolved} resolved</p>
               </div>
@@ -204,29 +186,31 @@ export default function Discrepancies() {
       </div>
 
       {/* Critical Alerts Banner */}
-      <Card className="border-red-200 bg-red-50">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5" />
-            <div className="flex-1">
-              <h3 className="font-medium text-red-900 mb-2">Critical Discrepancies Requiring Immediate Action</h3>
-              <div className="space-y-1 text-sm text-red-800">
-                <p>• CARD001: Severe anemia (Hgb 8.5 g/dL) - safety intervention required</p>
-                <p>• CARD005: Multiple discrepancies in cardiovascular markers</p>
-                <p>• CARD006: Protocol deviation in blood pressure monitoring</p>
-              </div>
-              <div className="mt-3 flex gap-2">
-                <Button size="sm" className="bg-red-600 hover:bg-red-700">
-                  Escalate All Critical
-                </Button>
-                <Button size="sm" variant="outline" className="border-red-200 text-red-700">
-                  Generate Safety Report
-                </Button>
+      {totalCritical > 0 && (
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="font-medium text-red-900 mb-2">Critical Discrepancies Requiring Immediate Action</h3>
+                <div className="space-y-1 text-sm text-red-800">
+                  <p>• {totalCritical} critical discrepancies identified across subjects</p>
+                  <p>• Review subject profiles for detailed analysis</p>
+                  <p>• Safety interventions may be required</p>
+                </div>
+                <div className="mt-3 flex gap-2">
+                  <Button size="sm" className="bg-red-600 hover:bg-red-700">
+                    Escalate All Critical
+                  </Button>
+                  <Button size="sm" variant="outline" className="border-red-200 text-red-700">
+                    Generate Safety Report
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Discrepancy Table */}
       <Card>
@@ -377,49 +361,6 @@ export default function Discrepancies() {
         </CardContent>
       </Card>
 
-      {/* AI Analysis Summary */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5" />
-            AI-Powered Discrepancy Analysis
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="font-medium mb-3">Pattern Detection</h4>
-              <div className="space-y-2 text-sm">
-                <p>• <strong>Missing adverse events:</strong> 4 subjects affected (regulatory concern)</p>
-                <p>• <strong>Vital signs data gaps:</strong> 23% of visits missing source verification</p>
-                <p>• <strong>Laboratory value discrepancies:</strong> 12% format inconsistencies</p>
-                <p>• <strong>Visit date formatting:</strong> 89% require standardization</p>
-              </div>
-            </div>
-            <div>
-              <h4 className="font-medium mb-3">Recommendations</h4>
-              <div className="space-y-2 text-sm">
-                <p>• Implement real-time EDC validation for adverse events</p>
-                <p>• Standardize vital signs data entry workflows</p>
-                <p>• Train sites on proper source document practices</p>
-                <p>• Schedule additional monitoring visits for high-discrepancy sites</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="mt-6 flex gap-2">
-            <Button variant="outline">
-              Generate Full Analysis Report
-            </Button>
-            <Button variant="outline">
-              Schedule Site Training
-            </Button>
-            <Button>
-              Create Bulk Queries
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
