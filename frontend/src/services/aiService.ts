@@ -9,9 +9,8 @@ export class AIService extends BaseApiService {
       
       const requestBody = {
         workflow_type: 'comprehensive_analysis',
-        subject_id: 'CARD001',
         input_data: {
-          request: `Get test data for subject CARD001 and analyze: ${message}`
+          request: message
         }
       };
       
@@ -66,16 +65,20 @@ export class AIService extends BaseApiService {
 
   async executeWorkflow(workflowType: string, inputData: any): Promise<any> {
     try {
+      const requestBody: any = {
+        workflow_type: workflowType,
+        input_data: inputData
+      };
+      
+      // Only include subject_id if it's provided
+      if (inputData.subject_id) {
+        requestBody.subject_id = inputData.subject_id;
+      }
+      
       return await this.fetchApi('/clinical/execute-workflow', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          workflow_type: workflowType,
-          subject_id: inputData.subject_id || 'CARD001',
-          input_data: {
-            request: `Get test data for subject ${inputData.subject_id || 'CARD001'} and execute ${workflowType}: ${JSON.stringify(inputData)}`
-          }
-        })
+        body: JSON.stringify(requestBody)
       });
     } catch (error) {
       console.warn('Workflow execution failed:', error);

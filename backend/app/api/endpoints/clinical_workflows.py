@@ -55,7 +55,7 @@ class WorkflowRequest(BaseModel):
     """Request for multi-agent workflows."""
 
     workflow_type: str  # comprehensive_analysis, query_resolution, data_verification
-    subject_id: str
+    subject_id: Optional[str] = None
     input_data: Dict[str, Any]
 
 
@@ -220,9 +220,11 @@ async def execute_clinical_workflow(request: WorkflowRequest):
             "data_verification": "Verify all data points and generate queries",
         }
 
+        subject_info = f"Subject ID: {request.subject_id}" if request.subject_id else "No specific subject (general clinical question)"
+        
         message = f"""Execute {request.workflow_type} workflow:
         Description: {workflow_descriptions.get(request.workflow_type, 'Custom workflow')}
-        Subject ID: {request.subject_id}
+        {subject_info}
         Input Data: {json.dumps(request.input_data)}
 
         Coordinate with relevant agents and return comprehensive results."""
