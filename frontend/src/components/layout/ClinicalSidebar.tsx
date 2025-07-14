@@ -52,16 +52,16 @@ const navigationSections: NavigationSection[] = [
   {
     title: "Core Workflows", 
     items: [
-      { title: "Query Management", url: "/queries", icon: Search, badge: "45" },
+      { title: "Query Management", url: "/queries", icon: Search },
       { title: "Source Data Verification", url: "/sdv", icon: FileCheck },
-      { title: "Protocol Compliance", url: "/compliance", icon: Shield, badge: "3" }
+      { title: "Protocol Compliance", url: "/compliance", icon: Shield }
     ]
   },
   {
     title: "Data Management",
     items: [
       { title: "Subjects", url: "/subjects", icon: Users },
-      { title: "Discrepancies", url: "/discrepancies", icon: AlertTriangle, badge: "12" }
+      { title: "Discrepancies", url: "/discrepancies", icon: AlertTriangle }
     ]
   },
   {
