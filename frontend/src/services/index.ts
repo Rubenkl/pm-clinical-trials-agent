@@ -33,7 +33,7 @@ class ApiService extends StudyService {
   getProtocolMonitoring = this.complianceService.getProtocolMonitoring.bind(this.complianceService);
 
   // Analytics methods
-  getDashboardAnalytics = this.analyticsService.getDashboardAnalytics.bind(this.analyticsService);
+  // getDashboardAnalytics = this.analyticsService.getDashboardAnalytics.bind(this.analyticsService);
 
   // AI methods
   sendChatMessage = this.aiService.sendChatMessage.bind(this.aiService);

@@ -40,8 +40,10 @@ This frontend application demonstrates the capabilities of our **Clinical Trials
 ✅ **AI Agent Chat Interface**: Interactive communication with Portfolio Manager for clinical analysis - **LIVE & WORKING**
 ✅ **Subject Management Dashboard**: Comprehensive patient data visualization and management - **LIVE & WORKING**
 ✅ **Clinical Data Visualization**: Advanced charts for vital signs, lab values, and trends - **LIVE & WORKING**
-✅ **Discrepancy Management**: Automated detection and tracking of EDC vs source document differences - **LIVE & WORKING**
-✅ **Study Management**: Protocol overview, site performance, and enrollment tracking - **LIVE & WORKING**
+✅ **Discrepancy Management**: Real-time detection and tracking of EDC vs source document differences - **LIVE & WORKING**
+✅ **Query Management**: AI-powered clinical query analysis and resolution - **LIVE & WORKING**
+✅ **Source Data Verification**: SDV workflow management and processing - **LIVE & WORKING**
+✅ **Protocol Compliance**: Automated compliance monitoring and deviation detection - **LIVE & WORKING**
 ✅ **Medical Alert System**: Clinical severity classification and safety monitoring - **LIVE & WORKING**
 ✅ **Responsive Design**: Medical-grade interface optimized for clinical workflows - **LIVE & WORKING**
 ✅ **Production API Integration**: Full backend connectivity with Railway-hosted AI system - **LIVE & WORKING**
@@ -97,9 +99,11 @@ This frontend application demonstrates the capabilities of our **Clinical Trials
 - Real-time clinical analysis and medical recommendations
 
 #### Data Quality & Compliance
-- `src/pages/Discrepancies.tsx` - EDC vs source document comparison
+- `src/pages/Discrepancies.tsx` - Real-time EDC vs source document analysis
 - `src/components/clinical/DiscrepanciesPanel.tsx` - Discrepancy resolution workflows
-- `src/pages/StudyManagement.tsx` - Protocol compliance and site performance
+- `src/pages/QueryManagement.tsx` - AI-powered query analysis and resolution
+- `src/pages/SourceDataVerification.tsx` - SDV workflow management
+- `src/pages/ProtocolCompliance.tsx` - Protocol compliance monitoring
 
 #### UI Components
 - `src/components/dashboard/ClinicalMetricsCard.tsx` - Key performance indicators

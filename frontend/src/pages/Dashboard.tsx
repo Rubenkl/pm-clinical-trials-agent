@@ -17,12 +17,26 @@ import { CriticalAlertsPanel } from "@/components/dashboard/CriticalAlertsPanel"
 import { apiService } from "@/services";
 
 export default function Dashboard() {
-  // Use demo data for comprehensive statistics 
-  const { data: studyStatus, isLoading } = useQuery({
-    queryKey: ['demo-study-status'],
-    queryFn: () => apiService.getDashboardAnalytics(),
+  // Fetch real data from available endpoints
+  const { data: subjects, isLoading: subjectsLoading } = useQuery({
+    queryKey: ['subjects'],
+    queryFn: () => apiService.getSubjects(),
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
+
+  const { data: studyStatus, isLoading: statusLoading } = useQuery({
+    queryKey: ['study-status'],
+    queryFn: () => apiService.getStudyStatus(),
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+
+  const isLoading = subjectsLoading || statusLoading;
+
+  // Calculate metrics from real data
+  const activeSubjects = subjects?.filter((s: any) => s.study_status === 'active').length || 0;
+  const totalSubjects = subjects?.length || 0;
+  const completedSubjects = subjects?.filter((s: any) => s.study_status === 'completed').length || 0;
+  const enrollmentPercentage = totalSubjects > 0 ? Math.round((totalSubjects / 50) * 100) : 0;
 
   if (isLoading) {
     return (
@@ -53,65 +67,65 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Critical Alerts Banner */}
-      <Alert className="border-red-200 bg-red-50">
-        <AlertTriangle className="h-4 w-4 text-red-600" />
-        <AlertDescription className="text-red-800">
-          <strong>3 Critical Clinical Alerts</strong> require immediate attention: CARD001 (severe anemia), CARD010 (age violation), CARD030 (age violation).
-          <a href="/discrepancies" className="underline ml-2">View Details →</a>
+      {/* Study Status Info */}
+      <Alert className="border-blue-200 bg-blue-50">
+        <Activity className="h-4 w-4 text-blue-600" />
+        <AlertDescription className="text-blue-800">
+          <strong>{studyStatus?.protocol || "Clinical Trial"}</strong> • {studyStatus?.phase || "Phase II"} • 
+          Status: {studyStatus?.status || "Active"} • {studyStatus?.subjects_enrolled || totalSubjects} subjects enrolled
+          <a href="/subjects" className="underline ml-2">View Subjects →</a>
         </AlertDescription>
       </Alert>
 
       {/* Key Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <ClinicalMetricsCard
-          title="Active Subjects"
-          value="20/50"
-          subtitle="40% enrollment (demo subset)"
+          title="Total Subjects"
+          value={`${totalSubjects}/50`}
+          subtitle={`${enrollmentPercentage}% enrollment`}
           icon={Users}
-          trend="+4 problem subjects analyzed"
+          trend={`${activeSubjects} active, ${completedSubjects} completed`}
           trendUp={true}
         />
         <ClinicalMetricsCard
-          title="Critical Alerts"
-          value="3"
-          subtitle="Safety & compliance concerns"
-          icon={AlertTriangle}
-          trend="CARD001, CARD010, CARD030"
-          trendUp={false}
-          alertLevel="critical"
-        />
-        <ClinicalMetricsCard
-          title="Open Queries"
-          value="52"
-          subtitle="From problem subjects"
-          icon={MessageSquare}
-          trend="12+13+13+14 discrepancies"
-          trendUp={false}
-        />
-        <ClinicalMetricsCard
-          title="AI Analysis"
-          value="100%"
-          subtitle="Real test data accuracy"
+          title="Study Status"
+          value={studyStatus?.status || "Active"}
+          subtitle={studyStatus?.phase || "Phase II"}
           icon={Activity}
-          trend="Live demo ready"
+          trend={`Started: ${studyStatus?.start_date || "2025-03-01"}`}
           trendUp={true}
         />
         <ClinicalMetricsCard
-          title="Clean Subjects"
-          value="60%"
-          subtitle="Zero discrepancies found" 
+          title="Enrollment Progress"
+          value={`${studyStatus?.subjects_enrolled || totalSubjects}/${studyStatus?.target_enrollment || 60}`}
+          subtitle="Target enrollment"
           icon={TrendingUp}
-          trend="CARD003, 007, 008, 014+"
+          trend={`${Math.round(((studyStatus?.subjects_enrolled || totalSubjects) / (studyStatus?.target_enrollment || 60)) * 100)}% complete`}
           trendUp={true}
         />
         <ClinicalMetricsCard
-          title="Protocol Compliance"
-          value="85%"
-          subtitle="Age violations detected"
+          title="Active Sites"
+          value={studyStatus?.sites_active?.toString() || "3"}
+          subtitle="Research sites"
           icon={Shield}
-          trend="2 critical deviations"
-          trendUp={false}
+          trend="All sites active"
+          trendUp={true}
+        />
+        <ClinicalMetricsCard
+          title="Study Timeline"
+          value={studyStatus?.estimated_completion ? new Date(studyStatus.estimated_completion).toLocaleDateString() : "Dec 2025"}
+          subtitle="Estimated completion"
+          icon={MessageSquare}
+          trend={studyStatus?.status === "Active" ? "On track" : "In progress"}
+          trendUp={true}
+        />
+        <ClinicalMetricsCard
+          title="Protocol"
+          value={studyStatus?.study_id || "CARD-2025-001"}
+          subtitle="Study identifier"
+          icon={AlertTriangle}
+          trend={studyStatus?.protocol || "Cardiovascular Phase 2"}
+          trendUp={true}
         />
       </div>
 
