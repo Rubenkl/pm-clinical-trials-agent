@@ -14,7 +14,7 @@ export default function QueryManagement() {
   const [selectedDemo, setSelectedDemo] = useState<any>(null);
   const [aiAnalysisResult, setAiAnalysisResult] = useState<any>(null);
 
-  // Fetch demo test data (limited to 10 for cost efficiency)
+  // Fetch test data queries
   const { data: queries, isLoading } = useQuery({
     queryKey: ['demo-queries'],
     queryFn: () => apiService.getDemoQueries(10),
@@ -110,8 +110,6 @@ export default function QueryManagement() {
       expected_value: scenario.expected_value,
       form_name: scenario.form_name,
       context: {
-        demo_mode: true,
-        limit_analysis: true,
         initials: "DEMO",
         site_name: `Site ${scenario.site_id}`
       }
@@ -124,7 +122,7 @@ export default function QueryManagement() {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <Loader2 className="h-12 w-12 mx-auto text-muted-foreground mb-4 animate-spin" />
-            <p className="text-muted-foreground">Loading demo data...</p>
+            <p className="text-muted-foreground">Loading queries...</p>
           </div>
         </div>
       </div>
@@ -134,15 +132,15 @@ export default function QueryManagement() {
     <div className="flex-1 space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">AI Query Analysis Demo</h1>
+          <h1 className="text-3xl font-bold tracking-tight">AI Query Analysis</h1>
           <p className="text-muted-foreground">
-            Demonstrating AI-powered clinical query analysis with real test data (limited to 10 samples for cost efficiency)
+            AI-powered clinical query analysis with real test data
           </p>
         </div>
       </div>
 
-      {/* Demo Statistics */}
-      <div className="grid gap-4 md:grid-cols-4">
+      {/* Query Statistics */}
+      <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Test Data Queries</CardTitle>
@@ -150,7 +148,7 @@ export default function QueryManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{queries?.length || 0}</div>
-            <p className="text-xs text-muted-foreground">Limited for demo</p>
+            <p className="text-xs text-muted-foreground">Available queries</p>
           </CardContent>
         </Card>
         <Card>
@@ -160,27 +158,7 @@ export default function QueryManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{scenariosWithResponses.filter(s => s.aiResponse).length}/{demoScenarios.length}</div>
-            <p className="text-xs text-muted-foreground">Ready for analysis</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">LLM Cost Control</CardTitle>
-            <AlertCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">ON</div>
-            <p className="text-xs text-muted-foreground">10 sample limit</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Demo Mode</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">ACTIVE</div>
-            <p className="text-xs text-muted-foreground">Limited analysis</p>
+            <p className="text-xs text-muted-foreground">Analyzed</p>
           </CardContent>
         </Card>
       </div>
@@ -191,7 +169,7 @@ export default function QueryManagement() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
-              Demo Input Scenarios
+              Clinical Scenarios
             </CardTitle>
             <CardDescription>
               Select a clinical scenario to send to AI agents for analysis
@@ -386,7 +364,7 @@ export default function QueryManagement() {
           <CardHeader>
             <CardTitle>Live API Test Data</CardTitle>
             <CardDescription>
-              Actual queries from {queries.length} test data samples (limited for demo cost efficiency)
+              Actual queries from {queries.length} test data samples
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -425,7 +403,7 @@ export default function QueryManagement() {
             </Table>
             {queries.length > 5 && (
               <p className="text-sm text-muted-foreground mt-4">
-                Showing 5 of {queries.length} total queries (limited for demo)
+                Showing 5 of {queries.length} total queries
               </p>
             )}
           </CardContent>

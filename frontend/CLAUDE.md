@@ -2,6 +2,34 @@
 
 A comprehensive React dashboard showcasing production-ready clinical intelligence through AI-powered analysis of real cardiology study data. **Fully functional and deployed with live backend integration.**
 
+## 🚀 Quick Start Guide
+
+### Prerequisites
+- Node.js 18+ and npm
+- Git (for subtree integration)
+
+### Running the Frontend
+```bash
+# From project root
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+# Opens at http://localhost:8080
+```
+
+### Available Scripts
+```bash
+npm run dev         # Start development server (port 8080)
+npm run build       # Production build
+npm run build:dev   # Development build
+npm run preview     # Preview production build
+npm run lint        # Run ESLint
+```
+
 ## 🎯 Project Overview
 
 This frontend application demonstrates the capabilities of our **Clinical Trials AI Agent System** by providing an intuitive interface for clinical trial stakeholders to interact with real patient data and AI-powered clinical analysis.
@@ -246,6 +274,61 @@ npm run build
 - **Lovable Platform**: Native deployment and hosting
 - **Custom Hosting**: Standard web app deployment anywhere
 
+## 🛠️ Development Workflow
+
+### Code Architecture Patterns
+
+#### 1. Service Layer Pattern
+All API calls go through a centralized service layer:
+```typescript
+// services/baseApiService.ts - Base class with error handling
+// services/studyService.ts - Study-specific endpoints  
+// services/queryService.ts - Query management
+// services/index.ts - Unified API service export
+```
+
+#### 2. Component Structure
+- **Pages**: Route-level components in `src/pages/`
+- **Feature Components**: Domain-specific in `src/components/{feature}/`
+- **UI Components**: Reusable shadcn/ui in `src/components/ui/`
+- **Layout**: Shell and navigation in `src/components/layout/`
+
+#### 3. State Management
+- **Server State**: React Query with 5-minute cache, 30-second refetch
+- **UI State**: React Context for sidebar, theme
+- **Form State**: React Hook Form with Zod validation
+
+#### 4. Type Safety
+- TypeScript with relaxed rules (strict: false)
+- Interfaces for all data models in services/types.ts
+- Component prop typing throughout
+
+### Common Development Tasks
+
+#### Adding a New Page
+1. Create component in `src/pages/`
+2. Add route in `src/App.tsx`
+3. Update sidebar navigation in `src/components/layout/ClinicalSidebar.tsx`
+
+#### Adding API Endpoints
+1. Add method to appropriate service class
+2. Update types in `services/types.ts`
+3. Use in components with React Query
+
+#### Styling Guidelines
+- Use Tailwind classes for all styling
+- Follow the medical-grade color scheme in `tailwind.config.ts`
+- Use shadcn/ui components as base, customize as needed
+
+### Testing Changes
+
+While no formal tests exist yet, verify:
+1. **Type Checking**: TypeScript compiles without errors
+2. **Linting**: `npm run lint` passes
+3. **Visual Testing**: Check responsive design at different breakpoints
+4. **API Integration**: Network tab shows successful API calls
+5. **Error States**: Test error handling with network throttling
+
 ## 🔄 Git Subtree Integration
 
 This frontend is integrated into the main project using **Git subtree** for simplified development workflow.
@@ -357,6 +440,51 @@ This frontend successfully demonstrates **production-ready clinical AI** through
 **Backend API**: https://pm-clinical-trials-agent-production.up.railway.app
 **Clinical Data**: 50 real cardiology subjects (CARD001-CARD050)
 **AI Intelligence**: Multi-agent system with Portfolio Manager orchestration
+
+## 🔍 Key Files Reference
+
+### Configuration Files
+- `vite.config.ts` - Vite build configuration, port 8080 setup
+- `tsconfig.json` - TypeScript config with path aliases
+- `tailwind.config.ts` - Medical-grade design system
+- `package.json` - Dependencies and scripts
+
+### Core Application Files
+- `src/main.tsx` - App entry point with React Query setup
+- `src/App.tsx` - Route definitions and layout wrapper
+- `src/services/index.ts` - Unified API service exports
+- `src/services/types.ts` - All TypeScript interfaces
+
+### Important Components
+- `src/pages/AIChat.tsx` - AI Portfolio Manager interface
+- `src/pages/SubjectProfile.tsx` - Individual patient views
+- `src/components/clinical/ClinicalVitalsChart.tsx` - Vital signs visualization
+- `src/components/layout/ClinicalSidebar.tsx` - Navigation component
+
+## 🚨 Common Issues & Solutions
+
+### Development Server Not Starting
+```bash
+# Clear node_modules and reinstall
+rm -rf node_modules package-lock.json
+npm install
+npm run dev
+```
+
+### TypeScript Errors
+- Check imports use `@/` alias for src files
+- Ensure all API responses match types in `services/types.ts`
+- Remember strict mode is disabled (intentionally)
+
+### API Connection Issues
+- Backend URL is hardcoded in `services/baseApiService.ts`
+- Check production backend is running: https://pm-clinical-trials-agent-production.up.railway.app
+- CORS is handled by backend, not frontend
+
+### Styling Issues
+- All styles use Tailwind classes
+- Custom colors defined in `tailwind.config.ts`
+- shadcn/ui components in `src/components/ui/`
 
 ## 📝 Documentation Notes
 

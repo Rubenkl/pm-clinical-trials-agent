@@ -11,8 +11,7 @@ export class AIService extends BaseApiService {
         workflow_type: 'comprehensive_analysis',
         subject_id: 'CARD001',
         input_data: {
-          clinical_concern: message,
-          data_points: []
+          request: `Get test data for subject CARD001 and analyze: ${message}`
         }
       };
       
