@@ -41,9 +41,9 @@ This frontend application demonstrates the capabilities of our **Clinical Trials
 ✅ **Subject Management Dashboard**: Comprehensive patient data visualization and management - **LIVE & WORKING**
 ✅ **Clinical Data Visualization**: Advanced charts for vital signs, lab values, and trends - **LIVE & WORKING**
 ✅ **Discrepancy Management**: Real-time detection and tracking of EDC vs source document differences - **LIVE & WORKING**
-✅ **Query Management**: AI-powered clinical query analysis and resolution - **LIVE & WORKING**
+✅ **Query Management**: AI-powered clinical query analysis with normal vs problem case examples - **LIVE & WORKING**
 ✅ **Source Data Verification**: SDV workflow management and processing - **LIVE & WORKING**
-✅ **Protocol Compliance**: Automated compliance monitoring and deviation detection - **LIVE & WORKING**
+✅ **Protocol Compliance**: Automated compliance monitoring with compliant and deviant examples - **LIVE & WORKING**
 ✅ **Medical Alert System**: Clinical severity classification and safety monitoring - **LIVE & WORKING**
 ✅ **Responsive Design**: Medical-grade interface optimized for clinical workflows - **LIVE & WORKING**
 ✅ **Production API Integration**: Full backend connectivity with Railway-hosted AI system - **LIVE & WORKING**
@@ -61,6 +61,28 @@ This frontend application demonstrates the capabilities of our **Clinical Trials
 - **Real-time Chat**: Interactive clinical queries with AI-powered responses
 - **Workflow Automation**: 8-40x efficiency improvements in query resolution
 - **Medical Accuracy**: >95% clinical interpretation accuracy
+
+### 🎯 Normal vs Problem Case Examples
+The system now includes comprehensive examples for AI analysis demonstration:
+
+#### **Clean Subjects (Normal Cases)**
+- **CARD003, CARD007, CARD008, CARD014, CARD015, CARD027**: Zero discrepancies, perfect protocol compliance
+- **Examples**: Normal hemoglobin (13.2 g/dL), proper BP (128 mmHg), healthy LVEF (58%)
+- **Compliance**: 100% age range adherence (18-80), complete visit windows, proper documentation
+
+#### **Problem Subjects (Deviation Cases)**
+- **CARD001**: Critical anemia (Hgb 8.5 g/dL), safety intervention required
+- **CARD002**: Major BP elevation (185 mmHg), cardiovascular risk
+- **CARD005**: Cardiac function decline (LVEF 35%), clinical concern
+- **CARD010, CARD030**: Protocol violations (age 85, age 17), regulatory issues
+
+#### **Visual Indicators**
+- **Green Cards**: Normal range scenarios with proper clinical values
+- **Red Cards**: Critical alerts requiring immediate attention
+- **Amber Cards**: Major discrepancies needing clinical review
+- **Category Badges**: Clear labeling of "Normal Range", "Critical Alert", "Major Discrepancy"
+
+This comprehensive approach allows stakeholders to test AI analysis across the full spectrum of clinical scenarios, demonstrating both normal case recognition and problem detection capabilities.
 
 ## 🛠️ Technical Implementation
 
