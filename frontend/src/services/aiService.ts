@@ -72,7 +72,9 @@ export class AIService extends BaseApiService {
         body: JSON.stringify({
           workflow_type: workflowType,
           subject_id: inputData.subject_id || 'CARD001',
-          input_data: inputData
+          input_data: {
+            request: `Get test data for subject ${inputData.subject_id || 'CARD001'} and execute ${workflowType}: ${JSON.stringify(inputData)}`
+          }
         })
       });
     } catch (error) {
