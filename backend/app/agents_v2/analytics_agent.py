@@ -274,6 +274,56 @@ Format for dashboard display with clear, actionable information."""
                 "timestamp": datetime.now().isoformat(),
             }
 
+    async def generate_analytics_insights_ai(
+        self, trial_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Generate AI-powered analytics insights for trial data."""
+        try:
+            context = AnalyticsContext()
+
+            message = f"""Analyze the following clinical trial data and generate comprehensive analytics insights:
+
+Trial Data: {json.dumps(trial_data, indent=2)}
+
+Please provide detailed analytics insights including:
+1. Enrollment analysis and trends
+2. Data quality assessment
+3. Site performance evaluation
+4. Risk indicators and recommendations
+5. Predictive insights for trial success
+
+Format the response as JSON with 'ai_powered': true and 'analytics_insights' containing the analysis."""
+
+            result = await Runner.run(self.agent, message, context=context)
+            response_text = (
+                result.final_output if hasattr(result, "final_output") else str(result)
+            )
+
+            try:
+                parsed_response = json.loads(response_text)
+                # Ensure the response has the expected structure
+                if "ai_powered" not in parsed_response:
+                    parsed_response["ai_powered"] = True
+                return parsed_response
+            except json.JSONDecodeError:
+                # Fallback response if parsing fails
+                return {
+                    "ai_powered": True,
+                    "analytics_insights": {
+                        "analysis": response_text,
+                        "enrollment_analysis": {},
+                        "quality_analysis": {},
+                    },
+                }
+
+        except Exception as e:
+            return {
+                "success": False,
+                "ai_powered": False,
+                "error": f"Analytics insights generation failed: {str(e)}",
+                "timestamp": datetime.now().isoformat(),
+            }
+
 
 # Create agent instance for use by API endpoints
 analytics_agent = AnalyticsAgent().agent

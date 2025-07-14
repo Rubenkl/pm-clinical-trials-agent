@@ -307,6 +307,30 @@ Use your medical knowledge to make real clinical assessments."""
                 "execution_time": datetime.now().isoformat(),
             }
 
+    async def orchestrate_query_workflow(
+        self, request_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Orchestrate query-specific workflows."""
+        context = WorkflowContext()
+        workflow_type = request_data.get("workflow_type", "query_resolution")
+        return await self.orchestrate_workflow(workflow_type, request_data, context)
+
+    async def orchestrate_sdv_workflow(
+        self, request_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Orchestrate SDV-specific workflows."""
+        context = WorkflowContext()
+        workflow_type = request_data.get("workflow_type", "data_verification")
+        return await self.orchestrate_workflow(workflow_type, request_data, context)
+
+    async def orchestrate_deviation_workflow(
+        self, request_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Orchestrate deviation detection workflows."""
+        context = WorkflowContext()
+        workflow_type = request_data.get("workflow_type", "deviation_detection")
+        return await self.orchestrate_workflow(workflow_type, request_data, context)
+
     async def analyze_clinical_data(
         self, clinical_data: Dict[str, Any], context: WorkflowContext
     ) -> Dict[str, Any]:
