@@ -218,7 +218,7 @@ export default function ProtocolCompliance() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Protocol Compliance</h1>
-          <p className="text-muted-foreground">Monitor protocol adherence and manage deviations</p>
+          <p className="text-muted-foreground">Monitor protocol adherence with examples of both compliant and deviant cases</p>
         </div>
       </div>
 
@@ -250,6 +250,21 @@ export default function ProtocolCompliance() {
         <AlertDescription className="text-red-700">
           Critical protocol violations detected: CARD010 (age 85) and CARD030 (age 17) enrolled outside age criteria. 
           Immediate PI review and regulatory notification required.
+        </AlertDescription>
+      </Alert>
+
+      {/* Compliant Subjects Examples */}
+      <Alert className="border-green-200 bg-green-50">
+        <CheckCircle className="h-4 w-4 text-green-600" />
+        <AlertTitle className="text-green-800">Protocol Compliant Examples</AlertTitle>
+        <AlertDescription className="text-green-700">
+          <strong>Exemplary compliance:</strong> CARD003, CARD007, CARD008, CARD014, CARD015 showing 100% protocol adherence - 
+          proper age range (18-80), complete visit windows, medication compliance, and documentation standards.
+          <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
+            <div>• <strong>Age Compliance:</strong> All within 18-80 range</div>
+            <div>• <strong>Visit Windows:</strong> 100% adherence to ±3 days</div>
+            <div>• <strong>Documentation:</strong> Complete and timely</div>
+          </div>
         </AlertDescription>
       </Alert>
 

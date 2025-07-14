@@ -50,8 +50,9 @@ export default function QueryManagement() {
     }
   });
 
-  // Demo data scenarios for AI analysis
+  // Demo data scenarios for AI analysis - mix of normal and problem cases
   const demoScenarios = [
+    // PROBLEM CASES
     {
       id: 1,
       title: "Critical Lab Value: Severe Anemia",
@@ -62,7 +63,8 @@ export default function QueryManagement() {
       field_value: "8.5",
       expected_value: "12.5",
       form_name: "Laboratory Results",
-      description: "Hemoglobin dropped from 12.5 to 8.5 g/dL",
+      description: "Critical: Hemoglobin dropped from 12.5 to 8.5 g/dL",
+      category: "Critical Alert",
       aiResponse: null
     },
     {
@@ -75,20 +77,65 @@ export default function QueryManagement() {
       field_value: "185",
       expected_value: "140",
       form_name: "Vital Signs",
-      description: "Systolic BP elevated to 185 mmHg",
+      description: "Major: Systolic BP elevated to 185 mmHg",
+      category: "Major Discrepancy",
       aiResponse: null
     },
     {
       id: 3,
-      title: "Cardiac Function Alert",
-      subject_id: "CARD003",
-      site_id: "SITE_001",
+      title: "Cardiac Function Decline",
+      subject_id: "CARD005",
+      site_id: "SITE_003",
       visit: "Week_16",
       field_name: "lvef",
       field_value: "35",
       expected_value: "55", 
       form_name: "Echocardiogram",
-      description: "LVEF decreased from 55% to 35%",
+      description: "Major: LVEF decreased from 55% to 35%",
+      category: "Major Discrepancy",
+      aiResponse: null
+    },
+    // NORMAL CASES
+    {
+      id: 4,
+      title: "Normal Hemoglobin Levels",
+      subject_id: "CARD003",
+      site_id: "SITE_001",
+      visit: "Week_4",
+      field_name: "hemoglobin",
+      field_value: "13.2",
+      expected_value: "13.0",
+      form_name: "Laboratory Results",
+      description: "Normal: Hemoglobin within expected range (13.2 g/dL)",
+      category: "Normal Range",
+      aiResponse: null
+    },
+    {
+      id: 5,
+      title: "Normal Blood Pressure",
+      subject_id: "CARD007",
+      site_id: "SITE_002",
+      visit: "Week_8",
+      field_name: "systolic_bp",
+      field_value: "128",
+      expected_value: "130",
+      form_name: "Vital Signs",
+      description: "Normal: Systolic BP within target range (128 mmHg)",
+      category: "Normal Range",
+      aiResponse: null
+    },
+    {
+      id: 6,
+      title: "Normal Cardiac Function",
+      subject_id: "CARD008",
+      site_id: "SITE_001",
+      visit: "Week_12",
+      field_name: "lvef",
+      field_value: "58",
+      expected_value: "55",
+      form_name: "Echocardiogram",
+      description: "Normal: LVEF maintained at 58% (normal range)",
+      category: "Normal Range",
       aiResponse: null
     }
   ];
@@ -134,7 +181,7 @@ export default function QueryManagement() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">AI Query Analysis</h1>
           <p className="text-muted-foreground">
-            AI-powered clinical query analysis with real test data
+            AI-powered clinical query analysis with both normal and problematic cases
           </p>
         </div>
       </div>
@@ -172,17 +219,29 @@ export default function QueryManagement() {
               Clinical Scenarios
             </CardTitle>
             <CardDescription>
-              Select a clinical scenario to send to AI agents for analysis
+              Select a clinical scenario (normal or problematic) to send to AI agents for analysis
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {scenariosWithResponses.map((scenario) => (
-              <div key={scenario.id} className="border rounded-lg p-4 space-y-3">
+              <div key={scenario.id} className={`border rounded-lg p-4 space-y-3 ${
+                scenario.category === 'Normal Range' ? 'border-green-200 bg-green-50/50' : 
+                scenario.category === 'Critical Alert' ? 'border-red-200 bg-red-50/50' : 
+                'border-amber-200 bg-amber-50/50'
+              }`}>
                 <div className="flex items-center justify-between">
-                  <h4 className="font-medium">{scenario.title}</h4>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-medium">{scenario.title}</h4>
+                    <Badge variant={
+                      scenario.category === 'Normal Range' ? 'secondary' :
+                      scenario.category === 'Critical Alert' ? 'destructive' : 'default'
+                    } className="text-xs">
+                      {scenario.category}
+                    </Badge>
+                  </div>
                   <div className="flex items-center gap-2">
                     {scenario.aiResponse && (
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge variant="outline" className="text-xs">
                         <CheckCircle className="h-3 w-3 mr-1" />
                         Analyzed
                       </Badge>
