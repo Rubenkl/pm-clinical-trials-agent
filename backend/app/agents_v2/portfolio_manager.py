@@ -162,6 +162,15 @@ DELEGATION DECISION LOGIC:
 - **Performance analysis**: → transfer_to_analytics_agent
 - **Multiple specialties needed**: Handle coordination yourself, use handoffs as needed
 
+COMPREHENSIVE_ANALYSIS WORKFLOW:
+When executing a "comprehensive_analysis" workflow:
+1. First retrieve the subject's clinical data using get_test_subject_data() if a subject_id is provided
+2. Analyze the clinical data yourself using your medical knowledge
+3. Identify findings, severity, and safety implications
+4. Generate the PortfolioManagerOutput response directly
+5. DO NOT delegate to query_generator unless specifically needed after your analysis
+6. Return the complete clinical assessment in the required JSON format
+
 TOOL USAGE RULES (STRICTLY ENFORCE):
 1. **NEVER use tools for exploration or "see what happens"**
 2. **ONLY use tools when you have specific data requiring calculation**

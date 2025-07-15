@@ -222,7 +222,15 @@ async def execute_clinical_workflow(request: WorkflowRequest):
 
         subject_info = f"Subject ID: {request.subject_id}" if request.subject_id else "No specific subject (general clinical question)"
         
-        message = f"""Execute {request.workflow_type} workflow:
+        # Create workflow-specific messages
+        if request.workflow_type == "comprehensive_analysis":
+            message = f"""Execute comprehensive_analysis workflow:
+        {subject_info}
+        Input Data: {json.dumps(request.input_data)}
+
+        Perform a comprehensive clinical analysis of the provided data. If a subject_id is provided, retrieve their clinical data and analyze it. Return your analysis in the PortfolioManagerOutput format with clinical_assessment, findings, severity, safety_implications, recommended_actions, workflow_next_steps, and priority."""
+        else:
+            message = f"""Execute {request.workflow_type} workflow:
         Description: {workflow_descriptions.get(request.workflow_type, 'Custom workflow')}
         {subject_info}
         Input Data: {json.dumps(request.input_data)}
@@ -231,11 +239,13 @@ async def execute_clinical_workflow(request: WorkflowRequest):
 
         # Run workflow with max_turns limit
         context = WorkflowContext()
+        # Use fewer turns for comprehensive_analysis as it should be direct analysis
+        max_turns = 10 if request.workflow_type == "comprehensive_analysis" else 50
         result = await Runner.run(
             portfolio_manager_agent,
             message,
             context=context,
-            max_turns=50,  # Allow comprehensive multi-agent orchestration
+            max_turns=max_turns,
         )
 
         # Handle Pydantic model response
@@ -252,6 +262,14 @@ async def execute_clinical_workflow(request: WorkflowRequest):
             # Fallback for other types
             response_data = {"workflow_results": str(result.final_output)}
 
+        # For comprehensive_analysis, return the PortfolioManagerOutput directly
+        if request.workflow_type == "comprehensive_analysis" and isinstance(response_data, dict):
+            # If the response has the expected structure, return it directly
+            if all(key in response_data for key in ["success", "workflow_type", "findings", "recommended_actions"]):
+                response_data["execution_time"] = (datetime.now() - start_time).total_seconds()
+                return response_data
+
+        # For other workflows or unexpected structures, wrap in results
         return {
             "success": True,
             "workflow_type": request.workflow_type,
