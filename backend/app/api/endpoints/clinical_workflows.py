@@ -239,11 +239,13 @@ async def execute_clinical_workflow(request: WorkflowRequest):
 
         # Run workflow with max_turns limit
         context = WorkflowContext()
+        # Use fewer turns for comprehensive_analysis to prevent tool loops
+        max_turns = 20 if request.workflow_type == "comprehensive_analysis" else 50
         result = await Runner.run(
             portfolio_manager_agent,
             message,
             context=context,
-            max_turns=50,  # Allow comprehensive multi-agent orchestration
+            max_turns=max_turns,
         )
 
         # Handle Pydantic model response
