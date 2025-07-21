@@ -1,0 +1,777 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<title>IQVIA Clinical AI Platform - Comprehensive Product Strategy</title>
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reset.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/theme/white.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/highlight/monokai.css">
+
+	<!-- IQVIA Unified Brand Theme -->
+	<link rel="stylesheet" href="../iqvia-brand-theme.css">
+
+	<!-- Chart.js for visualizations -->
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+	<!-- Custom CSS for comprehensive strategy presentation -->
+	<style>
+		.reveal .slides section {
+			text-align: left;
+			overflow: hidden;
+			max-height: 100vh;
+			padding: 1rem;
+		}
+
+		.reveal h1,
+		.reveal h2,
+		.reveal h3 {
+			color: #1e3a8a;
+		}
+
+		.reveal .title-slide {
+			text-align: center;
+		}
+
+		/* Strategy-specific styling */
+		.strategy-highlight {
+			background: linear-gradient(135deg, #1e3a8a, #3730a3);
+			color: white;
+			padding: 0.75rem 1.5rem;
+			border-radius: 0.5rem;
+			font-weight: bold;
+			display: inline-block;
+			margin: 0.5rem 0.2rem;
+		}
+
+		.metric-card {
+			background: #f8fafc;
+			border: 2px solid #e2e8f0;
+			padding: 1rem;
+			border-radius: 0.5rem;
+			text-align: center;
+			margin: 0.5rem;
+		}
+
+		.metric-value {
+			font-size: 2em;
+			font-weight: bold;
+			color: #1e3a8a;
+			margin-bottom: 0.2rem;
+		}
+
+		.metric-label {
+			color: #64748b;
+			font-size: 0.85em;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+		}
+
+		.persona-card {
+			background: #f0f9ff;
+			border: 2px solid #0284c7;
+			padding: 1rem;
+			border-radius: 0.5rem;
+			margin: 0.5rem 0;
+		}
+
+		.competitor-card {
+			background: #fef3c7;
+			border: 2px solid #f59e0b;
+			padding: 0.8rem;
+			border-radius: 0.5rem;
+			margin: 0.5rem 0;
+		}
+
+		.strategy-card {
+			background: #f0fdf4;
+			border: 2px solid #10b981;
+			padding: 1rem;
+			border-radius: 0.5rem;
+			margin: 0.5rem 0;
+		}
+
+		.okr-card {
+			background: #faf5ff;
+			border-left: 4px solid #7c3aed;
+			padding: 1rem;
+			margin: 0.5rem 0;
+		}
+
+		.roadmap-phase {
+			background: #e0f2fe;
+			border: 2px solid #0ea5e9;
+			padding: 0.8rem;
+			border-radius: 0.5rem;
+			margin: 0.5rem;
+		}
+
+		.risk-item {
+			background: #fee2e2;
+			border: 2px solid #ef4444;
+			padding: 0.8rem;
+			border-radius: 0.5rem;
+			margin: 0.5rem 0;
+		}
+
+		.build-buy-option {
+			padding: 0.8rem;
+			border-radius: 0.5rem;
+			margin: 0.5rem;
+		}
+
+		.option-build {
+			background: #dcfce7;
+			border: 2px solid #22c55e;
+		}
+
+		.option-partner {
+			background: #dbeafe;
+			border: 2px solid #3b82f6;
+		}
+
+		.option-buy {
+			background: #f3f4f6;
+			border: 2px solid #9ca3af;
+		}
+
+		/* Responsive grids */
+		.metric-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+			gap: 0.5rem;
+		}
+
+		.strategy-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 1.5rem;
+		}
+
+		/* Prevent overflow */
+		.reveal ul {
+			font-size: 0.85em;
+			line-height: 1.4;
+		}
+
+		.reveal li {
+			margin-bottom: 0.3rem;
+		}
+
+		/* Mobile responsiveness */
+		@media (max-width: 768px) {
+			.strategy-grid {
+				grid-template-columns: 1fr;
+			}
+
+			.metric-value {
+				font-size: 1.5em;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<div class="reveal">
+		<div class="slides">
+			<!-- Slide 1: Title & Executive Summary -->
+			<section class="title-slide">
+				<h1>IQVIA Clinical Operations AI Platform</h1>
+				<h2>Comprehensive Product Strategy & Roadmap</h2>
+				<div style="margin: 2rem 0;">
+					<span class="strategy-highlight">10x Query Speed</span>
+					<span class="strategy-highlight">50-60% Cost Reduction</span>
+					<span class="strategy-highlight">25% Efficiency Gain</span>
+				</div>
+				<p><strong>Transforming Internal Efficiency Through Multi-Agent AI</strong></p>
+				<p><em>Product Management Interview Presentation</em></p>
+			</section>
+
+			<!-- Slide 2: Mission & Vision -->
+			<section>
+				<h2>Mission & Vision</h2>
+
+				<div class="strategy-card">
+					<h3>🎯 Mission</h3>
+					<p><em>"To transform IQVIA's clinical trial operations through intelligent automation, enabling our
+							teams to focus on high-value clinical insights while AI agents handle routine tasks,
+							ultimately accelerating the delivery of life-saving treatments to patients."</em></p>
+				</div>
+
+				<div class="strategy-card">
+					<h3>🔮 Vision</h3>
+					<p><em>"To be the world's first AI-native clinical research organization, where every clinical trial
+							workflow is enhanced by specialized AI agents, setting the standard for efficiency, quality,
+							and innovation in clinical research."</em></p>
+				</div>
+			</section>
+
+			<!-- Slide 3: The Problem - Industry Crisis (Fixed Overflow) -->
+			<section>
+				<h2>The Problem: Clinical Research Industry Crisis</h2>
+
+				<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; margin-bottom: 1rem;">
+					<div class="metric-card">
+						<div class="metric-value">22-30%</div>
+						<div class="metric-label">CRA Turnover<sup>1</sup></div>
+					</div>
+					<div class="metric-card">
+						<div class="metric-value">30-40%</div>
+						<div class="metric-label">Time on SDV<sup>2</sup></div>
+					</div>
+					<div class="metric-card">
+						<div class="metric-value">$141K</div>
+						<div class="metric-label">Per Amendment<sup>3</sup></div>
+					</div>
+				</div>
+
+				<div class="strategy-card" style="background: #fef2f2; border-color: #dc2626;">
+					<h3>Key Challenges Impacting IQVIA</h3>
+					<ul>
+						<li><strong>Workforce Crisis:</strong> 165-hour work months<sup>4</sup>, high stress levels</li>
+						<li><strong>Operational Inefficiency:</strong> 57% protocols need amendments<sup>3</sup></li>
+						<li><strong>Manual Burden:</strong> 80% of sites use 100% SDV despite guidance<sup>2</sup></li>
+						<li><strong>Competitive Pressure:</strong> Must deliver better, faster service to win</li>
+					</ul>
+					<p style="font-size: 0.7em; margin-top: 1rem;"><sup>1</sup>BDO 2024, <sup>2</sup>TransCelerate 2022,
+						<sup>3</sup>Tufts CSDD 2016, <sup>4</sup>Tufts CSDD 2012</p>
+				</div>
+			</section>
+
+			<!-- Slide 5: Competitive Landscape Analysis -->
+			<section>
+				<h2>Competitive Landscape Analysis</h2>
+				<p style="font-size: 0.8em; color: #666;">Market: $1.85B (2023) → $4.73B (2032) | 11% CAGR</p>
+
+				<h3>🏢 Major CROs: Proprietary Platforms</h3>
+				<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem;">
+					<div class="competitor-card">
+						<strong>Parexel IMPACT</strong>
+						<p style="font-size: 0.8em;">25K+ users, 25K trials<br>Palantir AI partnership<br>50 RPA
+							solutions</p>
+					</div>
+					<div class="competitor-card">
+						<strong>ICON FIRECREST</strong>
+						<p style="font-size: 0.8em;">40% fewer deviations<br>2x faster screening<br>2-week deployment
+						</p>
+					</div>
+					<div class="competitor-card">
+						<strong>Covance Xcellerate</strong>
+						<p style="font-size: 0.8em;">240K+ users globally<br>60% less missing data<br>Award-winning CRA
+							app</p>
+					</div>
+				</div>
+
+				<h3>💻 CTMS Vendors & AI Disruptors</h3>
+				<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem;">
+					<div class="competitor-card">
+						<strong>Veeva Vault</strong>
+						<p style="font-size: 0.8em;">100+ CTMS clients<br>30% monitoring cost ↓<br>AI launch Dec 2025
+						</p>
+					</div>
+					<div class="competitor-card">
+						<strong>Medidata</strong>
+						<p style="font-size: 0.8em;">72% FDA approvals<br>80% data review time ↓<br>36K+ trials dataset
+						</p>
+					</div>
+					<div class="competitor-card">
+						<strong>Saama AI</strong>
+						<p style="font-size: 0.8em;">90+ AI models<br>90% query time ↓<br>Pfizer COVID trial</p>
+					</div>
+				</div>
+
+				<div class="strategy-card" style="margin-top: 1rem;">
+					<h3>🚀 IQVIA's Unique Differentiator</h3>
+					<p><strong>Multi-Agent AI Orchestration:</strong> While competitors focus on point solutions (RBM
+						only) or incremental AI features, IQVIA is building the industry's first comprehensive
+						multi-agent platform that coordinates specialized AI agents for end-to-end CRA workflow
+						automation.</p>
+				</div>
+			</section>
+
+			<!-- Slide 6: Product Strategy (Not Architecture!) -->
+			<section>
+				<h2>Product Strategy: Where to Play & How to Win</h2>
+
+				<div class="strategy-grid">
+					<div>
+						<h3>🎯 Where to Play</h3>
+						<div class="strategy-card" style="margin-bottom: 0.8rem;">
+							<p><strong>Target Segments:</strong></p>
+							<ul style="margin: 0.3rem 0;">
+								<li>High-volume IQVIA clinical sites</li>
+								<li>Complex therapeutic areas (oncology, rare disease)</li>
+								<li>Phase II-III trials with heavy monitoring</li>
+							</ul>
+						</div>
+						<div class="strategy-card">
+							<p><strong>Strategic Focus:</strong></p>
+							<ul style="margin: 0.3rem 0;">
+								<li>Internal operational excellence</li>
+								<li>CRA productivity and satisfaction</li>
+								<li>Data quality improvement</li>
+							</ul>
+						</div>
+					</div>
+
+					<div>
+						<h3>🏆 How to Win</h3>
+						<div class="strategy-card" style="margin-bottom: 0.8rem;">
+							<p><strong>Differentiation:</strong></p>
+							<ul style="margin: 0.3rem 0;">
+								<li>AI-native workflows vs bolt-on tools</li>
+								<li>Multi-agent orchestration vs single AI</li>
+								<li>Human-centric design vs pure automation</li>
+							</ul>
+						</div>
+						<div class="strategy-card">
+							<p><strong>Capabilities to Build:</strong></p>
+							<ul style="margin: 0.3rem 0;">
+								<li>Intelligent query resolution</li>
+								<li>Risk-based monitoring</li>
+								<li>Proactive deviation detection</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- Slide 7: Build vs Buy vs Partner Decision -->
+			<section>
+				<h2>Build vs Buy vs Partner Analysis</h2>
+
+				<div class="option-build">
+					<h3>🏗️ BUILD ✓ Core AI Orchestration Platform</h3>
+					<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+						<div>
+							<p><strong>What We Build:</strong></p>
+							<ul>
+								<li>Multi-agent coordination logic</li>
+								<li>IQVIA-specific workflows</li>
+								<li>Clinical domain expertise</li>
+								<li>Confidence-based routing</li>
+							</ul>
+						</div>
+						<div>
+							<p><strong>Why Build:</strong></p>
+							<ul>
+								<li>No existing multi-agent clinical solutions</li>
+								<li>Proprietary competitive advantage</li>
+								<li>Control over roadmap</li>
+								<li>IP ownership</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+
+				<div class="option-partner" style="margin-top: 0.8rem;">
+					<h3>🤝 PARTNER: Infrastructure & Integrations</h3>
+					<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem;">
+						<div>
+							<p><strong>LLM Provider:</strong></p>
+							<ul style="font-size: 0.85em;">
+								<li>OpenAI GPT-4</li>
+								<li>Agents SDK</li>
+								<li>Enterprise support</li>
+							</ul>
+						</div>
+						<div>
+							<p><strong>Infrastructure:</strong></p>
+							<ul style="font-size: 0.85em;">
+								<li>NVIDIA AI Enterprise</li>
+								<li>GPU optimization</li>
+								<li>Monitoring tools</li>
+							</ul>
+						</div>
+						<div>
+							<p><strong>Integrations:</strong></p>
+							<ul style="font-size: 0.85em;">
+								<li>EDC vendor APIs</li>
+								<li>CTMS systems</li>
+								<li>Document OCR</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+
+				<div class="option-buy" style="margin-top: 0.8rem;">
+					<h3>💰 BUY: Not Viable</h3>
+					<p><strong>Market Reality:</strong> No existing solution offers multi-agent orchestration for
+						clinical trials. Single-purpose tools exist but lack comprehensive workflow automation.</p>
+				</div>
+			</section>
+
+			<!-- Slide 8: 2025 OKRs -->
+			<section>
+				<h2>2025 Strategic OKRs</h2>
+
+				<div class="okr-card">
+					<h3>🎯 Objective 1: Enable CRAs to Focus on High-Value Clinical Work</h3>
+					<ul>
+						<li><strong>KR1:</strong> Reduce time CRAs spend on routine query resolution from 30 minutes to
+							3 minutes per query</li>
+						<li><strong>KR2:</strong> Decrease CRA overtime hours by 25% through automated workflow
+							assistance</li>
+						<li><strong>KR3:</strong> Achieve 80% first-time-right query resolution (reducing
+							back-and-forth)</li>
+					</ul>
+				</div>
+
+				<div class="okr-card">
+					<h3>💰 Objective 2: Improve Data Quality and Study Timeline Predictability</h3>
+					<ul>
+						<li><strong>KR1:</strong> Reduce critical data discrepancies by 60% through proactive detection
+						</li>
+						<li><strong>KR2:</strong> Decrease protocol deviation rates by 35% through early pattern
+							recognition</li>
+						<li><strong>KR3:</strong> Accelerate database lock timelines by 20% through faster query
+							resolution</li>
+					</ul>
+				</div>
+
+				<div class="okr-card">
+					<h3>👥 Objective 3: Build AI-Ready Clinical Operations Culture</h3>
+					<ul>
+						<li><strong>KR1:</strong> Achieve 75% voluntary adoption rate among CRAs (no mandates)</li>
+						<li><strong>KR2:</strong> Establish 50+ AI champions across IQVIA sites who train peers</li>
+						<li><strong>KR3:</strong> Reduce resistance to new technology by 40% (measured via surveys)</li>
+					</ul>
+				</div>
+			</section>
+
+			<!-- Slide 9: Initiatives (Programs to Achieve OKRs) -->
+			<section>
+				<h2>Strategic Initiatives: From OKRs to Action</h2>
+
+				<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem;">
+					<div class="strategy-card">
+						<h3>🤖 Initiative 1: Intelligent Query Management</h3>
+						<p style="font-size: 0.85em;"><strong>Supports:</strong> OKR 1 & 2</p>
+						<ul style="font-size: 0.85em;">
+							<li>Automate query generation</li>
+							<li>AI-powered resolution</li>
+							<li>SLA tracking & escalation</li>
+						</ul>
+						<div class="metric-value" style="font-size: 1.3em; margin-top: 0.5rem;">10x</div>
+						<div class="metric-label">Speed Target</div>
+					</div>
+
+					<div class="strategy-card">
+						<h3>📉 Initiative 2: Risk-Based Monitoring</h3>
+						<p style="font-size: 0.85em;"><strong>Supports:</strong> OKR 2</p>
+						<ul style="font-size: 0.85em;">
+							<li>Intelligent SDV prioritization</li>
+							<li>Site risk scoring</li>
+							<li>Resource optimization</li>
+						</ul>
+						<div class="metric-value" style="font-size: 1.3em; margin-top: 0.5rem;">50-60%</div>
+						<div class="metric-label">Cost Reduction<sup>1</sup></div>
+					</div>
+
+					<div class="strategy-card">
+						<h3>🎓 Initiative 3: AI Skills Transformation</h3>
+						<p style="font-size: 0.85em;"><strong>Supports:</strong> OKR 3</p>
+						<ul style="font-size: 0.85em;">
+							<li>Comprehensive training</li>
+							<li>Change management</li>
+							<li>Champion network</li>
+						</ul>
+						<div class="metric-value" style="font-size: 1.3em; margin-top: 0.5rem;">500+</div>
+						<div class="metric-label">Staff Enabled</div>
+					</div>
+				</div>
+
+				<div class="strategy-highlight" style="margin-top: 1rem;">
+					Each initiative contains multiple features that will be delivered incrementally
+				</div>
+			</section>
+
+			<!-- Slide 10: Features (Capabilities Within Initiatives) -->
+			<section>
+				<h2>Key Features: Building Blocks of Our Initiatives</h2>
+
+				<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+					<div>
+						<h3>🔍 Query Management Features</h3>
+						<div class="strategy-card" style="background: #f0f9ff; border-color: #0284c7;">
+							<ul style="font-size: 0.85em;">
+								<li><strong>Query Analyzer:</strong> NLP-powered categorization</li>
+								<li><strong>Query Generator:</strong> Medical writing automation</li>
+								<li><strong>Query Tracker:</strong> Real-time SLA monitoring</li>
+								<li><strong>Smart Routing:</strong> Confidence-based escalation</li>
+							</ul>
+						</div>
+
+						<h3>📊 Monitoring Features</h3>
+						<div class="strategy-card" style="background: #f0fdf4; border-color: #10b981;">
+							<ul style="font-size: 0.85em;">
+								<li><strong>Risk Scorer:</strong> ML-based site assessment</li>
+								<li><strong>SDV Optimizer:</strong> Intelligent verification</li>
+								<li><strong>Workload Balancer:</strong> CRA scheduling AI</li>
+								<li><strong>OCR Engine:</strong> Document processing</li>
+							</ul>
+						</div>
+					</div>
+
+					<div>
+						<h3>⚠️ Deviation Detection Features</h3>
+						<div class="strategy-card" style="background: #fef3c7; border-color: #f59e0b;">
+							<ul style="font-size: 0.85em;">
+								<li><strong>Pattern Detector:</strong> Anomaly identification</li>
+								<li><strong>Root Cause AI:</strong> Systematic issue analysis</li>
+								<li><strong>Alert System:</strong> Proactive notifications</li>
+								<li><strong>Report Generator:</strong> Compliance documentation</li>
+							</ul>
+						</div>
+
+						<h3>🔧 Platform Features</h3>
+						<div class="strategy-card" style="background: #faf5ff; border-color: #7c3aed;">
+							<ul style="font-size: 0.85em;">
+								<li><strong>Unified Dashboard:</strong> Single pane of glass</li>
+								<li><strong>Integration APIs:</strong> EDC/CTMS connectors</li>
+								<li><strong>Audit Trail:</strong> 21 CFR Part 11 compliant</li>
+								<li><strong>Analytics Engine:</strong> Real-time insights</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- Slide 11: Product Roadmap (Feature Timeline) -->
+			<section>
+				<h2>Product Roadmap: Feature Delivery Timeline</h2>
+
+				<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem;">
+					<div class="roadmap-phase">
+						<h3>Q1 2025: Foundation & PoC</h3>
+						<p style="font-size: 0.75em; color: #666;">Core Query Management MVP</p>
+						<ul style="font-size: 0.85em;">
+							<li>✅ Multi-agent architecture</li>
+							<li>✅ Query Analyzer agent</li>
+							<li>✅ Query Generator agent</li>
+							<li>🔄 Basic UI + API</li>
+						</ul>
+					</div>
+
+					<div class="roadmap-phase">
+						<h3>Q2 2025: MVP Release</h3>
+						<p style="font-size: 0.75em; color: #666;">5-Site Pilot Launch</p>
+						<ul style="font-size: 0.85em;">
+							<li>🚀 Production deployment</li>
+							<li>📊 Query tracking dashboard</li>
+							<li>🔧 EDC integrations (Medidata)</li>
+							<li>👥 User training program</li>
+						</ul>
+					</div>
+
+					<div class="roadmap-phase">
+						<h3>Q3 2025: Enhanced Core</h3>
+						<p style="font-size: 0.75em; color: #666;">Expanding Foundation</p>
+						<ul style="font-size: 0.85em;">
+							<li>🤖 Deviation Detection agent</li>
+							<li>📈 Risk scoring basics</li>
+							<li>🔄 Additional EDC systems</li>
+							<li>📊 Performance analytics</li>
+						</ul>
+					</div>
+
+					<div class="roadmap-phase">
+						<h3>Q4 2025: Scale & Optimize</h3>
+						<p style="font-size: 0.75em; color: #666;">25-Site Expansion</p>
+						<ul style="font-size: 0.85em;">
+							<li>🌍 Multi-region deployment</li>
+							<li>🎯 Advanced ML models</li>
+							<li>📊 Full reporting suite</li>
+							<li>🔧 API for internal tools</li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="strategy-highlight" style="margin-top: 1rem;">
+					Features are prioritized based on user value and technical dependencies
+				</div>
+			</section>
+
+			<!-- Slide 12: Deployment Strategy (Not Go-to-Market!) -->
+			<section>
+				<h2>Deployment Strategy (Internal Rollout)</h2>
+
+				<div class="strategy-card">
+					<h3>📍 Phase 1: High-Impact Sites (Q2 2025)</h3>
+					<div style="display: grid; grid-template-columns: 1fr; gap: 0.8rem;">
+						<div>
+							<strong>Selection Criteria:</strong>
+							<ul style="font-size: 0.85em; margin: 0.3rem 0;">
+								<li>High query volume (>500/month)</li>
+								<li>Complex protocols (oncology, rare disease)</li>
+								<li>Strategic importance to IQVIA</li>
+								<li>Champion availability and buy-in</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+
+				<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-top: 0.8rem;">
+					<div class="strategy-card">
+						<h3>🌎 Phase 2: Regional Expansion (Q3)</h3>
+						<ul style="font-size: 0.85em;">
+							<li><strong>North America:</strong> 10 sites</li>
+							<li><strong>Europe:</strong> 8 sites (GDPR)</li>
+							<li><strong>Asia-Pacific:</strong> 7 sites</li>
+						</ul>
+					</div>
+
+					<div class="strategy-card">
+						<h3>🚀 Phase 3: Global Standard (Q4)</h3>
+						<ul style="font-size: 0.85em;">
+							<li><strong>All Sites:</strong> 500+ locations</li>
+							<li><strong>Change Mgmt:</strong> Support network</li>
+							<li><strong>Continuous:</strong> Feature updates</li>
+						</ul>
+					</div>
+				</div>
+			</section>
+
+			<!-- Slide 13: Business Case & ROI -->
+			<section>
+				<h2>Business Case & ROI Model</h2>
+
+				<div class="strategy-grid">
+					<div>
+						<h3>💰 Investment Requirements</h3>
+						<div class="metric-card">
+							<div class="metric-value">$2.5M</div>
+							<div class="metric-label">Year 1 Investment</div>
+						</div>
+						<ul style="font-size: 0.85em; margin: 0.5rem 0;">
+							<li><strong>Engineering:</strong> 12 FTEs @ $150K</li>
+							<li><strong>AI/Cloud:</strong> $300K annually</li>
+							<li><strong>Training:</strong> $200K</li>
+							<li><strong>Operations:</strong> $200K</li>
+						</ul>
+
+						<h3>⏱️ Timeline to Value</h3>
+						<ul style="font-size: 0.85em; margin: 0.5rem 0;">
+							<li><strong>First Value:</strong> Q2 2025</li>
+							<li><strong>Break-even:</strong> Q4 2025</li>
+							<li><strong>Full ROI:</strong> Q2 2026</li>
+						</ul>
+					</div>
+
+					<div>
+						<h3>📈 Returns & Benefits</h3>
+						<div class="metric-card">
+							<div class="metric-value">$8-12M</div>
+							<div class="metric-label">Annual Savings</div>
+						</div>
+
+						<h4>Value Drivers:</h4>
+						<ul style="font-size: 0.85em; margin: 0.5rem 0;">
+							<li><strong>CRA Time:</strong> 30% reduction = $4M</li>
+							<li><strong>Query Efficiency:</strong> 10x faster = $3M</li>
+							<li><strong>SDV Optimization:</strong> 50% less = $2M</li>
+							<li><strong>Retention:</strong> Lower turnover = $2M</li>
+						</ul>
+
+						<h4>Strategic Impact:</h4>
+						<ul style="font-size: 0.85em; margin: 0.5rem 0;">
+							<li>Win more bids with tech differentiation</li>
+							<li>Faster database lock timelines</li>
+							<li>Higher quality deliverables</li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="strategy-highlight" style="margin-top: 1rem;">
+					3-5x ROI within 18 months based on operational efficiency gains alone
+				</div>
+			</section>
+
+			<!-- Slide 14: Platform Demo - What We've Built -->
+			<section>
+				<h2>Platform Demo: 7 AI Agents in Production</h2>
+
+				<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem;">
+					<div class="strategy-card" style="background: #e0f2fe; border-color: #0284c7;">
+						<h4>🔍 Query Analyzer</h4>
+						<p style="font-size: 0.75em;"><strong>Performance:</strong> 7.8s avg</p>
+						<ul style="font-size: 0.75em; margin: 0.3rem 0;">
+							<li>Clinical significance assessment</li>
+							<li>Priority classification</li>
+							<li>Medical knowledge base</li>
+						</ul>
+					</div>
+
+					<div class="strategy-card" style="background: #dcfce7; border-color: #22c55e;">
+						<h4>✅ Source Data Verifier (SDV)</h4>
+						<p style="font-size: 0.75em;"><strong>Performance:</strong> 5.2s avg</p>
+						<ul style="font-size: 0.75em; margin: 0.3rem 0;">
+							<li>Source document validation</li>
+						</ul>
+					</div>
+
+					<div class="strategy-card" style="background: #fef3c7; border-color: #f59e0b;">
+						<h4>⚠️ Protocol Compliance Detector</h4>
+						<p style="font-size: 0.75em;"><strong>Performance:</strong> 5.0s avg</p>
+						<ul style="font-size: 0.75em; margin: 0.3rem 0;">
+							<li>Protocol compliance</li>
+							<li>Root cause analysis</li>
+							<li>CAPA recommendations</li>
+						</ul>
+					</div>
+
+					<div class="strategy-card" style="background: #f3f4f6; border-color: #6b7280;">
+						<h4>🎯 Portfolio Manager</h4>
+						<p style="font-size: 0.75em;"><strong>AI Orchestrator</strong></p>
+						<ul style="font-size: 0.75em; margin: 0.3rem 0;">
+							<li>Multi-agent coordination</li>
+							<li>Workflow optimization</li>
+							<li>10.3s total workflow</li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="metric-grid" style="margin-top: 1.5rem;">
+					<div class="metric-card">
+						<div class="metric-value">8-40x</div>
+						<div class="metric-label">Efficiency Gain</div>
+					</div>
+					<div class="metric-card">
+						<div class="metric-value">6.6s</div>
+						<div class="metric-label">Query Resolution</div>
+					</div>
+					<div class="metric-card">
+						<div class="metric-value">50</div>
+						<div class="metric-label">Test Subjects</div>
+					</div>
+					<div class="metric-card">
+						<div class="metric-value">GPT-4o</div>
+						<div class="metric-label">AI Engine</div>
+					</div>
+				</div>
+			</section>
+		</div>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/dist/reveal.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/notes/notes.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/markdown/markdown.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.3.1/plugin/highlight/highlight.js"></script>
+	<script>
+		// Initialize Reveal.js
+		Reveal.initialize({
+			hash: true,
+			plugins: [RevealMarkdown, RevealHighlight, RevealNotes],
+			// Presentation settings
+			transition: 'slide',
+			transitionSpeed: 'default',
+			backgroundTransition: 'fade'
+		});
+	</script>
+</body>
+
+</html>
