@@ -121,6 +121,9 @@ interface DataVerifierOutput {
   verification_status: string;
   confidence_score?: string;
   recommendations: string[];
+  risk_score: string;  // "0.0" to "1.0"
+  risk_level: string;  // "minimal" | "low" | "moderate" | "high" | "critical"
+  risk_factors: string[];
 }
 ```
 
@@ -152,6 +155,13 @@ interface DataVerifierOutput {
     "Source document re-verification needed",
     "Safety assessment prior to next dose",
     "Enhanced monitoring for remaining visits"
+  ],
+  "risk_score": "0.85",
+  "risk_level": "critical",
+  "risk_factors": [
+    "60 mmHg BP difference indicates potential hypertensive crisis",
+    "Missing safety data in EDC could delay intervention",
+    "Critical vital sign discrepancy requires immediate medical review"
   ]
 }
 ```

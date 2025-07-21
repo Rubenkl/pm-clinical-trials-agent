@@ -119,6 +119,11 @@ POST /clinical/verify-data
     "recommendations": [
       "Contact site to verify hemoglobin value",
       "Request source document clarification"
+    ],
+    "risk_score": "0.25",
+    "risk_level": "low",
+    "risk_factors": [
+      "Minor hemoglobin discrepancy within acceptable clinical range"
     ]
   },
   "execution_time": 5.2

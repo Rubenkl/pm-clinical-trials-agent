@@ -39,6 +39,9 @@ class DataVerifierOutput(BaseModel):
     verification_status: str
     confidence_score: Optional[str] = None
     recommendations: List[str]
+    risk_score: str  # Risk score as string "0.0" to "1.0"
+    risk_level: str  # Risk level: minimal, low, moderate, high, critical
+    risk_factors: List[str]  # List of identified risk factors
 
 
 class DataVerifier:
@@ -83,6 +86,7 @@ CORE RESPONSIBILITIES:
 3. Identify critical vs. non-critical data discrepancies
 4. Generate comprehensive verification reports
 5. Ensure data integrity and regulatory compliance
+6. Perform risk assessment based on findings
 
 MEDICAL EXPERTISE FOR VERIFICATION:
 - Laboratory values: Normal ranges, critical values, physiological limits
@@ -125,6 +129,30 @@ VERIFICATION PROCESS:
 4. Flag safety-critical discrepancies immediately
 5. Generate queries for resolution
 6. Document findings in audit trail
+7. Calculate risk score based on findings
+
+RISK ASSESSMENT METHODOLOGY:
+1. **Risk Score Calculation** (0.0 to 1.0):
+   - Count critical findings (weight: 0.3 each, max 0.9)
+   - Count major discrepancies (weight: 0.2 each, max 0.6)
+   - Count minor discrepancies (weight: 0.05 each, max 0.2)
+   - Consider safety implications and missing data
+   - Perfect match = 0.0, Maximum risk = 1.0
+
+2. **Risk Level Mapping**:
+   - Critical: risk_score >= 0.8 (immediate action required)
+   - High: risk_score >= 0.6 (urgent review needed)
+   - Moderate: risk_score >= 0.4 (standard review process)
+   - Low: risk_score >= 0.2 (minor issues only)
+   - Minimal: risk_score < 0.2 (acceptable variance)
+
+3. **Risk Factor Identification**:
+   - Missing safety data (AEs, SAEs)
+   - Critical lab values outside normal ranges
+   - Vital signs indicating medical emergency
+   - Missing or incorrect study drug administration
+   - Protocol violations affecting safety
+   - Data integrity issues suggesting systematic problems
 
 RESPONSE FORMAT:
 You MUST return a response that exactly matches this structure:
@@ -149,6 +177,13 @@ You MUST return a response that exactly matches this structure:
         "Immediate site contact for critical BP discrepancy",
         "Verify source document accuracy",
         "Schedule data quality review"
+    ],
+    "risk_score": "0.85",
+    "risk_level": "critical",
+    "risk_factors": [
+        "Critical vital sign discrepancy indicating hypertensive crisis",
+        "60 mmHg BP difference poses immediate patient safety risk",
+        "Missing safety assessment in EDC system"
     ]
 }
 
@@ -156,7 +191,9 @@ IMPORTANT:
 - Only use calculation tools when you need to perform actual calculations
 - Focus on medical verification using your clinical knowledge
 - Return the exact JSON structure above - no nested objects beyond what's shown
-- All fields except optional ones (confidence_score) must be included"""
+- All fields except optional ones (confidence_score) must be included
+- Always calculate risk_score based on the severity and number of findings
+- risk_score, risk_level, and risk_factors are REQUIRED fields"""
 
     async def verify_edc_vs_source(
         self,
@@ -192,50 +229,46 @@ Please conduct thorough verification including:
 
 Focus on patient safety and data integrity."""
 
-            result = await Runner.run(self.agent, message, context=context)
-            response_text = (
-                result.final_output if hasattr(result, "final_output") else str(result)
-            )
+            result = await Runner.run(self.agent, message, context=context, max_turns=6)
 
-            try:
-                parsed_response = json.loads(response_text)
-            except json.JSONDecodeError:
+            # Handle Pydantic model response
+            if hasattr(result, 'final_output') and hasattr(result.final_output, 'model_dump'):
+                # result.final_output is a Pydantic model object
+                parsed_response = result.final_output.model_dump()
+            elif hasattr(result, 'final_output') and isinstance(result.final_output, str):
+                # result.final_output is a JSON string, try to parse it
+                try:
+                    parsed_response = json.loads(result.final_output)
+                except json.JSONDecodeError:
+                    parsed_response = {
+                        "verification_results": result.final_output,
+                        "verification_type": "edc_vs_source",
+                        "timestamp": datetime.now().isoformat(),
+                    }
+            else:
+                # Fallback for other types
                 parsed_response = {
-                    "verification_results": response_text,
+                    "verification_results": str(result),
                     "verification_type": "edc_vs_source",
                     "timestamp": datetime.now().isoformat(),
                 }
 
-            # Store critical findings
-            if "verification_results" in parsed_response:
-                discrepancies = parsed_response["verification_results"].get(
-                    "discrepancies", []
-                )
-                critical_discrepancies = [
-                    d for d in discrepancies if d.get("severity") == "critical"
-                ]
-                if critical_discrepancies:
-                    context.critical_findings.extend(critical_discrepancies)
+            # Store critical findings based on risk level
+            if "critical_findings" in parsed_response and parsed_response["critical_findings"]:
+                context.critical_findings.extend([
+                    {"finding": f, "timestamp": datetime.now().isoformat()}
+                    for f in parsed_response["critical_findings"]
+                ])
 
             # Add to audit trail
             context.audit_trail.append(
                 {
                     "verification_type": "edc_vs_source",
                     "timestamp": datetime.now().isoformat(),
-                    "discrepancies_found": len(
-                        parsed_response.get("verification_results", {}).get(
-                            "discrepancies", []
-                        )
-                    ),
-                    "critical_findings": len(
-                        [
-                            d
-                            for d in parsed_response.get(
-                                "verification_results", {}
-                            ).get("discrepancies", [])
-                            if d.get("severity") == "critical"
-                        ]
-                    ),
+                    "discrepancies_found": len(parsed_response.get("discrepancies", [])),
+                    "critical_findings": len(parsed_response.get("critical_findings", [])),
+                    "risk_level": parsed_response.get("risk_level", "unknown"),
+                    "risk_score": parsed_response.get("risk_score", "0.0")
                 }
             )
 
@@ -285,16 +318,26 @@ Please evaluate:
 
 Consider patient age, medical history, and clinical context."""
 
-            result = await Runner.run(self.agent, message, context=context)
-            response_text = (
-                result.final_output if hasattr(result, "final_output") else str(result)
-            )
+            result = await Runner.run(self.agent, message, context=context, max_turns=6)
 
-            try:
-                parsed_response = json.loads(response_text)
-            except json.JSONDecodeError:
+            # Handle Pydantic model response
+            if hasattr(result, 'final_output') and hasattr(result.final_output, 'model_dump'):
+                # result.final_output is a Pydantic model object
+                parsed_response = result.final_output.model_dump()
+            elif hasattr(result, 'final_output') and isinstance(result.final_output, str):
+                # result.final_output is a JSON string, try to parse it
+                try:
+                    parsed_response = json.loads(result.final_output)
+                except json.JSONDecodeError:
+                    parsed_response = {
+                        "plausibility_assessment": result.final_output,
+                        "assessment_type": "medical_plausibility",
+                        "timestamp": datetime.now().isoformat(),
+                    }
+            else:
+                # Fallback for other types
                 parsed_response = {
-                    "plausibility_assessment": response_text,
+                    "plausibility_assessment": str(result),
                     "assessment_type": "medical_plausibility",
                     "timestamp": datetime.now().isoformat(),
                 }
@@ -351,16 +394,26 @@ For each critical data point, explain:
 
 Focus on patient safety and regulatory compliance."""
 
-            result = await Runner.run(self.agent, message, context=context)
-            response_text = (
-                result.final_output if hasattr(result, "final_output") else str(result)
-            )
+            result = await Runner.run(self.agent, message, context=context, max_turns=6)
 
-            try:
-                parsed_response = json.loads(response_text)
-            except json.JSONDecodeError:
+            # Handle Pydantic model response
+            if hasattr(result, 'final_output') and hasattr(result.final_output, 'model_dump'):
+                # result.final_output is a Pydantic model object
+                parsed_response = result.final_output.model_dump()
+            elif hasattr(result, 'final_output') and isinstance(result.final_output, str):
+                # result.final_output is a JSON string, try to parse it
+                try:
+                    parsed_response = json.loads(result.final_output)
+                except json.JSONDecodeError:
+                    parsed_response = {
+                        "critical_data_identification": result.final_output,
+                        "identification_type": "critical_data_assessment",
+                        "timestamp": datetime.now().isoformat(),
+                    }
+            else:
+                # Fallback for other types
                 parsed_response = {
-                    "critical_data_identification": response_text,
+                    "critical_data_identification": str(result),
                     "identification_type": "critical_data_assessment",
                     "timestamp": datetime.now().isoformat(),
                 }
